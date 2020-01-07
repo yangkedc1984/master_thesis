@@ -20,15 +20,18 @@ Setting up Environment with 'environment.yml' file:
 """
 Path Architecture
 """
-path_main = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis'
-path_data_input = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/Data'
-output_folder = 'Output'
-
-if os.path.exists(path_main + '/' + output_folder) is not True:
-    os.mkdir(path_main + '/' + output_folder)
+main_path = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis'
+data_input_path = main_path + '/Data'
+folder_output = 'Output'
 
 
 class PathArchitecture:
+
+    """
+    This seems to be a weird way to handle folder paths
+    (especially for the input data --> every user has the data located in a different place)
+    """
+
     def __init__(self,
                  path_main,
                  path_output,
@@ -43,9 +46,20 @@ class PathArchitecture:
             os.mkdir(self.path_main + '/' + self.path_output)
         self.output_path = self.path_main + '/' + self.path_output
 
+    def make_subfolder(self):
+        if os.path.exists(self.output_path + '/' + 'HARModel') is not True:
+            os.mkdir(self.output_path + '/' + 'HARModel')
 
-instance_path = PathArchitecture(path_main,
-                                 output_folder,
-                                 path_data_input)
-instance_path.make_folder()
+        if os.path.exists(self.output_path + '/' + 'NeuralNet') is not True:
+            os.mkdir(self.output_path + '/' + 'NeuralNet')
 
+    def config_folder_structure(self):
+        self.make_folder()
+        self.make_subfolder()
+
+
+instance_path = PathArchitecture(main_path,
+                                 folder_output,
+                                 data_input_path)
+
+instance_path.config_folder_structure()
