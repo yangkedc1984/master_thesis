@@ -1,3 +1,5 @@
+import os
+
 """
 Setting up Environment with 'requirements.txt':
 """
@@ -14,3 +16,12 @@ Setting up Environment with 'environment.yml' file:
 # 2. conda env list (lists all environments that exists on computer - check whether new environment is installed)
 # 3. activate environment in terminal (conda activate environment)
 
+"""
+Path Architecture
+"""
+path_main = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis'
+path_data_input = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/Data'
+output_folder = 'Output'
+
+os.chdir(path_main)
+os.mkdir(path_main + '/' + output_folder)
