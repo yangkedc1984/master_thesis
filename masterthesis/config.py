@@ -23,5 +23,28 @@ path_main = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis'
 path_data_input = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/Data'
 output_folder = 'Output'
 
-os.chdir(path_main)
-os.mkdir(path_main + '/' + output_folder)
+if os.path.exists(path_main + '/' + output_folder) is not True:
+    os.mkdir(path_main + '/' + output_folder)
+
+
+class PathArchitecture:
+    def __init__(self,
+                 path_main,
+                 path_output,
+                 path_input):
+        self.path_main = path_main
+        self.path_output = path_output
+        self.path_input = path_input
+        self.output_path = None
+
+    def make_folder(self):
+        if os.path.exists(self.path_main + '/' + self.path_output) is not True:
+            os.mkdir(self.path_main + '/' + self.path_output)
+        self.output_path = self.path_main + '/' + self.path_output
+
+
+instance_path = PathArchitecture(path_main,
+                                 output_folder,
+                                 path_data_input)
+instance_path.make_folder()
+

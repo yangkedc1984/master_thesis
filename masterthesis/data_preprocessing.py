@@ -1,5 +1,4 @@
-
-
+from config import path_data_input
 import pandas as pd
 
-df_m = pd.read_csv('Data/RealizedMeasures03_10.csv', index_col=0)
+df_m = pd.read_csv(path_data_input, index_col=0)
