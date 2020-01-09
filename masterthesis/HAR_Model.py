@@ -1,18 +1,6 @@
-from config import instance_path
 import pandas as pd
-import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 from sklearn import metrics
-import numpy as np
-plt.style.use('seaborn')
-
-# data loading :: this should not happen here though (only for verification
-# purposes  (data loading happens in the run file)
-
-df_m = pd.read_csv(instance_path.path_input + '/' + 'RealizedMeasures03_10.csv',
-                   index_col=0)
-df_m.DATE = df_m.DATE.values
-df_m.DATE = pd.to_datetime(df_m.DATE, format='%Y%m%d')
 
 
 class HARModel:
@@ -156,32 +144,3 @@ class HARModel:
 
     def run_complete_model(self):
         self.make_accuracy_measures()
-
-
-instance_test = HARModel(
-    df=df_m,
-    future=20,
-    lags=[4, 20],
-    feature='RV_s',
-    semi_variance=True,
-    period_train=list([pd.to_datetime('20030910', format='%Y%m%d'), pd.to_datetime('20081001', format='%Y%m%d')]),
-    period_test=list([pd.to_datetime('20090910', format='%Y%m%d'), pd.to_datetime('20100301', format='%Y%m%d')]))
-
-
-instance_test.run_complete_model()
-
-instance_test.predict_values()
-instance_test.make_accuracy_measures()
-
-
-df_verify = instance_test.output_df.copy()
-df_check = instance_test.testing_set.copy()
-
-plt.figure()
-plt.plot(df_check.DATE, df_check.future, label='Realized Volatility')
-plt.plot(df_check.DATE, instance_test.prediction_test, label='Predicted Volatility')
-plt.legend()
-
-
-
-
