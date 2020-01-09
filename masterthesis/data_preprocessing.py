@@ -24,10 +24,10 @@ class HARModel:
                  lags=[4, 20],
                  feature='RV_s',
                  semi_variance=False,
-                 period_train=[pd.to_datetime('20030910', format='%Y%m%d'),
-                               pd.to_datetime('20081001', format='%Y%m%d')],
-                 period_test=[pd.to_datetime('20090910', format='%Y%m%d'),
-                              pd.to_datetime('20101001', format='%Y%m%d')]
+                 period_train=list([pd.to_datetime('20030910', format='%Y%m%d'),
+                               pd.to_datetime('20081001', format='%Y%m%d')]),
+                 period_test=list([pd.to_datetime('20090910', format='%Y%m%d'),
+                              pd.to_datetime('20100301', format='%Y%m%d')])
                  ):
         self.df = df
         self.future = future
@@ -43,7 +43,7 @@ class HARModel:
         self.model = None  # statsmodel instance
         self.estimation_results = None  # table
         self.accuracy = None  # dictionary
-        self.output_df = None  # DataFrame
+        self.output_df = None  # DataFrame (data frame which contains all the features needed for the regression)
 
     def lag_average(self):
 
@@ -102,58 +102,52 @@ class HARModel:
         assert (self.output_df.RV_t.iloc[1:(self.future + 1)].mean()
                 - self.output_df.future[0] == 0), 'Error'
 
-    def estimate_model(self):
+    def make_testing_training_set(self):
         self.generate_complete_data_set()
-        df = self.output_df
+        df = self.output_df.copy()
+
+        df_train = (df.loc[(df.DATE >= self.period_train[0])
+                           & (df.DATE <= self.period_train[1])].reset_index(drop=True))
+        df_test = (df.loc[(df.DATE >= self.period_test[0]) & (df.DATE <= self.period_test[1])].reset_index(drop=True))
+
+        self.training_set = df_train
+        self.testing_set = df_test
+
+    def estimate_model(self):
+        self.make_testing_training_set()
 
         if self.semi_variance:
-            result = smf.ols(formula='future ~ RSV_s_plus + RSV_s_minus + RV_w + RV_m', data=df).fit()
-
+            result = smf.ols(formula='future ~ RSV_s_plus + RSV_s_minus + RV_w + RV_m', data=self.training_set).fit()
         else:
-            result = smf.ols(formula='future ~ RV_t + RV_w + RV_m', data=df).fit()
+            result = smf.ols(formula='future ~ RV_t + RV_w + RV_m', data=self.training_set).fit()
+
+        self.model = result
+        self.estimation_results = result.summary().as_latex()
 
     def predict_values(self):
-
-
-
-        prediction_HAR_1 = fit_HAR_1.predict(rv_m_test[['LaggedRV', 'RV_w', 'RV_m']])
-
-
-
-        # add an estimation an a prediction method (depends on timestamps)
-        # add an export method that saves all the results
-
-
-
+        self.estimate_model()
+        if self.semi_variance:
+            self.prediction_train = self.model.predict(self.training_set[['RSV_s_plus', 'RSV_s_minus', 'RV_w', 'RV_m']])
+            self.prediction_test = self.model.predict(self.testing_set[['RSV_s_plus', 'RSV_s_minus', 'RV_w', 'RV_m']])
+        else:
+            self.prediction_train = self.model.predict(self.training_set[['RV_t', 'RV_w', 'RV_m']])
+            self.prediction_test = self.model.predict(self.testing_set[['RV_t', 'RV_w', 'RV_m']])
 
 
 instance_test = HARModel(
     df=df_m,
-    future=1,
+    future=20,
     lags=[4, 20],
     feature='RV_s',
-    semi_variance=True)
+    semi_variance=False)
 
-instance_test.generate_complete_data_set()
-df_test = instance_test.output_df
+instance_test.predict_values()
+df = instance_test.testing_set.copy()
 
-# plt.figure()
-# plt.plot(df_test.DATE[0:500], df_test.RV_t[0:500], 'darkgreen', alpha=0.75)
-# plt.plot(df_test.DATE[0:500], df_test.future[0:500], 'k-.')
-# plt.show()
-
-
-dates = list([pd.to_datetime('20070910', format='%Y%m%d'), pd.to_datetime('20081001', format='%Y%m%d')])
-dates[0]
-
-df_train = df_test.loc[(df_test.DATE >= dates[0]) and (df_test.DATE < dates[1])]
-
-
-
-df_train.head()
-
-# reset_index(drop=True)
-
+plt.figure()
+plt.plot(df.DATE, df.RV_t, label='Realized Volatility')
+plt.plot(df.DATE, instance_test.prediction_test, label='Predicted Volatility')
+plt.legend()
 
 
 
