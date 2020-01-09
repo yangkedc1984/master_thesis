@@ -1,6 +1,8 @@
 import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn import metrics
+import matplotlib.pyplot as plt
+plt.style.use('seaborn')
 
 
 class HARModel:
@@ -144,3 +146,12 @@ class HARModel:
 
     def run_complete_model(self):
         self.make_accuracy_measures()
+
+    def make_graph(self):
+        self.predict_values()
+
+        plt.figure()
+        plt.plot(self.testing_set.DATE, self.testing_set.future, label='Realized Volatility')
+        plt.plot(self.testing_set.DATE, self.prediction_test, label='Predicted Volatility')
+        plt.legend()
+        plt.show()
