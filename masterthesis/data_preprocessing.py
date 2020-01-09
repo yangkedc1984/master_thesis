@@ -1,6 +1,9 @@
 from config import instance_path
 import pandas as pd
 import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+import statsmodels.stats.api as sms
+from statsmodels.compat import lzip
 import numpy as np
 plt.style.use('seaborn')
 
@@ -33,9 +36,12 @@ class HARModel:
         self.semi_variance = semi_variance
         self.period_train = period_train
         self.period_test = period_test
+        self.training_set = None  # data frames
+        self.testing_set = None  # data frames
         self.prediction_train = None  # vector (or excel export)
-        self.prediction_test = None  # vector (or excel export
-        self.estimators = None  # table
+        self.prediction_test = None  # vector (or excel export)
+        self.model = None  # statsmodel instance
+        self.estimation_results = None  # table
         self.accuracy = None  # dictionary
         self.output_df = None  # DataFrame
 
@@ -43,12 +49,12 @@ class HARModel:
 
         df = self.df[['DATE', self.feature]]
         df['RV_t'] = df[self.feature].shift(-1)
-        df['RV_t_4'] = df[self.feature].rolling(window=self.lags[0]).mean()
+        df['RV_w'] = df[self.feature].rolling(window=self.lags[0]).mean()
 
         rw20 = self.df[self.feature].rolling(window=self.lags[1]).mean()
 
-        df['RV_t_20'] = list(
-                ((self.lags[1] * rw20) - (self.lags[0] * df.RV_t_4)) /
+        df['RV_m'] = list(
+                ((self.lags[1] * rw20) - (self.lags[0] * df.RV_w)) /
                 (self.lags[1] - self.lags[0])
         )
 
@@ -58,7 +64,7 @@ class HARModel:
 
         df.drop([self.feature], axis=1, inplace=True)
 
-        assert round(df.RV_t[0:self.lags[0]].mean() - df.RV_t_4[self.lags[0]], 12) == 0, 'Error'
+        assert round(df.RV_t[0:self.lags[0]].mean() - df.RV_w[self.lags[0]], 12) == 0, 'Error'
 
         self.output_df = df
 
@@ -96,25 +102,58 @@ class HARModel:
         assert (self.output_df.RV_t.iloc[1:(self.future + 1)].mean()
                 - self.output_df.future[0] == 0), 'Error'
 
-        # add an estimation an a prediction method
+    def estimate_model(self):
+        self.generate_complete_data_set()
+        df = self.output_df
+
+        if self.semi_variance:
+            result = smf.ols(formula='future ~ RSV_s_plus + RSV_s_minus + RV_w + RV_m', data=df).fit()
+
+        else:
+            result = smf.ols(formula='future ~ RV_t + RV_w + RV_m', data=df).fit()
+
+    def predict_values(self):
+
+
+
+        prediction_HAR_1 = fit_HAR_1.predict(rv_m_test[['LaggedRV', 'RV_w', 'RV_m']])
+
+
+
+        # add an estimation an a prediction method (depends on timestamps)
         # add an export method that saves all the results
+
+
+
 
 
 instance_test = HARModel(
     df=df_m,
-    future=3,
-    lags=[1, 20],
+    future=1,
+    lags=[4, 20],
     feature='RV_s',
-    semi_variance=False)
+    semi_variance=True)
 
 instance_test.generate_complete_data_set()
 df_test = instance_test.output_df
-df_test
+
+# plt.figure()
+# plt.plot(df_test.DATE[0:500], df_test.RV_t[0:500], 'darkgreen', alpha=0.75)
+# plt.plot(df_test.DATE[0:500], df_test.future[0:500], 'k-.')
+# plt.show()
 
 
-plt.figure()
-plt.plot(df_test.DATE[0:500], df_test.RV_t[0:500], 'darkgreen', alpha=0.75)
-plt.plot(df_test.DATE[0:500], df_test.future[0:500], 'k-.')
-plt.show()
+dates = list([pd.to_datetime('20070910', format='%Y%m%d'), pd.to_datetime('20081001', format='%Y%m%d')])
+dates[0]
+
+df_train = df_test.loc[(df_test.DATE >= dates[0]) and (df_test.DATE < dates[1])]
+
+
+
+df_train.head()
+
+# reset_index(drop=True)
+
+
 
 
