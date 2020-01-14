@@ -82,7 +82,7 @@ class HARModel:
         if self.semi_variance:
             self.future_average()
             df = self.output_df.copy()
-            df = df.merge(self.df[['DATE', 'RSV_s_plus', 'RSV_s_minus']], on='DATE')
+            df = df.merge(self.df[['DATE', 'RSV_s_plus', 'RSV_s_minus']], on='DATE')  # RSV_s_... is hard coded!
 
         else:
             self.future_average()
