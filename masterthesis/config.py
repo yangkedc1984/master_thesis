@@ -21,7 +21,7 @@ Setting up Environment with 'environment.yml' file:
 Path Architecture
 """
 main_path = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis'
-data_input_path = main_path + '/Data'
+data_input_path = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/Data'
 folder_output = 'Output'
 
 
@@ -39,6 +39,8 @@ class PathArchitecture:
         self.path_main = path_main
         self.path_output = path_output
         self.path_input = path_input
+        self.HARModel = 'HARModel'
+        self.NN = 'NeuralNet'
         self.output_path = None
 
     def make_folder(self):
@@ -58,8 +60,7 @@ class PathArchitecture:
         self.make_subfolder()
 
 
-instance_path = PathArchitecture(main_path,
-                                 folder_output,
-                                 data_input_path)
-
+instance_path = PathArchitecture(main_path, folder_output, data_input_path)
 instance_path.config_folder_structure()
+
+
