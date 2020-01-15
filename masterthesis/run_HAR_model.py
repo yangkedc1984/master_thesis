@@ -53,7 +53,6 @@ def run_all(save_output=True):
 
 results = run_all(save_output=True)
 
-
 results['har_1_True'].prediction_test.head()
 results['har_5_True'].prediction_test.head()
 results['har_20_True'].prediction_test.head()

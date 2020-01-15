@@ -2,6 +2,7 @@ import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn import metrics
 import matplotlib.pyplot as plt
+
 plt.style.use('seaborn')
 
 
@@ -14,9 +15,9 @@ class HARModel:
                  feature='RV_s',
                  semi_variance=False,
                  period_train=list([pd.to_datetime('20030910', format='%Y%m%d'),
-                               pd.to_datetime('20081001', format='%Y%m%d')]),
+                                    pd.to_datetime('20081001', format='%Y%m%d')]),
                  period_test=list([pd.to_datetime('20090910', format='%Y%m%d'),
-                              pd.to_datetime('20100301', format='%Y%m%d')])
+                                   pd.to_datetime('20100301', format='%Y%m%d')])
                  ):
         self.df = df
         self.future = future
@@ -44,8 +45,8 @@ class HARModel:
         rw20 = self.df[self.feature].rolling(window=self.lags[1]).mean()
 
         df['RV_m'] = list(
-                ((self.lags[1] * rw20) - (self.lags[0] * df.RV_w)) /
-                (self.lags[1] - self.lags[0])
+            ((self.lags[1] * rw20) - (self.lags[0] * df.RV_w)) /
+            (self.lags[1] - self.lags[0])
         )
 
         df['DATE'] = df.DATE.shift(-1)
@@ -74,7 +75,7 @@ class HARModel:
 
         self.output_df = df
 
-        assert (self.output_df.RV_t[1:(self.future+1)].mean()
+        assert (self.output_df.RV_t[1:(self.future + 1)].mean()
                 - self.output_df.future[0] == 0), 'Error'
 
     def generate_complete_data_set(self):
