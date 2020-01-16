@@ -1,3 +1,5 @@
 .idea
 new_env
 output
+environment.yml
+data

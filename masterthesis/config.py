@@ -20,8 +20,8 @@ Setting up Environment with 'environment.yml' file:
 """
 Path Architecture
 """
-main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"
-data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/Data"
+main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"  # what is the ubuntu path?  (fuck it sideways)
+data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"  # what is the ubuntu path?
 folder_output = "output"
 
 
