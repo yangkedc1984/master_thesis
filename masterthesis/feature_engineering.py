@@ -72,6 +72,5 @@ def run_feature_engineering():
 
 df_feature = run_feature_engineering()
 
-
 # summary stats
 df_feature[["RV", "RSV_plus", "RSV_minus"]].mean()
