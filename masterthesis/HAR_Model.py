@@ -16,14 +16,14 @@ class HARModel:
         semi_variance=False,
         period_train=list(
             [
-                pd.to_datetime("20110103", format="%Y%m%d"),
-                pd.to_datetime("20110208", format="%Y%m%d"),
+                pd.to_datetime("20030910", format="%Y%m%d"),
+                pd.to_datetime("20080208", format="%Y%m%d"),
             ]
         ),
         period_test=list(
             [
-                pd.to_datetime("20110209", format="%Y%m%d"),
-                pd.to_datetime("20110211", format="%Y%m%d"),
+                pd.to_datetime("20080209", format="%Y%m%d"),
+                pd.to_datetime("20101231", format="%Y%m%d"),
             ]
         ),
     ):
@@ -205,9 +205,15 @@ class HARModel:
             self.training_set.DATE,
             self.training_set.future,
             label="Realized Volatility",
+            alpha=0.5,
+            color="black",
         )
         plt.plot(
-            self.training_set.DATE, self.prediction_train, label="Predicted Volatility"
+            self.training_set.DATE,
+            self.prediction_train,
+            label="Predicted Volatility",
+            alpha=0.75,
+            color="darkgreen",  # was sell das scheiss komma da?
         )
         plt.legend()
         plt.show()
