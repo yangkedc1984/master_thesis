@@ -42,3 +42,6 @@ df = load_data()
 lstm_instance = LSTM(df=df, future=20)
 lstm_instance.generate_complete_data_set()
 data_test = lstm_instance.df_processed_data
+
+df_to = df[["DATE", "RSV_minus"]]
+df_test = data_test.merge(df_to, on="DATE")

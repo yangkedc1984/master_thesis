@@ -67,8 +67,10 @@ def run_all(save_output=True):
     return res
 
 
-results = run_all(save_output=True)
+results = run_all(save_output=False)
 
 results["har_1_True"].prediction_test.head()
 results["har_5_True"].prediction_test.head()
 results["har_20_True"].prediction_test.head()
+
+results["har_5_True"].make_graph()

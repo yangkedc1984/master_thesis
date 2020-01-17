@@ -85,4 +85,8 @@ class LSTM:
         data_set_complete = data_set_complete.dropna()
         data_set_complete.reset_index(drop=True, inplace=True)
 
+        if self.semi_variance:
+            df_tmp = self.df[["DATE", "RSV_minus"]]
+            data_set_complete = data_set_complete.merge(df_tmp, on="DATE")
+
         self.df_processed_data = data_set_complete
