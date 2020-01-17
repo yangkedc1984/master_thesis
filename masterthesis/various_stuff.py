@@ -1,5 +1,7 @@
 from run_HAR_model import *
 from LSTM import *
+from config import *
+
 
 plt.style.use("seaborn")
 
@@ -38,10 +40,44 @@ def load_data():
 
 df = load_data()
 
+# this works perfectly fine
+# lstm_instance = LSTM(df=df, future=20, semi_variance=False)
+# lstm_instance.generate_complete_data_set()
+#
+# data_test = lstm_instance.df_processed_data
+# data_test.head()
 
-lstm_instance = LSTM(df=df, future=20)
-lstm_instance.generate_complete_data_set()
-data_test = lstm_instance.df_processed_data
 
-df_to = df[["DATE", "RSV_minus"]]
-df_test = data_test.merge(df_to, on="DATE")
+def sequence_future(_series, num_lag, num_future):
+    # Input Variables
+    num_1 = num_lag  # the number of lags
+    num_2 = num_future  # the future average you want to compute
+    names = ["Lag" + str((num_lag - i)) for i in range(num_1)]
+    name_depend = "future_average_of_{}days".format(num_2)
+    names.append(name_depend)  # names of the data frame
+
+    # Input Data
+    _rv = _series.RV
+    k = pd.DataFrame(0, index=range(len(_rv) - num_1 - num_2), columns=range(num_1 + 1))
+
+    # Generating Sequence
+    for i in range(num_1, len(_rv) - num_2):
+        k.iloc[i - num_1] = _rv[(i - num_1) : i].reset_index(drop=True)
+        k.iloc[(i - num_1)][num_lag] = np.mean(
+            _rv[i : (i + num_2)].reset_index(drop=True)
+        )
+
+    k.columns = names
+
+    # Returning Data Frame
+    return k
+
+
+import numpy as np
+
+df_old_function = sequence_future(df, 20, 20)
+df_seq = df_old_function.rename(
+    index=str, columns={df_old_function.columns[df_old_function.shape[1] - 1]: "y"}
+)
+x_train = df_seq.drop(["y"], axis=1)
+x_train.values
