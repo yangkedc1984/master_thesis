@@ -3,9 +3,7 @@ from HAR_Model import *
 
 
 def load_data():
-    df_m = pd.read_csv(
-        instance_path.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
-    )
+    df_m = pd.read_csv(instance_path.path_input + "/" + "DataFeatures.csv", index_col=0)
     df_m.DATE = df_m.DATE.values
     df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
 
@@ -24,18 +22,18 @@ def estimate_and_predict_har_models(df_input, save=True):
                 df=df_input,
                 future=i,
                 lags=[4, 20],
-                feature="RV_s",
+                feature="RV",
                 semi_variance=k,
                 period_train=list(
                     [
-                        pd.to_datetime("20030910", format="%Y%m%d"),
-                        pd.to_datetime("20081001", format="%Y%m%d"),
+                        pd.to_datetime("20110103", format="%Y%m%d"),
+                        pd.to_datetime("20111003", format="%Y%m%d"),
                     ]
                 ),
                 period_test=list(
                     [
-                        pd.to_datetime("20090910", format="%Y%m%d"),
-                        pd.to_datetime("20100301", format="%Y%m%d"),
+                        pd.to_datetime("20111004", format="%Y%m%d"),
+                        pd.to_datetime("20111230", format="%Y%m%d"),
                     ]
                 ),
             )
@@ -68,8 +66,11 @@ def run_all(save_output=True):
     return res
 
 
-results = run_all(save_output=True)
+results = run_all(save_output=False)
 
 results["har_1_True"].prediction_test.head()
 results["har_5_True"].prediction_test.head()
 results["har_20_True"].prediction_test.head()
+
+
+results["har_1_True"].make_graph()

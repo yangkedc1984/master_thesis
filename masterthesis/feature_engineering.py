@@ -8,7 +8,9 @@ tqdm.pandas()
 
 def load_raw_data():
     hf_data = pd.read_csv(
-        instance_path.path_input + "/" + "SPY2011.csv", nrows=100000000
+        instance_path.path_input
+        + "/"
+        + "SPY2011.csv",  # nrows=10000000  # use nrows for only a selection of the data
     )
 
     return hf_data
@@ -23,12 +25,12 @@ def etl(df):
     cut_u = pd.to_timedelta("16:00:00")
     df = df.loc[(df.TIME_M >= cut_l) & (df.TIME_M <= cut_u)]
 
-    # sampling --> sample 10 times and take averages (increases computational stress)
+    # sampling [--> sample 10 times and take averages (increases computational stress)]
     interval_size = np.floor(df.shape[0] / 78)
     interval = np.arange(0, df.shape[0], interval_size)
-
     df = df.iloc[interval]
 
+    # Log Prices, Returns & Realized Volatility
     df["LogPrice"] = np.log(df["PRICE"])
     df["Returns"] = df["LogPrice"] - df["LogPrice"].shift(1)
     df["RV"] = df["Returns"] ** 2
@@ -62,15 +64,19 @@ def make_all_features(high_frequency_data_set):
     return df
 
 
+def save_data_features(df):
+    df.to_csv(
+        instance_path.path_input + "/" + "DataFeatures.csv"
+    )  # adding a unique identifier?
+    print("Data exported in {}".format(instance_path.path_input))
+
+
 def run_feature_engineering():
     hf_data = load_raw_data()
-
     df = make_all_features(hf_data)
+    save_data_features(df)
 
-    return df
+    # return df
 
 
-df_feature = run_feature_engineering()
-
-# summary stats
-df_feature[["RV", "RSV_plus", "RSV_minus"]].mean()
+run_feature_engineering()

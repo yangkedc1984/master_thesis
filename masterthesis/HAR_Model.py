@@ -3,22 +3,30 @@ import statsmodels.formula.api as smf
 from sklearn import metrics
 import matplotlib.pyplot as plt
 
-plt.style.use('seaborn')
+plt.style.use("seaborn")
 
 
 class HARModel:
-
-    def __init__(self,
-                 df,
-                 future=1,
-                 lags=[4, 20],
-                 feature='RV_s',
-                 semi_variance=False,
-                 period_train=list([pd.to_datetime('20030910', format='%Y%m%d'),
-                                    pd.to_datetime('20081001', format='%Y%m%d')]),
-                 period_test=list([pd.to_datetime('20090910', format='%Y%m%d'),
-                                   pd.to_datetime('20100301', format='%Y%m%d')])
-                 ):
+    def __init__(
+        self,
+        df,
+        future=1,
+        lags=[4, 20],
+        feature="RV",
+        semi_variance=False,
+        period_train=list(
+            [
+                pd.to_datetime("20110103", format="%Y%m%d"),
+                pd.to_datetime("20110208", format="%Y%m%d"),
+            ]
+        ),
+        period_test=list(
+            [
+                pd.to_datetime("20110209", format="%Y%m%d"),
+                pd.to_datetime("20110211", format="%Y%m%d"),
+            ]
+        ),
+    ):
         self.df = df
         self.future = future
         self.lags = lags
@@ -38,24 +46,26 @@ class HARModel:
 
     def lag_average(self):
 
-        df = self.df[['DATE', self.feature]]
-        df['RV_t'] = df[self.feature].shift(-1)
-        df['RV_w'] = df[self.feature].rolling(window=self.lags[0]).mean()
+        df = self.df[["DATE", self.feature]]
+        df["RV_t"] = df[self.feature].shift(-1)
+        df["RV_w"] = df[self.feature].rolling(window=self.lags[0]).mean()
 
         rw20 = self.df[self.feature].rolling(window=self.lags[1]).mean()
 
-        df['RV_m'] = list(
-            ((self.lags[1] * rw20) - (self.lags[0] * df.RV_w)) /
-            (self.lags[1] - self.lags[0])
+        df["RV_m"] = list(
+            ((self.lags[1] * rw20) - (self.lags[0] * df.RV_w))
+            / (self.lags[1] - self.lags[0])
         )
 
-        df['DATE'] = df.DATE.shift(-1)
+        df["DATE"] = df.DATE.shift(-1)
 
         df = df.dropna().reset_index(drop=True)
 
         df.drop([self.feature], axis=1, inplace=True)
 
-        assert round(df.RV_t[0:self.lags[0]].mean() - df.RV_w[self.lags[0]], 12) == 0, 'Error'
+        assert (
+            round(df.RV_t[0 : self.lags[0]].mean() - df.RV_w[self.lags[0]], 12) == 0
+        ), "Error"
 
         self.output_df = df
 
@@ -69,21 +79,25 @@ class HARModel:
             df_help[str(i)] = df.RV_t.shift(-(1 + i))
         df_help = df_help.dropna()
 
-        df['future'] = df_help.mean(axis=1)
+        df["future"] = df_help.mean(axis=1)
 
         df = df.dropna().reset_index(drop=True)
 
         self.output_df = df
 
-        assert (self.output_df.RV_t[1:(self.future + 1)].mean()
-                - self.output_df.future[0] == 0), 'Error'
+        assert (
+            self.output_df.RV_t[1 : (self.future + 1)].mean() - self.output_df.future[0]
+            == 0
+        ), "Error"
 
     def generate_complete_data_set(self):
 
         if self.semi_variance:
             self.future_average()
             df = self.output_df.copy()
-            df = df.merge(self.df[['DATE', 'RSV_s_plus', 'RSV_s_minus']], on='DATE')  # RSV_s_... is hard coded!
+            df = df.merge(
+                self.df[["DATE", "RSV_plus", "RSV_minus"]], on="DATE"
+            )  # RSV_s_... is hard coded!
 
         else:
             self.future_average()
@@ -91,16 +105,22 @@ class HARModel:
 
         self.output_df = df
 
-        assert (self.output_df.RV_t.iloc[1:(self.future + 1)].mean()
-                - self.output_df.future[0] == 0), 'Error'
+        assert (
+            self.output_df.RV_t.iloc[1 : (self.future + 1)].mean()
+            - self.output_df.future[0]
+            == 0
+        ), "Error"
 
     def make_testing_training_set(self):
         self.generate_complete_data_set()
         df = self.output_df.copy()
 
-        df_train = (df.loc[(df.DATE >= self.period_train[0])
-                           & (df.DATE <= self.period_train[1])].reset_index(drop=True))
-        df_test = (df.loc[(df.DATE >= self.period_test[0]) & (df.DATE <= self.period_test[1])].reset_index(drop=True))
+        df_train = df.loc[
+            (df.DATE >= self.period_train[0]) & (df.DATE <= self.period_train[1])
+        ].reset_index(drop=True)
+        df_test = df.loc[
+            (df.DATE >= self.period_test[0]) & (df.DATE <= self.period_test[1])
+        ].reset_index(drop=True)
 
         self.training_set = df_train
         self.testing_set = df_test
@@ -109,9 +129,14 @@ class HARModel:
         self.make_testing_training_set()
 
         if self.semi_variance:
-            result = smf.ols(formula='future ~ RSV_s_plus + RSV_s_minus + RV_w + RV_m', data=self.training_set).fit()
+            result = smf.ols(
+                formula="future ~ RSV_plus + RSV_minus + RV_w + RV_m",
+                data=self.training_set,
+            ).fit()
         else:
-            result = smf.ols(formula='future ~ RV_t + RV_w + RV_m', data=self.training_set).fit()
+            result = smf.ols(
+                formula="future ~ RV_t + RV_w + RV_m", data=self.training_set
+            ).fit()
 
         self.model = result
         self.estimation_results = result.summary().as_latex()
@@ -119,11 +144,19 @@ class HARModel:
     def predict_values(self):
         self.estimate_model()
         if self.semi_variance:
-            self.prediction_train = self.model.predict(self.training_set[['RSV_s_plus', 'RSV_s_minus', 'RV_w', 'RV_m']])
-            self.prediction_test = self.model.predict(self.testing_set[['RSV_s_plus', 'RSV_s_minus', 'RV_w', 'RV_m']])
+            self.prediction_train = self.model.predict(
+                self.training_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+            )
+            self.prediction_test = self.model.predict(
+                self.testing_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+            )
         else:
-            self.prediction_train = self.model.predict(self.training_set[['RV_t', 'RV_w', 'RV_m']])
-            self.prediction_test = self.model.predict(self.testing_set[['RV_t', 'RV_w', 'RV_m']])
+            self.prediction_train = self.model.predict(
+                self.training_set[["RV_t", "RV_w", "RV_m"]]
+            )
+            self.prediction_test = self.model.predict(
+                self.testing_set[["RV_t", "RV_w", "RV_m"]]
+            )
 
     def make_accuracy_measures(self):
         """
@@ -135,12 +168,28 @@ class HARModel:
         """
         self.predict_values()
 
-        test_accuracy = {'MSE': metrics.mean_squared_error(self.testing_set['future'], self.prediction_test),
-                         'MAE': metrics.mean_absolute_error(self.testing_set['future'], self.prediction_test),
-                         'RSquared': metrics.r2_score(self.testing_set['future'], self.prediction_test)}
-        train_accuracy = {'MSE': metrics.mean_squared_error(self.training_set['future'], self.prediction_train),
-                          'MAE': metrics.mean_absolute_error(self.training_set['future'], self.prediction_train),
-                          'RSquared': metrics.r2_score(self.training_set['future'], self.prediction_train)}
+        test_accuracy = {
+            "MSE": metrics.mean_squared_error(
+                self.testing_set["future"], self.prediction_test
+            ),
+            "MAE": metrics.mean_absolute_error(
+                self.testing_set["future"], self.prediction_test
+            ),
+            "RSquared": metrics.r2_score(
+                self.testing_set["future"], self.prediction_test
+            ),
+        }
+        train_accuracy = {
+            "MSE": metrics.mean_squared_error(
+                self.training_set["future"], self.prediction_train
+            ),
+            "MAE": metrics.mean_absolute_error(
+                self.training_set["future"], self.prediction_train
+            ),
+            "RSquared": metrics.r2_score(
+                self.training_set["future"], self.prediction_train
+            ),
+        }
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
@@ -152,7 +201,13 @@ class HARModel:
         self.predict_values()
 
         plt.figure()
-        plt.plot(self.testing_set.DATE, self.testing_set.future, label='Realized Volatility')
-        plt.plot(self.testing_set.DATE, self.prediction_test, label='Predicted Volatility')
+        plt.plot(
+            self.training_set.DATE,
+            self.training_set.future,
+            label="Realized Volatility",
+        )
+        plt.plot(
+            self.training_set.DATE, self.prediction_train, label="Predicted Volatility"
+        )
         plt.legend()
         plt.show()
