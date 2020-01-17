@@ -1,3 +1,10 @@
+"""
+To Do:
+    - Implement Weighted Least Squares for the estimation method (might need to ask J.P. Ortega)
+    - ...
+"""
+
+
 import pandas as pd
 import statsmodels.formula.api as smf
 from sklearn import metrics

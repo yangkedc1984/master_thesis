@@ -1,3 +1,10 @@
+"""
+Realized Volatility is computed here (only the basic version though)
+    - Update: Check how outliers and extreme values are treated
+    - Update: Check what re-sampling does and whether it improves the results (10 fold business time sampling)
+
+"""
+
 from config import *
 import pandas as pd
 import numpy as np

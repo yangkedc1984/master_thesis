@@ -1,4 +1,5 @@
 from run_HAR_model import *
+from LSTM import *
 
 plt.style.use("seaborn")
 
@@ -23,3 +24,21 @@ _training_set = _training_set.iloc[0:30]
 
 
 _training_set.RV_t.iloc[1:21].mean() - _training_set.future[0]  # test passed
+
+
+def load_data():
+    df_m = pd.read_csv(
+        instance_path.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
+    )
+    df_m.DATE = df_m.DATE.values
+    df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
+
+    return df_m
+
+
+df = load_data()
+
+
+lstm_instance = LSTM(df=df, future=20)
+lstm_instance.generate_complete_data_set()
+data_test = lstm_instance.df_processed_data
