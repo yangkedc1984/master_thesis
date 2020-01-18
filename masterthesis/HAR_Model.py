@@ -6,6 +6,7 @@ To Do:
 
 
 import pandas as pd
+import numpy as np
 import statsmodels.formula.api as smf
 from sklearn import metrics
 import matplotlib.pyplot as plt
@@ -21,6 +22,7 @@ class HARModel:
         lags=[4, 20],
         feature="RV",
         semi_variance=False,
+        jump_detec=True,
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
@@ -39,6 +41,7 @@ class HARModel:
         self.lags = lags
         self.feature = feature
         self.semi_variance = semi_variance
+        self.jump_detec = jump_detec
         self.period_train = period_train
         self.period_test = period_test
         self.training_set = None  # data frames
@@ -50,6 +53,17 @@ class HARModel:
         self.test_accuracy = None  # dictionary
         self.train_accuracy = None
         self.output_df = None  # DataFrame (data frame which contains all the features needed for the regression)
+
+    def jump_detection(self):
+        df_tmp = self.df.copy()
+        df_tmp["threshold"] = df_tmp["RV"].rolling(window=200).std() * 4
+        df_tmp.threshold = np.where(df_tmp.threshold.isna(), 1, df_tmp.threshold)
+        df_tmp["larger"] = np.where(df_tmp.RV > df_tmp.threshold, True, False)
+        df_tmp = df_tmp[df_tmp.larger == False]
+
+        df_tmp.drop(columns={"threshold", "larger"}, axis=1, inplace=True)
+
+        self.df = df_tmp.copy()
 
     def lag_average(self):
 
@@ -99,12 +113,13 @@ class HARModel:
 
     def generate_complete_data_set(self):
 
+        if self.jump_detec:
+            self.jump_detection()
+
         if self.semi_variance:
             self.future_average()
             df = self.output_df.copy()
-            df = df.merge(
-                self.df[["DATE", "RSV_plus", "RSV_minus"]], on="DATE"
-            )  # RSV_s_... is hard coded!
+            df = df.merge(self.df[["DATE", "RSV_plus", "RSV_minus"]], on="DATE")
 
         else:
             self.future_average()
@@ -220,7 +235,7 @@ class HARModel:
             self.prediction_train,
             label="Predicted Volatility",
             alpha=0.75,
-            color="darkgreen",  # was sell das scheiss komma da?
+            color="darkgreen",
         )
         plt.legend()
         plt.show()

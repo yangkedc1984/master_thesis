@@ -26,6 +26,7 @@ def estimate_and_predict_har_models(df_input, save=True):
                 lags=[4, 20],
                 feature="RV",
                 semi_variance=k,
+                jump_detec=True,
                 period_train=list(
                     [
                         pd.to_datetime("20030910", format="%Y%m%d"),
@@ -73,4 +74,6 @@ results["har_1_True"].prediction_test.head()
 results["har_5_True"].prediction_test.head()
 results["har_20_True"].prediction_test.head()
 
-results["har_5_True"].make_graph()
+plt.hist(np.log(results["har_1_True"].df.RV), bins=100)  # makes it much better
+
+results["har_1_True"].df.shape
