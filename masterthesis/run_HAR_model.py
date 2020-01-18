@@ -77,3 +77,29 @@ results["har_20_True"].prediction_test.head()
 plt.hist(np.log(results["har_1_True"].df.RV), bins=100)  # makes it much better
 
 results["har_1_True"].df.shape
+
+from sklearn.preprocessing import normalize
+from sklearn.preprocessing import MinMaxScaler
+
+scaler_ = MinMaxScaler()
+data = np.log(results["har_1_True"].df.RV.values)
+
+ser = scaler_.fit_transform(data.reshape(-1, 1))
+series_minmax = np.reshape(ser, (1791,))
+series_minmax
+
+series_minmax_log_2 = np.where(series_minmax == 0, 0.1, series_minmax)
+
+series = normalize(np.log(results["har_1_True"].df.RV.values.reshape(1, -1)))
+series = np.reshape(series, (1791,))
+s = pd.Series(series)
+
+plt.hist(s, bins=100)
+plt.hist(series_minmax, bins=100, color="black", alpha=0.6)
+
+
+plt.close()
+fig, axs = plt.subplots(3)
+axs[0].hist(s, bins=50)
+axs[1].hist(series_minmax, bins=50, color="black", alpha=0.6)
+axs[2].hist(np.log(series_minmax_log_2), bins=50, color="c", alpha=0.7)
