@@ -82,24 +82,79 @@ from sklearn.preprocessing import normalize
 from sklearn.preprocessing import MinMaxScaler
 
 scaler_ = MinMaxScaler()
+results["har_1_True"].df.RV = scaler_.fit_transform(
+    np.log(results["har_1_True"].df.RV.values).reshape(-1, 1)
+)
+
+df_view = results["har_1_True"].df
+
 data = np.log(results["har_1_True"].df.RV.values)
 
-ser = scaler_.fit_transform(data.reshape(-1, 1))
-series_minmax = np.reshape(ser, (1791,))
-series_minmax
 
-series_minmax_log_2 = np.where(series_minmax == 0, 0.1, series_minmax)
+ser = scaler_.fit_transform(data.reshape(-1, 1))
+series_minmax = np.reshape(ser, (1791,))  # hard coded!!!
+
+series_minmax_log_2 = np.where(series_minmax == 0, 0.5, series_minmax)
 
 series = normalize(np.log(results["har_1_True"].df.RV.values.reshape(1, -1)))
-series = np.reshape(series, (1791,))
-s = pd.Series(series)
+df_view.RV = normalize(df_view.RV.values.reshape(-1, 1))
 
-plt.hist(s, bins=100)
-plt.hist(series_minmax, bins=100, color="black", alpha=0.6)
+
+series = np.reshape(series, (1791,))  # hard coded!!!
+ser = pd.Series(series)
+
+
+scaler_2 = MinMaxScaler()
+sca_2 = scaler_2.fit_transform(series_minmax_log_2.reshape(-1, 1))
+sca_2 = np.reshape(sca_2, (1791,))
+sca_2 = pd.Series(sca_2)
+
+
+from scipy import stats
+
+all_series = [series_minmax, series_minmax_log_2, sca_2]
+
+color_hist = ["black", "navy", "green"]
+color_density = ["pink", "c", "black"]
+
+fig, axs = plt.subplots(3)
+for i in range(len(all_series)):
+    xt = plt.xticks()[0]
+    xmin, xmax = min(xt), max(xt)
+    lnspc = np.linspace(xmin, xmax, len(all_series[i]))
+    m, s = stats.norm.fit(all_series[i])  # get mean and standard deviation
+    pdf_g = stats.norm.pdf(lnspc, m, s)  # now get theoretical values in our interval
+    axs[i].hist(all_series[i], bins=50, alpha=0.5, density=True, color=color_hist[i])
+    axs[i].plot(lnspc, pdf_g, label="Norm", color=color_density[i])  # plot it
 
 
 plt.close()
-fig, axs = plt.subplots(3)
-axs[0].hist(s, bins=50)
-axs[1].hist(series_minmax, bins=50, color="black", alpha=0.6)
-axs[2].hist(np.log(series_minmax_log_2), bins=50, color="c", alpha=0.7)
+fig, axs = plt.subplots(2, 2)
+axs[0, 0].hist(s, bins=50, color="black", alpha=0.5, density=True)
+axs[0, 1].hist(series_minmax, bins=50, color="black", alpha=0.6, density=True)
+axs[1, 0].hist(
+    np.log(series_minmax_log_2), bins=50, color="black", alpha=0.7, density=True
+)
+axs[1, 1].hist(sca_2, bins=50, color="black", alpha=0.8, density=True)
+axs[1, 1].plot(lnspc, pdf_g, label="Norm", color="pink")  # plot it
+
+
+xt = plt.xticks()[0]
+xmin, xmax = min(xt), max(xt)
+lnspc = np.linspace(xmin, xmax, len(sca_2))
+
+m, s = stats.norm.fit(sca_2)  # get mean and standard deviation
+pdf_g = stats.norm.pdf(lnspc, m, s)  # now get theoretical values in our interval
+
+plt.close()
+plt.plot(lnspc, pdf_g, label="Norm", color="pink")  # plot it
+plt.hist(sca_2, bins=100, color="black", alpha=0.6, density=True)
+
+stats.kurtosis(s)
+stats.kurtosis(series_minmax)
+stats.kurtosis(series_minmax_log_2)
+stats.kurtosis(sca_2)
+
+stats.skew(s)
+stats.skew(series_minmax)
+stats.skew(series_minmax_log_2)

@@ -22,7 +22,7 @@ class HARModel:
         lags=[4, 20],
         feature="RV",
         semi_variance=False,
-        jump_detec=True,
+        jump_detect=True,
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
@@ -41,7 +41,7 @@ class HARModel:
         self.lags = lags
         self.feature = feature
         self.semi_variance = semi_variance
-        self.jump_detec = jump_detec
+        self.jump_detect = jump_detect
         self.period_train = period_train
         self.period_test = period_test
         self.training_set = None  # data frames
@@ -63,6 +63,7 @@ class HARModel:
 
         df_tmp.drop(columns={"threshold", "larger"}, axis=1, inplace=True)
 
+        # unit test
         self.df = df_tmp.copy()
 
     def lag_average(self):
@@ -113,7 +114,7 @@ class HARModel:
 
     def generate_complete_data_set(self):
 
-        if self.jump_detec:
+        if self.jump_detect:
             self.jump_detection()
 
         if self.semi_variance:
