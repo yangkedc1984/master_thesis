@@ -1,9 +1,5 @@
 """
 Class makes volatility predictions by applying deep learning
-
-plt.hist(np.log(results["har_1_True"].df.RV), bins=100)
-        # check optimal distribution of data with given scaler
-
 """
 
 import pandas as pd
@@ -11,20 +7,21 @@ import numpy as np
 import random
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
 
 
-class LSTM:
+class DataPreparationLSTM:
     def __init__(
         self,
-        df,
-        future=1,
-        lag=20,
-        feature="RV",
-        semi_variance=False,
-        jump_detect=True,
-        log_transform=True,
-        min_max_scaler=True,
-        standard_scaler=False,
+        df: pd.DataFrame,
+        future: int = 1,
+        lag: int = 20,
+        feature: str = "RV",
+        semi_variance: bool = False,
+        jump_detect: bool = True,
+        log_transform: bool = True,
+        min_max_scaler: bool = True,
+        standard_scaler: bool = False,
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
@@ -49,24 +46,17 @@ class LSTM:
         self.standard_scaler = standard_scaler
         self.period_train = period_train
         self.period_test = period_test
-        # self.scale_min_max = True
-        # self.scale_log = True
-        # self.scale_standard = True
 
         # Predefined generated output
         self.training_set = None  # data frames
         self.testing_set = None  # data frames
-        self.prediction_train = None  # vector (or excel export)
-        self.prediction_test = None  # vector (or excel export)
-        self.model = None  # stats model instance
-        self.estimation_results = None  # table
-        self.test_accuracy = None  # dictionary
-        self.train_accuracy = None
         self.future_values = None
         self.historical_values = None
         self.df_processed_data = None
         self.train_matrix = None
         self.train_y = None
+        self.test_matrix = None
+        self.test_y = None
 
     def jump_detection(self):
         df_tmp = self.df.copy()
@@ -110,7 +100,7 @@ class LSTM:
                 self.df.RSV_minus = normalize(self.df.RSV_minus.values.reshape(-1, 1))
 
     def future_averages(self):
-        df = self.df[["DATE", "RV"]]
+        df = self.df[["DATE", "RV"]].copy()
         for i in range(self.future):
             df["future_{}".format(i + 1)] = df.RV.shift(-(i + 1))
         df = df.dropna()
@@ -127,7 +117,7 @@ class LSTM:
         self.future_values = df_output
 
     def historical_lag_transformation(self):
-        df = self.df[["DATE", "RV"]]
+        df = self.df[["DATE", "RV"]].copy()
         for i in range((self.lag - 1)):
             df["lag_{}".format(i + 1)] = df.RV.shift(+(i + 1))
 
@@ -140,6 +130,8 @@ class LSTM:
 
         if self.jump_detect:
             self.jump_detection()
+
+        self.data_scaling()
 
         self.future_averages()
         self.historical_lag_transformation()
@@ -172,61 +164,65 @@ class LSTM:
 
     def neural_network_input(self):
         self.make_testing_training_set()
+
+        # training values
         self.train_matrix = self.training_set.drop(columns={"DATE", "future"}).values
         self.train_y = self.training_set[["future"]].values
 
+        # testing values
+        self.test_matrix = self.testing_set.drop(columns={"DATE", "future"}).values
+        self.test_y = self.testing_set[["future"]].values
 
-# to set hyper-parameters we need a class that defines the NN structure (otherwise the whole data wrangling is redone
-# each time)
-from run_HAR_model import load_data
-import matplotlib.pyplot as plt
+    def prepare_complete_data_set(self):
+        self.neural_network_input()
 
-df_input = load_data()
 
-lstm_instance = LSTM(
-    df=df_input,
-    standard_scaler=False,
-    min_max_scaler=True,
-    log_transform=True,
-    semi_variance=True,
-)
-lstm_instance.data_scaling()
+class TrainLSTM:
+    def __init__(
+        self,
+        training_set,
+        testing_set,
+        activation,
+        layer_architecture,
+        neuron_architecture,
+        batch_size,
+        learning_rate,
+    ):
+        self.training_set = training_set
+        self.testing_set = testing_set
+        self.activation = activation
+        self.layer_architecture = layer_architecture
+        self.neuron_architecture = neuron_architecture
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
 
-plt.close()
-plt.hist(lstm_instance.df.RV, bins=100, alpha=0.5, color="black")
-plt.hist(lstm_instance.df.RSV_minus, bins=100, alpha=0.5)
-plt.hist(lstm_instance.df.RSV_plus, bins=100, alpha=0.5)
+        # Predefined output
+        self.train_matrix = None
+        self.train_y = None
+        self.test_matrix = None
+        self.test_y = None
 
-# class TrainingNetwork(LSTM):  # this class does not help me much probably (good to know that it works though)
-#     def __init__(self, kt):
-#         LSTM.__init__(
-#             self,
-#             df=df,
-#             future=1,
-#             lag=20,
-#             feature="RV",
-#             semi_variance=True,
-#             period_train=list(
-#                 [
-#                     pd.to_datetime("20030910", format="%Y%m%d"),
-#                     pd.to_datetime("20080208", format="%Y%m%d"),
-#                 ]
-#             ),
-#             period_test=list(
-#                 [
-#                     pd.to_datetime("20080209", format="%Y%m%d"),
-#                     pd.to_datetime("20101231", format="%Y%m%d"),
-#                 ]
-#             ),
-#         )
-#         self.kt = kt
-#
-#     # def make_something(self):
-#     #     inc = self.future + self.neuron
-#     #
-#     #     return inc
-#
-#
-# x = TrainingNetwork(3)
-# x.kt
-# x.generate_complete_data_set()
+    def reshape_input_data(self):
+        self.train_matrix = self.training_set.drop(columns={"DATE", "future"}).values
+        self.train_y = self.training_set[["future"]].values
+
+        self.test_matrix = self.testing_set.drop(columns={"DATE", "future"}).values
+        self.test_y = self.testing_set[["future"]].values
+
+        n_features = 1
+
+        train_shape_rows = self.train_matrix.shape[0]
+        train_shape_columns = self.train_matrix.shape[1]
+
+        self.train_matrix = self.train_matrix.reshape(
+            (train_shape_rows, train_shape_columns, n_features)
+        )
+
+        test_shape_rows = self.test_matrix.shape[0]
+        test_shape_columns = self.train_matrix.shape[1]
+
+        self.test_matrix = self.test_matrix.reshape(
+            (test_shape_rows, test_shape_columns, n_features)
+        )
+
+    # def train_lstm(self):
