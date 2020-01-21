@@ -1,7 +1,7 @@
 """
 Class makes volatility predictions by applying deep learning
 """
-
+from sklearn import metrics
 import pandas as pd
 import numpy as np
 import random
@@ -162,19 +162,8 @@ class DataPreparationLSTM:
         self.training_set = df_train
         self.testing_set = df_test
 
-    def neural_network_input(self):
-        self.make_testing_training_set()
-
-        # training values
-        self.train_matrix = self.training_set.drop(columns={"DATE", "future"}).values
-        self.train_y = self.training_set[["future"]].values
-
-        # testing values
-        self.test_matrix = self.testing_set.drop(columns={"DATE", "future"}).values
-        self.test_y = self.testing_set[["future"]].values
-
     def prepare_complete_data_set(self):
-        self.neural_network_input()
+        self.make_testing_training_set()
 
 
 class TrainLSTM:
@@ -182,18 +171,16 @@ class TrainLSTM:
         self,
         training_set,
         testing_set,
-        activation,
-        layer_architecture,
-        neuron_architecture,
-        batch_size,
-        learning_rate,
+        activation=tf.nn.elu,
+        epochs=20,
+        learning_rate=0.01,
+        network_architecture={"Layer1": 20, "Layer2": 3, "Layer3": 5, "Layer4": 12},
     ):
         self.training_set = training_set
         self.testing_set = testing_set
         self.activation = activation
-        self.layer_architecture = layer_architecture
-        self.neuron_architecture = neuron_architecture
-        self.batch_size = batch_size
+        self.network_architecture = network_architecture
+        self.epochs = epochs
         self.learning_rate = learning_rate
 
         # Predefined output
@@ -201,6 +188,11 @@ class TrainLSTM:
         self.train_y = None
         self.test_matrix = None
         self.test_y = None
+        self.fitted_model = None
+        self.prediction_train = None
+        self.prediction_test = None
+        self.test_accuracy = None
+        self.train_accuracy = None
 
     def reshape_input_data(self):
         self.train_matrix = self.training_set.drop(columns={"DATE", "future"}).values
@@ -225,4 +217,112 @@ class TrainLSTM:
             (test_shape_rows, test_shape_columns, n_features)
         )
 
-    # def train_lstm(self):
+    def train_lstm(self):
+        if self.train_matrix is None:
+            self.reshape_input_data()
+
+        m = tf.keras.models.Sequential()
+        m.add(
+            tf.keras.layers.LSTM(
+                self.network_architecture["Layer1"],
+                activation=self.activation,
+                return_sequences=True,
+                input_shape=(self.train_matrix.shape[1], 1),
+            )
+        )
+        if self.network_architecture["Layer2"] > 0:
+            if self.network_architecture["Layer3"] > 0:
+                if self.network_architecture["Layer4"] > 0:
+                    m.add(
+                        tf.keras.layers.LSTM(
+                            self.network_architecture["Layer2"],
+                            activation=self.activation,
+                            return_sequences=True,
+                        )
+                    )
+                    m.add(
+                        tf.keras.layers.LSTM(
+                            self.network_architecture["Layer3"],
+                            activation=self.activation,
+                            return_sequences=True,
+                        )
+                    )
+                    m.add(
+                        tf.keras.layers.LSTM(
+                            self.network_architecture["Layer4"],
+                            activation=self.activation,
+                        )
+                    )
+                else:
+                    m.add(
+                        tf.keras.layers.LSTM(
+                            self.network_architecture["Layer2"],
+                            activation=self.activation,
+                            return_sequences=True,
+                        )
+                    )
+                    m.add(
+                        tf.keras.layers.LSTM(
+                            self.network_architecture["Layer3"],
+                            activation=self.activation,
+                        )
+                    )
+            else:
+                m.add(
+                    tf.keras.layers.LSTM(
+                        self.network_architecture["Layer2"], activation=self.activation
+                    )
+                )
+        m.add(tf.keras.layers.Dense(1, activation="linear"))
+
+        o = tf.keras.optimizers.Adam(
+            lr=self.learning_rate,
+            beta_1=0.9,
+            beta_2=0.999,
+            epsilon=None,
+            decay=0.0,
+            amsgrad=False,
+        )
+
+        m.compile(optimizer=o, loss=tf.keras.losses.logcosh)
+
+        m.fit(self.train_matrix, self.train_y, epochs=20, verbose=1)
+
+        self.fitted_model = m
+
+    def predict_lstm(self):
+        if self.fitted_model is None:
+            self.train_lstm()
+
+        self.prediction_train = self.fitted_model.predict(self.train_matrix)
+        self.prediction_test = self.fitted_model.predict(self.test_matrix)
+
+    def make_accuracy_measures(self):
+        if self.prediction_test is None:
+            self.predict_lstm()
+
+        test_accuracy = {
+            "MSE": metrics.mean_squared_error(
+                self.testing_set["future"], self.prediction_test
+            ),
+            "MAE": metrics.mean_absolute_error(
+                self.testing_set["future"], self.prediction_test
+            ),
+            "RSquared": metrics.r2_score(
+                self.testing_set["future"], self.prediction_test
+            ),
+        }
+        train_accuracy = {
+            "MSE": metrics.mean_squared_error(
+                self.training_set["future"], self.prediction_train
+            ),
+            "MAE": metrics.mean_absolute_error(
+                self.training_set["future"], self.prediction_train
+            ),
+            "RSquared": metrics.r2_score(
+                self.training_set["future"], self.prediction_train
+            ),
+        }
+
+        self.test_accuracy = test_accuracy
+        self.train_accuracy = train_accuracy
