@@ -229,7 +229,7 @@ class TrainLSTM:
                 self.network_architecture["Layer1"],
                 activation=self.activation,
                 return_sequences=True,
-                input_shape=(self.train_matrix.shape[1], 1),
+                input_shape=(int(self.train_matrix.shape[int(1)]), int(1)),
             )
         )
         if self.network_architecture["Layer2"] > 0:

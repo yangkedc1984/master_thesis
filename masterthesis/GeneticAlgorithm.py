@@ -1,6 +1,8 @@
 from run_HAR_model import load_data
 from LSTM import *
 from collections import OrderedDict
+import mpmath as mp  # used for mathematical optimization of fitness function
+import matplotlib.pyplot as plt
 
 
 """
@@ -14,8 +16,8 @@ from collections import OrderedDict
 class GeneticAlgorithm:
     def __init__(
         self,
-        training_set,
-        testing_set,
+        training_set_ga,
+        testing_set_ga,
         network_architecture=OrderedDict(
             [
                 ("Layer1", [10, 21, 5]),
@@ -28,8 +30,8 @@ class GeneticAlgorithm:
         batch_size=[20, 50, 5],
         initial_poulation_source_external=False,  # if there is a csv file with the initial population (load it into the algorithm)
     ):
-        self.training_set = training_set
-        self.testing_set = testing_set
+        self.training_set_ga = training_set_ga
+        self.testing_set_ga = testing_set_ga
         self.network_architecture = network_architecture
         self.learning_rate = learning_rate
         self.batch_size = batch_size
@@ -108,8 +110,8 @@ class GeneticAlgorithm:
             for i in range(self.initial_population.shape[0]):
                 tf.reset_default_graph()
                 training_model = TrainLSTM(
-                    self.training_set,
-                    self.testing_set,
+                    training_set=self.training_set_ga,
+                    testing_set=self.testing_set_ga,
                     activation=tf.nn.elu,
                     epochs=1,
                     learning_rate=self.initial_population.LR[i],
@@ -126,9 +128,7 @@ class GeneticAlgorithm:
             if save_population_to_csv:
                 pass  # save initial_population to a given path (as csv file)
 
-    def select_parents(
-        self,
-    ):  # add two different methods to select parents in __init__()
+    def select_parents(self,):
         if self.initial_population is None:
             self.make_initial_population()
 
@@ -196,15 +196,15 @@ class GeneticAlgorithm:
 
         self.initial_population.reset_index(drop=True, inplace=True)
 
-        ind = self.initial_population[
-            self.initial_population.Fitness.isna()
-        ].reset_index(drop=True)
+    def add_fitness(self):
+        ind = self.initial_population.copy()
+        ind = ind[ind.Fitness.isna()].reset_index(drop=True)
 
-        for i in ind.index:  # error !!
+        for i in ind.index:
             tf.reset_default_graph()
-            training_model = TrainLSTM(
-                self.training_set,
-                self.testing_set,
+            train_m = TrainLSTM(
+                training_set=self.training_set_ga,
+                testing_set=self.testing_set_ga,
                 activation=tf.nn.elu,
                 epochs=1,
                 learning_rate=ind.LR[i],
@@ -212,63 +212,96 @@ class GeneticAlgorithm:
                 .iloc[i]
                 .to_dict(),
             )
-            training_model.make_accuracy_measures()
-
-            self.initial_population.Fitness[i] = training_model.fitness
+            train_m.make_accuracy_measures()
+            print(train_m.fitness)
 
 
 df = load_data()
 
-_lstm = DataPreparationLSTM(df=df, future=1)
-_lstm.prepare_complete_data_set()
+_lstm_instance = DataPreparationLSTM(
+    df=df,
+    future=1,
+    standard_scaler=False,
+    min_max_scaler=True,
+    log_transform=True,
+    semi_variance=True,
+)
+_lstm_instance.prepare_complete_data_set()
 
-_ga = GeneticAlgorithm(_lstm.training_set, _lstm.testing_set)
+_ga = GeneticAlgorithm(
+    training_set_ga=_lstm_instance.training_set,
+    testing_set_ga=_lstm_instance.testing_set,
+)
+
 _ga.make_initial_population()
-
 _ga.select_parents()
 _ga.make_offsprings()
-_ga.initial_population
+_ga.add_fitness()
 
-check = _ga.initial_population
-check
-ind = check[check.Fitness.isna()]
-ind
+matrix = _ga.initial_population
+matrix = matrix[matrix.Fitness.isna()].reset_index(drop=True)
 
-for i in ind.index:
-    print(i)
-
-u = TrainLSTM(
-    _lstm.training_set,
-    _lstm.testing_set,
-    learning_rate=ind.LR[0],
+train_mo = TrainLSTM(
+    training_set=_lstm_instance.training_set,
+    testing_set=_lstm_instance.testing_set,
+    activation=tf.nn.elu,
     epochs=1,
-    network_architecture={"Layer3": 5.0, "Layer2": 2.0, "Layer1": 15.0, "Layer4": 0.0},
+    learning_rate=0.001,
+    network_architecture={"Layer4": 2.0, "Layer1": 20.0, "Layer2": 2.0, "Layer3": 7.0},
 )
-u.train_lstm()
 
-u.make_accuracy_measures()
+train_mo.make_accuracy_measures()
 
+m = TrainLSTM(
+    _lstm_instance.training_set, _lstm_instance.testing_set, epochs=1
+)  # this works
+m.make_accuracy_measures()
 
-ind[["Layer1", "Layer2", "Layer3", "Layer4", "Layer5"]].iloc[0].to_dict()
-ind.LR[0]
+m = TrainLSTM(  # this works (with/without the network architecture)
+    _lstm_instance.training_set,
+    _lstm_instance.testing_set,
+    epochs=2,
+    learning_rate=0.001,
+    network_architecture={"Layer1": 12, "Layer2": 3, "Layer3": 4, "Layer4": 0},
+)
 
-for i in range(ind.shape[0]):
-    tf.reset_default_graph()
-
-    training_model_u = TrainLSTM(
-        _ga.training_set,
-        _ga.testing_set,
-        activation=tf.nn.elu,
-        epochs=1,
-        learning_rate=ind.LR[i],
-        network_architecture=ind[["Layer1", "Layer2", "Layer3", "Layer4", "Layer5"]]
-        .iloc[i]
-        .to_dict(),
-    )
-
-    training_model_u.make_accuracy_measures()
-    ind.Fitness[i] = training_model_u.fitness
+m.make_accuracy_measures()
 
 
-check = _ga.initial_population
-check.head()
+m = TrainLSTM(_ga.training_set_ga, _ga.testing_set_ga)  # this works as well
+m.make_accuracy_measures()
+
+
+# initial_population.Fitness[i] = training_model.fitness
+
+
+print(m.train_matrix)
+m.train_lstm()
+
+type(m.train_matrix.shape[1])
+
+m.train_lstm()
+
+
+"""
+Mathematical Optimization of Fitness function :
+Difficulty: Implementation, as the lambda has to be updated for each iteration
+"""
+
+_df = _ga.initial_population[~_ga.initial_population.Fitness.isna()]
+_df.Fitness.nlargest(2)
+_df.Fitness.nsmallest(3)
+
+[_df.Fitness.nlargest(2)[i] ** x for i in _df.Fitness.nlargest(2).index]
+
+
+mp.findroot(
+    lambda x: [_df.Fitness.nlargest(2)[i] ** x for i in _df.Fitness.nlargest(2).index],
+    0,
+)
+
+result = mp.findroot(lambda x: 2 ** x + 3 ** x + 4 ** x - 5 ** x - 6 ** x, 0)
+float(result)
+int(2 ** result + 3 ** result + 4 ** result - 5 ** result - 6 ** result)
+
+mp.findroot(lambda x: x ** 2 - 4, 0)  # has to equal zero
