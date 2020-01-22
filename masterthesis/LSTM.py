@@ -193,6 +193,7 @@ class TrainLSTM:
         self.prediction_test = None
         self.test_accuracy = None
         self.train_accuracy = None
+        self.fitness = None
 
     def reshape_input_data(self):
         self.train_matrix = self.training_set.drop(columns={"DATE", "future"}).values
@@ -221,6 +222,7 @@ class TrainLSTM:
         if self.train_matrix is None:
             self.reshape_input_data()
 
+        tf.reset_default_graph()
         m = tf.keras.models.Sequential()
         m.add(
             tf.keras.layers.LSTM(
@@ -286,7 +288,7 @@ class TrainLSTM:
 
         m.compile(optimizer=o, loss=tf.keras.losses.logcosh)
 
-        m.fit(self.train_matrix, self.train_y, epochs=20, verbose=1)
+        m.fit(self.train_matrix, self.train_y, epochs=self.epochs, verbose=1)
 
         self.fitted_model = m
 
@@ -326,3 +328,4 @@ class TrainLSTM:
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
+        self.fitness = 1 / self.train_accuracy["MSE"]
