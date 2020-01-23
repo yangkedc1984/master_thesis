@@ -43,10 +43,14 @@ _ga = GeneticAlgorithm(
     ),
     learning_rate=[0.00001, 0.1, 0.005],
     batch_size=[20, 50, 5],
+    initial_population_source_external=True,
 )
 
 
-_ga.run_complete_genetic_algorithm(initial_population_size=20, number_of_generations=5)
+_ga.run_complete_genetic_algorithm(initial_population_size=20, number_of_generations=20)
+
 
 result = _ga.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation.csv")
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation_run_test.csv")
+
+print("RESULTS SAVED")

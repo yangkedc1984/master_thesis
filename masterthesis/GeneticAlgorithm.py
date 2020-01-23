@@ -2,6 +2,7 @@ from run_HAR_model import load_data
 from LSTM import *
 from collections import OrderedDict
 import mpmath as mp  # used for mathematical optimization of fitness function
+from config import *
 
 """
 - Make Summary Statistics for the whole population (eg. conditional average and so on) --> call it, NETWORK ANALYSIS
@@ -41,47 +42,50 @@ class GeneticAlgorithm:
 
     def make_initial_population(self, save_population_to_csv=False, initial_pop_size=5):
 
-        if self.initial_population_source_external:
-            pass  # define path were the csv file is stored // plus define a
+        complete_architecture = OrderedDict(
+            [
+                (
+                    "LR",
+                    np.arange(
+                        self.learning_rate[0],
+                        self.learning_rate[1],
+                        self.learning_rate[2],
+                    ),
+                ),
+                (
+                    "BS",
+                    np.arange(
+                        self.batch_size[0], self.batch_size[1], self.batch_size[2]
+                    ),
+                ),
+            ]
+        )
 
-        else:
-            complete_architecture = OrderedDict(
-                [
-                    (
-                        "LR",
-                        np.arange(
-                            self.learning_rate[0],
-                            self.learning_rate[1],
-                            self.learning_rate[2],
-                        ),
-                    ),
-                    (
-                        "BS",
-                        np.arange(
-                            self.batch_size[0], self.batch_size[1], self.batch_size[2]
-                        ),
-                    ),
-                ]
+        for i in range(len(self.network_architecture.keys())):
+            complete_architecture.update(
+                {
+                    list(self.network_architecture.keys())[i]: np.arange(
+                        self.network_architecture[
+                            list(self.network_architecture.keys())[i]
+                        ][0],
+                        self.network_architecture[
+                            list(self.network_architecture.keys())[i]
+                        ][1],
+                        self.network_architecture[
+                            list(self.network_architecture.keys())[i]
+                        ][2],
+                    )
+                }
             )
 
-            for i in range(len(self.network_architecture.keys())):
-                complete_architecture.update(
-                    {
-                        list(self.network_architecture.keys())[i]: np.arange(
-                            self.network_architecture[
-                                list(self.network_architecture.keys())[i]
-                            ][0],
-                            self.network_architecture[
-                                list(self.network_architecture.keys())[i]
-                            ][1],
-                            self.network_architecture[
-                                list(self.network_architecture.keys())[i]
-                            ][2],
-                        )
-                    }
-                )
+        self.network_architecture = complete_architecture
 
-            self.network_architecture = complete_architecture
+        if self.initial_population_source_external:
+            self.initial_population = pd.read_csv(
+                instance_path.path_input + "/" + "InitialPopulation.csv", index_col=0
+            )
+
+        else:
 
             ind = pd.DataFrame(
                 0,
@@ -109,7 +113,7 @@ class GeneticAlgorithm:
                     training_set=self.training_set_ga,
                     testing_set=self.testing_set_ga,
                     activation=tf.nn.elu,
-                    epochs=10,
+                    epochs=2,
                     learning_rate=self.initial_population.LR[i],
                     layer_one=self.initial_population["Layer1"][i],
                     layer_two=self.initial_population["Layer2"][i],
@@ -118,45 +122,68 @@ class GeneticAlgorithm:
                 )
                 training_model.make_accuracy_measures()
 
-                self.initial_population.Fitness[i] = training_model.fitness
+                self.initial_population.Fitness.iloc[i] = training_model.fitness
 
             if save_population_to_csv:
-                pass  # save initial_population to a given path (as csv file)
+                self.initial_population.to_csv(
+                    instance_path.path_input + "/" + "InitialPopulation.csv"
+                )
 
-    def select_parents(self,):
+    def select_parents(self):
         if self.initial_population is None:
             self.make_initial_population()
 
         df_help = self.initial_population.copy()
-        df_help.Fitness = (
-            df_help.Fitness
-        )  # ** 2 (update fitness function: see issue on github)
-        prob_dist = df_help.Fitness / np.sum(df_help.Fitness)
-        arr_individuals = np.arange(df_help.index[0], df_help.shape[0])
-        parent1_location = np.random.choice(arr_individuals, p=prob_dist)
 
-        ind_help = df_help.drop(parent1_location, axis=0)
+        parent1_location = (
+            df_help.Fitness[
+                np.random.choice(
+                    df_help.index, int(df_help.shape[0] * 0.1), replace=False
+                )
+            ]
+            .nlargest(1)
+            .index
+        )
 
-        prob_dist = ind_help.Fitness / np.sum(ind_help.Fitness)
-        arr_individuals = np.delete(arr_individuals, parent1_location)
-        parent2_location = np.random.choice(arr_individuals, p=prob_dist)
+        parent2_location = (
+            df_help.Fitness[
+                np.random.choice(
+                    df_help.index, int(df_help.shape[0] * 0.1), replace=False
+                )
+            ]
+            .nlargest(1)
+            .index
+        )
 
-        parent1 = df_help.iloc[parent1_location]
-        parent2 = df_help.iloc[parent2_location]
+        # df_help.Fitness = (
+        #     df_help.Fitness
+        # )  # ** 2 (update fitness function: see issue on github)
+        # prob_dist = df_help.Fitness / np.sum(df_help.Fitness)
+        # arr_individuals = np.arange(df_help.index[0], df_help.shape[0])
+        # parent1_location = np.random.choice(arr_individuals, p=prob_dist)
+        #
+        # ind_help = df_help.drop(parent1_location, axis=0)
+        #
+        # prob_dist = ind_help.Fitness / np.sum(ind_help.Fitness)
+        # arr_individuals = np.delete(arr_individuals, parent1_location)
+        # parent2_location = np.random.choice(arr_individuals, p=prob_dist)
+        #
+        # parent1 = df_help.iloc[parent1_location]
+        # parent2 = df_help.iloc[parent2_location]
 
-        self.parent_one = parent1
-        self.parent_two = parent2
+        self.parent_one = df_help.iloc[parent1_location]
+        self.parent_two = df_help.iloc[parent2_location]
 
     def make_offsprings(self):
         self.select_parents()
 
-        df_test_parent_one = self.parent_one.to_frame()
-        df_test_parent_two = self.parent_two.to_frame()
-        df_test_parent_one = (
-            df_test_parent_one.transpose().reset_index(drop=True).reset_index(level=0)
+        df_test_parent_one = self.parent_one
+        df_test_parent_two = self.parent_two
+        df_test_parent_one = df_test_parent_one.reset_index(drop=True).reset_index(
+            level=0
         )
-        df_test_parent_two = (
-            df_test_parent_two.transpose().reset_index(drop=True).reset_index(level=0)
+        df_test_parent_two = df_test_parent_two.reset_index(drop=True).reset_index(
+            level=0
         )
 
         child_one = df_test_parent_one[list(df_test_parent_one.columns[:3])].merge(
@@ -199,7 +226,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=10,
+                epochs=2,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],
@@ -207,7 +234,7 @@ class GeneticAlgorithm:
                 layer_four=individuals_help.Layer4[i],
             )
             train_m.make_accuracy_measures()
-            self.initial_population.Fitness[i] = train_m.fitness
+            self.initial_population.Fitness.iloc[i] = train_m.fitness
 
     def run_complete_genetic_algorithm(
         self, initial_population_size=50, number_of_generations=20
