@@ -35,7 +35,7 @@ _ga = GeneticAlgorithm(
     testing_set_ga=_lstm_instance.testing_set,
     network_architecture=OrderedDict(
         [
-            ("Layer1", [6, 21, 2]),
+            ("Layer1", [6, 41, 2]),
             ("Layer2", [2, 21, 2]),
             ("Layer3", [0, 21, 5]),
             ("Layer4", [0, 21, 5]),
@@ -45,12 +45,8 @@ _ga = GeneticAlgorithm(
     batch_size=[20, 50, 5],
 )
 
-_ga.make_initial_population(save_population_to_csv=False, initial_pop_size=10)
 
+_ga.run_complete_genetic_algorithm(initial_population_size=20, number_of_generations=5)
 
 result = _ga.initial_population.copy()
-result.to_csv(
-    instance_path.path_input + "/" + "InitialPopulation.csv"
-)  # adding a unique identifier?
-
-#  _ga.run_complete_genetic_algorithm()
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation.csv")

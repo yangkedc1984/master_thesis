@@ -104,6 +104,7 @@ class GeneticAlgorithm:
             self.initial_population = ind
 
             for i in range(self.initial_population.shape[0]):
+                print("Progress: {}".format(i / self.initial_population.shape[0]))
                 training_model = TrainLSTM(
                     training_set=self.training_set_ga,
                     testing_set=self.testing_set_ga,
@@ -217,6 +218,7 @@ class GeneticAlgorithm:
             )
 
         for iteration in range(number_of_generations):
+            print("Progress Generation: {}".format(iteration / number_of_generations))
             print(iteration)
             self.make_offsprings()
 
