@@ -8,6 +8,7 @@ import random
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 
 class DataPreparationLSTM:
@@ -173,15 +174,21 @@ class TrainLSTM:
         testing_set,
         activation=tf.nn.elu,
         epochs=20,
-        learning_rate=0.01,
-        network_architecture={"Layer1": 20, "Layer2": 3, "Layer3": 5, "Layer4": 12},
+        learning_rate=0.001,
+        layer_one=20,
+        layer_two=15,
+        layer_three=8,
+        layer_four=4,
     ):
         self.training_set = training_set
         self.testing_set = testing_set
         self.activation = activation
-        self.network_architecture = network_architecture
         self.epochs = epochs
         self.learning_rate = learning_rate
+        self.layer_one = int(layer_one)
+        self.layer_two = int(layer_two)
+        self.layer_three = int(layer_three)
+        self.layer_four = int(layer_four)
 
         # Predefined output
         self.train_matrix = None
@@ -226,55 +233,49 @@ class TrainLSTM:
         m = tf.keras.models.Sequential()
         m.add(
             tf.keras.layers.LSTM(
-                self.network_architecture["Layer1"],
+                self.layer_one,
                 activation=self.activation,
                 return_sequences=True,
                 input_shape=(int(self.train_matrix.shape[int(1)]), int(1)),
             )
         )
-        if self.network_architecture["Layer2"] > 0:
-            if self.network_architecture["Layer3"] > 0:
-                if self.network_architecture["Layer4"] > 0:
+        if self.layer_two > 0:
+            if self.layer_three > 0:
+                if self.layer_four > 0:
                     m.add(
                         tf.keras.layers.LSTM(
-                            self.network_architecture["Layer2"],
+                            self.layer_two,
                             activation=self.activation,
                             return_sequences=True,
                         )
                     )
                     m.add(
                         tf.keras.layers.LSTM(
-                            self.network_architecture["Layer3"],
+                            self.layer_three,
                             activation=self.activation,
                             return_sequences=True,
                         )
                     )
                     m.add(
                         tf.keras.layers.LSTM(
-                            self.network_architecture["Layer4"],
-                            activation=self.activation,
+                            self.layer_four, activation=self.activation,
                         )
                     )
                 else:
                     m.add(
                         tf.keras.layers.LSTM(
-                            self.network_architecture["Layer2"],
+                            self.layer_two,
                             activation=self.activation,
                             return_sequences=True,
                         )
                     )
                     m.add(
                         tf.keras.layers.LSTM(
-                            self.network_architecture["Layer3"],
-                            activation=self.activation,
+                            self.layer_three, activation=self.activation,
                         )
                     )
             else:
-                m.add(
-                    tf.keras.layers.LSTM(
-                        self.network_architecture["Layer2"], activation=self.activation
-                    )
-                )
+                m.add(tf.keras.layers.LSTM(self.layer_two, activation=self.activation))
         m.add(tf.keras.layers.Dense(1, activation="linear"))
 
         o = tf.keras.optimizers.Adam(
@@ -328,4 +329,39 @@ class TrainLSTM:
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
-        self.fitness = 1 / self.train_accuracy["MSE"]
+        self.fitness = 1 / self.test_accuracy["MSE"]
+
+    def make_performance_plot(self):
+        plt.close()
+        fig, axs = plt.subplots(3)
+        axs[0].plot(
+            self.training_set.DATE,
+            self.training_set.future,
+            label="Realized Volatility",
+            alpha=0.5,
+            color="black",
+        )
+        axs[0].plot(
+            self.training_set.DATE, self.prediction_train, label="Prediction", alpha=0.8
+        )
+        axs[0].legend()
+        axs[1].plot(
+            self.training_set.future,
+            self.prediction_train,
+            "o",
+            alpha=0.4,
+            color="black",
+        )
+        axs[1].plot(
+            [np.min(self.prediction_train), np.max(self.prediction_train)],
+            [np.min(self.prediction_train), np.max(self.prediction_train)],
+            color="red",
+            alpha=0.5,
+        )
+        axs[2].hist(
+            self.training_set.future
+            - self.prediction_train.reshape(self.prediction_train.shape[0],),
+            bins=50,
+            alpha=0.7,
+            color="black",
+        )

@@ -12,14 +12,10 @@ lstm_instance = DataPreparationLSTM(
     log_transform=True,
     semi_variance=True,
 )
-
 lstm_instance.prepare_complete_data_set()
 
-x = TrainLSTM(lstm_instance.training_set, lstm_instance.testing_set, epochs=2)
-x.reshape_input_data()
-x.train_lstm()
+x = TrainLSTM(lstm_instance.training_set, lstm_instance.testing_set, epochs=20)
 x.make_accuracy_measures()
-x.fitness
 
 
 prediction = x.fitted_model.predict(x.train_matrix)
