@@ -1,6 +1,5 @@
 from run_HAR_model import load_data
 from LSTM import *
-import matplotlib.pyplot as plt
 
 df_input = load_data()
 
@@ -31,13 +30,13 @@ lstm_instance.prepare_complete_data_set()
 x = TrainLSTM(
     lstm_instance.training_set,
     lstm_instance.testing_set,
-    epochs=10,
-    learning_rate=0.01,
-    layer_one=30,
-    layer_two=20,
+    epochs=20,
+    learning_rate=0.005,
+    layer_one=20,
+    layer_two=10,
     layer_three=0,
     layer_four=0,
 )
 x.make_accuracy_measures()
 
-x.make_performance_plot()
+x.make_performance_plot(show_testing_sample=True)

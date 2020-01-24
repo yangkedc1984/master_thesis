@@ -4,10 +4,9 @@ from LSTM import *
 from sklearn.decomposition import PCA
 
 df_m = pd.read_csv(
-    instance_path.path_input + "/" + "InitialPopulation_sv_1.csv", index_col=0
+    instance_path.path_input + "/" + "InitialPopulation_sv_1_1.csv", index_col=0
 )
-df_m = df_m.iloc[40:]
-df_m.Fitness.nlargest(10).index
+# df_m = df_m.iloc[40:]
 
 
 df_p = df_m[["LR", "BS", "Layer1", "Layer2", "Layer3", "Layer4"]]
@@ -80,16 +79,6 @@ layer_two = [10, 25, 40]
 layer_three = [0, 5, 10, 20]
 layer_four = [0, 5, 10, 20]
 
-number_of_models = (
-    len(learning_rates)
-    * len(layer_one)
-    * len(layer_two)
-    * len(layer_three)
-    * len(layer_four)
-)
-number_of_models
-
-
 # All Scenarios
 dict_help = {}
 for i in range(len(learning_rates)):
@@ -104,10 +93,49 @@ for i in range(len(learning_rates)):
                         layer_three[c],
                         layer_four[f],
                     ]
-initial_population_scenarios = np.transpose(pd.DataFrame(dict_help)).reset_index(
-    drop=True
-)
 
+import numpy as np
+import pandas as pd
+
+initial_population_scenarios = pd.DataFrame(dict_help).transpose()
+initial_population_scenarios.rename(
+    columns={0: "LR", 1: "Layer1", 2: "Layer2", 3: "Layer3", 4: "Layer4"}, inplace=True
+)
+initial_population_scenarios["Fitness"] = 0
+initial_population_scenarios["Generation"] = 0
+initial_population_scenarios = initial_population_scenarios[
+    ~(
+        (initial_population_scenarios.Layer3 == 0)
+        & (initial_population_scenarios.Layer4 > 0)
+    )
+].reset_index(drop=True)
+
+initial_population_scenarios
+
+for i in range(2):
+    print("Progress: {}".format(i / initial_population_scenarios.shape[0]))
+    training_model = TrainLSTM(
+        training_set=lstm_instance.training_set,
+        testing_set=lstm_instance.testing_set,
+        activation=tf.nn.elu,
+        epochs=1,
+        learning_rate=initial_population_scenarios.LR[i],
+        layer_one=initial_population_scenarios["Layer1"][i],
+        layer_two=initial_population_scenarios["Layer2"][i],
+        layer_three=initial_population_scenarios["Layer3"][i],
+        layer_four=initial_population_scenarios["Layer4"][i],
+    )
+    training_model.make_accuracy_measures()
+
+    initial_population_scenarios.loc[i, "Fitness"] = training_model.fitness
+    del training_model
+
+
+training_model.fitness
+training_model.make_performance_plot(show_testing_sample=True)
+
+
+from mpl_toolkits.mplot3d import Axes3D
 
 # print PCA
 pca = PCA(n_components=3)
@@ -154,7 +182,6 @@ x_2 = pd.DataFrame(
 x_2 = x_2.merge(
     df_m.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
 )
-
 
 plt.close()
 plt.scatter(x.one, x.two, color="darkgreen", alpha=0.2)

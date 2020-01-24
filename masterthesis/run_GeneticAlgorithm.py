@@ -36,28 +36,27 @@ _ga_1 = GeneticAlgorithm(
     network_architecture=OrderedDict(
         [
             ("Layer1", [6, 41, 2]),
-            ("Layer2", [2, 21, 2]),
-            ("Layer3", [0, 21, 5]),
-            ("Layer4", [0, 21, 5]),
+            ("Layer2", [2, 41, 2]),
+            ("Layer3", [0, 21, 2]),
+            ("Layer4", [0, 21, 2]),
         ]
     ),
     learning_rate=[0.00001, 0.1, 0.005],
     batch_size=[20, 50, 5],
-    initial_population_source_external=True,
+    initial_population_source_external=False,
+    build_grid_scenarios=True,
 )
 
 
-_ga_1.run_complete_genetic_algorithm(
-    initial_population_size=80, number_of_generations=40
-)
+_ga_1.run_complete_genetic_algorithm(number_of_generations=20)
 
 
 result = _ga_1.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_1_1.csv")
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_1_2.csv")
 
 
 # df_1 = pd.read_csv(
-#     instance_path.path_input + "/" + "InitialPopulation_sv_1.csv", index_col=0
+#     instance_path.path_input + "/" + "InitialPopulation_sv_1_1.csv", index_col=0
 # )
 # df_5 = pd.read_csv(
 #     instance_path.path_input + "/" + "InitialPopulation_sv_5.csv", index_col=0

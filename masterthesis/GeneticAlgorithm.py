@@ -28,6 +28,7 @@ class GeneticAlgorithm:
         learning_rate=[0.0001, 0.1, 0.005],
         batch_size=[20, 50, 5],
         initial_population_source_external=False,
+        build_grid_scenarios=True,
     ):
         self.training_set_ga = training_set_ga
         self.testing_set_ga = testing_set_ga
@@ -35,6 +36,7 @@ class GeneticAlgorithm:
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.initial_population_source_external = initial_population_source_external
+        self.build_grid_scenarios = build_grid_scenarios
 
         self.initial_population = None
         self.parent_one = None
@@ -90,47 +92,116 @@ class GeneticAlgorithm:
 
         else:
 
-            ind = pd.DataFrame(
-                0,
-                index=range(initial_pop_size),
-                columns=np.array(
-                    list(self.network_architecture.keys()) + ["Fitness", "Generation"]
-                ),
-            )
+            if self.build_grid_scenarios:
 
-            for i in range(ind.shape[0]):
-                for j in range(len(self.network_architecture.keys())):
-                    ind[list(self.network_architecture.keys())[j]].iloc[
-                        i
-                    ] = random.choice(
-                        self.network_architecture[
-                            list(self.network_architecture.keys())[j]
-                        ]
+                learning_rates = [0.0001, 0.05, 0.1]
+                layer_one = [10, 25, 40]
+                layer_two = [10, 25, 40]
+                layer_three = [0, 5, 10, 20]
+                layer_four = [0, 5, 10, 20]
+
+                dict_help = {}
+                for i in range(len(learning_rates)):
+                    for j in range(len(layer_one)):
+                        for k in range(len(layer_two)):
+                            for c in range(len(layer_three)):
+                                for f in range(len(layer_four)):
+                                    dict_help["{}{}{}{}{}".format(i, j, k, c, f)] = [
+                                        learning_rates[i],
+                                        layer_one[j],
+                                        layer_two[k],
+                                        layer_three[c],
+                                        layer_four[f],
+                                    ]
+                self.initial_population = pd.DataFrame(dict_help).transpose()
+                self.initial_population.rename(
+                    columns={
+                        0: "LR",
+                        1: "Layer1",
+                        2: "Layer2",
+                        3: "Layer3",
+                        4: "Layer4",
+                    },
+                    inplace=True,
+                )
+                self.initial_population["Fitness"] = 0
+                self.initial_population["Generation"] = 0
+                self.initial_population = self.initial_population[
+                    ~(
+                        (self.initial_population.Layer3 == 0)
+                        & (self.initial_population.Layer4 > 0)
+                    )
+                ].reset_index(drop=True)
+
+                for i in range(self.initial_population.shape[0]):
+                    print("Progress: {}".format(i / self.initial_population.shape[0]))
+                    training_model = TrainLSTM(
+                        training_set=self.training_set_ga,
+                        testing_set=self.testing_set_ga,
+                        activation=tf.nn.elu,
+                        epochs=4,
+                        learning_rate=self.initial_population.LR[i],
+                        layer_one=self.initial_population["Layer1"][i],
+                        layer_two=self.initial_population["Layer2"][i],
+                        layer_three=self.initial_population["Layer3"][i],
+                        layer_four=self.initial_population["Layer4"][i],
+                    )
+                    training_model.make_accuracy_measures()
+
+                    self.initial_population.loc[i, "Fitness"] = training_model.fitness
+                    del training_model
+
+                if save_population_to_csv:
+                    self.initial_population.to_csv(
+                        instance_path.path_input
+                        + "/"
+                        + "InitialPopulation_all_scenarios.csv"
                     )
 
-            self.initial_population = ind
-
-            for i in range(self.initial_population.shape[0]):
-                print("Progress: {}".format(i / self.initial_population.shape[0]))
-                training_model = TrainLSTM(
-                    training_set=self.training_set_ga,
-                    testing_set=self.testing_set_ga,
-                    activation=tf.nn.elu,
-                    epochs=10,
-                    learning_rate=self.initial_population.LR[i],
-                    layer_one=self.initial_population["Layer1"][i],
-                    layer_two=self.initial_population["Layer2"][i],
-                    layer_three=self.initial_population["Layer3"][i],
-                    layer_four=self.initial_population["Layer4"][i],
+            else:
+                ind = pd.DataFrame(
+                    0,
+                    index=range(initial_pop_size),
+                    columns=np.array(
+                        list(self.network_architecture.keys())
+                        + ["Fitness", "Generation"]
+                    ),
                 )
-                training_model.make_accuracy_measures()
 
-                self.initial_population.Fitness.iloc[i] = training_model.fitness
+                for i in range(ind.shape[0]):
+                    for j in range(len(self.network_architecture.keys())):
+                        ind[list(self.network_architecture.keys())[j]].iloc[
+                            i
+                        ] = random.choice(
+                            self.network_architecture[
+                                list(self.network_architecture.keys())[j]
+                            ]
+                        )
 
-            if save_population_to_csv:
-                self.initial_population.to_csv(
-                    instance_path.path_input + "/" + "InitialPopulation.csv"
-                )
+                self.initial_population = ind
+
+                for i in range(self.initial_population.shape[0]):
+                    print("Progress: {}".format(i / self.initial_population.shape[0]))
+                    training_model = TrainLSTM(
+                        training_set=self.training_set_ga,
+                        testing_set=self.testing_set_ga,
+                        activation=tf.nn.elu,
+                        epochs=4,
+                        learning_rate=self.initial_population.LR[i],
+                        layer_one=self.initial_population["Layer1"][i],
+                        layer_two=self.initial_population["Layer2"][i],
+                        layer_three=self.initial_population["Layer3"][i],
+                        layer_four=self.initial_population["Layer4"][i],
+                    )
+                    training_model.make_accuracy_measures()
+
+                    self.initial_population.loc[i, "Fitness"] = training_model.fitness
+                    del training_model
+
+                if save_population_to_csv:
+                    self.initial_population.to_csv(
+                        instance_path.path_input + "/" + "InitialPopulation.csv"
+                    )
 
     def select_parents(self):
         if self.initial_population is None:
@@ -193,15 +264,23 @@ class GeneticAlgorithm:
         child_two = child_two.drop(["key_0", "index"], axis=1)
 
         _random_pick = random.choice(child_one.columns)
+        _random_pick_2 = random.choice(child_one.columns)
         child_three = child_one.copy()
         child_three[_random_pick] = random.choice(
             self.network_architecture[_random_pick]
         )
+        child_three[_random_pick_2] = random.choice(
+            self.network_architecture[_random_pick_2]
+        )
 
         _random_pick = random.choice(child_two.columns)
+        _random_pick_2 = random.choice(child_two.columns)
         child_four = child_two.copy()
         child_four[_random_pick] = random.choice(
             self.network_architecture[_random_pick]
+        )
+        child_four[_random_pick_2] = random.choice(
+            self.network_architecture[_random_pick_2]
         )
 
         self.initial_population = self.initial_population.append(child_one, sort=False)
@@ -220,7 +299,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=10,
+                epochs=4,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],
@@ -228,14 +307,16 @@ class GeneticAlgorithm:
                 layer_four=individuals_help.Layer4[i],
             )
             train_m.make_accuracy_measures()
-            self.initial_population.Fitness.iloc[i] = train_m.fitness
+            self.initial_population.loc[i, "Fitness"] = train_m.fitness
+
+            del train_m
 
     def run_complete_genetic_algorithm(
         self, initial_population_size=50, number_of_generations=20
     ):
         if self.initial_population is None:
             self.make_initial_population(
-                save_population_to_csv=False, initial_pop_size=initial_population_size
+                save_population_to_csv=True, initial_pop_size=initial_population_size
             )
 
         for iteration in range(number_of_generations):
@@ -243,51 +324,3 @@ class GeneticAlgorithm:
             print(iteration)
             print(self.parent_location_one, self.parent_location_two)
             self.make_offsprings()
-
-
-#
-# df = load_data()
-#
-# _lstm_instance = DataPreparationLSTM(
-#     df=df,
-#     future=1,
-#     standard_scaler=False,
-#     min_max_scaler=True,
-#     log_transform=True,
-#     semi_variance=True,
-# )
-# _lstm_instance.prepare_complete_data_set()
-#
-# _ga = GeneticAlgorithm(
-#     training_set_ga=_lstm_instance.training_set,
-#     testing_set_ga=_lstm_instance.testing_set,
-# )
-#
-# _ga.make_initial_population(save_population_to_csv=False, initial_pop_size=5)
-# _ga.initial_population
-#
-#
-# _ga.run_complete_genetic_algorithm(initial_population_size=5, number_of_generations=2)
-#
-# df_check = _ga.initial_population
-#
-#
-# """
-# Mathematical Optimization of Fitness function :
-# Difficulty: Implementation, as the lambda has to be updated for each iteration
-# """
-#
-# _df = _ga.initial_population[~_ga.initial_population.Fitness.isna()]
-# _df.Fitness.nlargest(2)
-# _df.Fitness.nsmallest(3)
-#
-# mp.findroot(
-#     lambda x: [_df.Fitness.nlargest(2)[i] ** x for i in _df.Fitness.nlargest(2).index],
-#     0,
-# )
-#
-# result = mp.findroot(lambda x: 2 ** x + 3 ** x + 4 ** x - 5 ** x - 6 ** x, 0)
-# float(result)
-# int(2 ** result + 3 ** result + 4 ** result - 5 ** result - 6 ** result)
-#
-# mp.findroot(lambda x: x ** 2 - 4, 0)  # has to equal zero
