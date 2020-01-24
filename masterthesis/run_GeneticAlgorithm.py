@@ -30,7 +30,7 @@ _lstm_instance = DataPreparationLSTM(
 _lstm_instance.prepare_complete_data_set()
 
 # Run Genetic Algorithm
-_ga = GeneticAlgorithm(
+_ga_1 = GeneticAlgorithm(
     training_set_ga=_lstm_instance.training_set,
     testing_set_ga=_lstm_instance.testing_set,
     network_architecture=OrderedDict(
@@ -47,10 +47,25 @@ _ga = GeneticAlgorithm(
 )
 
 
-_ga.run_complete_genetic_algorithm(initial_population_size=20, number_of_generations=20)
+_ga_1.run_complete_genetic_algorithm(
+    initial_population_size=80, number_of_generations=40
+)
 
 
-result = _ga.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation_run_test.csv")
+result = _ga_1.initial_population.copy()
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_1_1.csv")
 
-print("RESULTS SAVED")
+
+# df_1 = pd.read_csv(
+#     instance_path.path_input + "/" + "InitialPopulation_sv_1.csv", index_col=0
+# )
+# df_5 = pd.read_csv(
+#     instance_path.path_input + "/" + "InitialPopulation_sv_5.csv", index_col=0
+# )
+# df_20 = pd.read_csv(
+#     instance_path.path_input + "/" + "InitialPopulation_sv_20.csv", index_col=0
+# )
+#
+# df_run = pd.read_csv(
+#     instance_path.path_input + "/" + "InitialPopulation_run_test.csv", index_col=0
+# )

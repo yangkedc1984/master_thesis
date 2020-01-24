@@ -39,6 +39,8 @@ class GeneticAlgorithm:
         self.initial_population = None
         self.parent_one = None
         self.parent_two = None
+        self.parent_location_one = None
+        self.parent_location_two = None
 
     def make_initial_population(self, save_population_to_csv=False, initial_pop_size=5):
 
@@ -82,7 +84,8 @@ class GeneticAlgorithm:
 
         if self.initial_population_source_external:
             self.initial_population = pd.read_csv(
-                instance_path.path_input + "/" + "InitialPopulation.csv", index_col=0
+                instance_path.path_input + "/" + "InitialPopulation_sv_1.csv",
+                index_col=0,
             )
 
         else:
@@ -113,7 +116,7 @@ class GeneticAlgorithm:
                     training_set=self.training_set_ga,
                     testing_set=self.testing_set_ga,
                     activation=tf.nn.elu,
-                    epochs=2,
+                    epochs=10,
                     learning_rate=self.initial_population.LR[i],
                     layer_one=self.initial_population["Layer1"][i],
                     layer_two=self.initial_population["Layer2"][i],
@@ -138,7 +141,9 @@ class GeneticAlgorithm:
         parent1_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index, int(df_help.shape[0] * 0.1), replace=False
+                    df_help.index,
+                    int(df_help.shape[0] * 0.05),
+                    replace=False,  # might want to change 0.1 to 0.05
                 )
             ]
             .nlargest(1)
@@ -148,28 +153,17 @@ class GeneticAlgorithm:
         parent2_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index, int(df_help.shape[0] * 0.1), replace=False
+                    df_help.index,
+                    int(df_help.shape[0] * 0.05),
+                    replace=False,  # might want to change 0.1 to 0.05
                 )
             ]
             .nlargest(1)
             .index
         )
 
-        # df_help.Fitness = (
-        #     df_help.Fitness
-        # )  # ** 2 (update fitness function: see issue on github)
-        # prob_dist = df_help.Fitness / np.sum(df_help.Fitness)
-        # arr_individuals = np.arange(df_help.index[0], df_help.shape[0])
-        # parent1_location = np.random.choice(arr_individuals, p=prob_dist)
-        #
-        # ind_help = df_help.drop(parent1_location, axis=0)
-        #
-        # prob_dist = ind_help.Fitness / np.sum(ind_help.Fitness)
-        # arr_individuals = np.delete(arr_individuals, parent1_location)
-        # parent2_location = np.random.choice(arr_individuals, p=prob_dist)
-        #
-        # parent1 = df_help.iloc[parent1_location]
-        # parent2 = df_help.iloc[parent2_location]
+        self.parent_location_one = parent1_location
+        self.parent_location_two = parent2_location
 
         self.parent_one = df_help.iloc[parent1_location]
         self.parent_two = df_help.iloc[parent2_location]
@@ -226,7 +220,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=2,
+                epochs=10,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],
@@ -247,6 +241,7 @@ class GeneticAlgorithm:
         for iteration in range(number_of_generations):
             print("Progress Generation: {}".format(iteration / number_of_generations))
             print(iteration)
+            print(self.parent_location_one, self.parent_location_two)
             self.make_offsprings()
 
 
