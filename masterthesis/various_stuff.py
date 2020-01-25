@@ -1,6 +1,7 @@
 from run_HAR_model import *
 from LSTM import *
 from sklearn.decomposition import PCA
+from config import *
 
 
 df_input = load_data()
@@ -105,18 +106,21 @@ plt.plot(x.fitted_model.predict(train_matrix), train_y, "o", color="black", alph
 initial_population_scenarios = pd.read_csv(
     instance_path.path_input + "/" + "InitialPopulation_all_scenarios.csv", index_col=0
 )
-initial_population_scenarios = initial_population_scenarios[
-    ["LR", "Layer1", "Layer2", "Layer3", "Layer4"]
-]
+initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
+
 
 from mpl_toolkits.mplot3d import Axes3D
 
 # print PCA
 pca = PCA(n_components=3)
-pca.fit(initial_population_scenarios)
+pca.fit(initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 x = pd.DataFrame(
-    pca.transform(initial_population_scenarios), columns={"one", "two", "three"}
+    pca.transform(
+        initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]
+    ),
+    columns={"one", "two", "three"},
 ).reset_index(level=0)
+x = x.merge(initial_population_scenarios[["Fitness", "index"]], on="index")
 
 # pca_2 = PCA(n_components=3)
 # pca_2.fit(df_m[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
@@ -134,7 +138,7 @@ plt.close()
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 ax.scatter(
-    x.one, x.two, x.three, c=x.three, cmap="viridis", marker="^", s=50, alpha=0.3
+    x.one, x.two, x.three, marker="^", s=50,  # c=x.Fitness, cmap="viridis",
 )
 # ax.scatter(x_2.one, x_2.two, x_2.three, c=x_2.Fitness, cmap="binary")
 ax.set_xlabel("PC 1")
@@ -144,11 +148,14 @@ ax.set_zlabel("PC 3")
 
 # analysis with two components
 pca = PCA(n_components=2)
-pca.fit(initial_population_scenarios)
+pca.fit(initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 x = pd.DataFrame(
-    pca.transform(initial_population_scenarios), columns={"one", "two"}
+    pca.transform(
+        initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]
+    ),
+    columns={"one", "two"},
 ).reset_index(level=0)
-
+x = x.merge(initial_population_scenarios[["Fitness", "index"]], on="index")
 # pca_2 = PCA(n_components=2)
 # pca_2.fit(df_m[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 # x_2 = pd.DataFrame(
@@ -160,5 +167,5 @@ x = pd.DataFrame(
 # )
 
 plt.close()
-plt.scatter(x.one, x.two, color="darkgreen", alpha=0.2)
+plt.scatter(x.one, x.two, c=x.Fitness, alpha=0.2)
 # plt.scatter(x_2.one, x_2.two, c=x_2.Fitness, cmap="binary", alpha=0.7)

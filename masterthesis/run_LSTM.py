@@ -31,15 +31,30 @@ x = TrainLSTM(  # 0.9, 1, 1, 0, 0
     lstm_instance.training_set,
     lstm_instance.testing_set,
     epochs=10,
-    learning_rate=0.0001,
-    layer_one=40,
-    layer_two=40,
-    layer_three=20,
-    layer_four=10,
+    learning_rate=0.1,
+    layer_one=20,
+    layer_two=20,
+    layer_three=0,
+    layer_four=0,
 )
 x.make_accuracy_measures()
 
-x.fitness
 
-x.make_performance_plot(show_testing_sample=True)
+x.make_performance_plot(show_testing_sample=False)
+
+# back transformation:
+plt.close()
+plt.plot(
+    np.exp(lstm_instance.applied_scaler.inverse_transform(x.prediction_train)),
+    np.exp(
+        lstm_instance.applied_scaler.inverse_transform(
+            np.array(x.training_set.future).reshape(-1, 1)
+        )
+    ),
+    "o",
+    alpha=0.25,
+    color="black",
+)
+
+
 print(x.fitted_model.summary())

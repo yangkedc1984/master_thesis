@@ -35,15 +35,15 @@ _ga_1 = GeneticAlgorithm(
     testing_set_ga=_lstm_instance.testing_set,
     network_architecture=OrderedDict(
         [
-            ("Layer1", [20, 100, 2]),
-            ("Layer2", [20, 100, 2]),
+            ("Layer1", [2, 41, 5]),
+            ("Layer2", [2, 41, 5]),
             ("Layer3", [0, 21, 2]),
             ("Layer4", [0, 21, 2]),
         ]
     ),
     learning_rate=[0.00001, 0.1, 0.005],
-    initial_population_source_external=False,
-    build_grid_scenarios=True,
+    initial_population_source_external=True,
+    build_grid_scenarios=False,
 )
 _ga_1.run_complete_genetic_algorithm(number_of_generations=50)
 

@@ -61,6 +61,7 @@ class DataPreparationLSTM:
         self.future_values = None
         self.historical_values = None
         self.df_processed_data = None
+        self.applied_scaler = None
 
     def jump_detection(self):
         df_tmp = self.df.copy()
@@ -88,6 +89,7 @@ class DataPreparationLSTM:
 
         if self.min_max_scaler:
             s = MinMaxScaler()
+            self.applied_scaler = s
             self.df.RV = s.fit_transform(self.df.RV.values.reshape(-1, 1))
             if self.semi_variance:
                 self.df.RSV_plus = s.fit_transform(
@@ -317,8 +319,8 @@ class TrainLSTM:
         )
 
         m.compile(
-            optimizer=o, loss=tf.keras.losses.mean_absolute_error
-        )  # is MAE slower than logcosh?
+            optimizer=o, loss=tf.keras.losses.logcosh
+        )  # choose: R-MSE, MAE, logCosh
 
         m.fit(
             self.train_matrix,

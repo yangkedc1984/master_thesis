@@ -86,11 +86,11 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.0001, 0.001, 0.05, 0.1]
-                layer_one = [1, 10, 25, 40]
-                layer_two = [1, 10, 25, 40]
-                layer_three = [0, 1, 5, 20]
-                layer_four = [0, 1, 5, 10]
+                learning_rates = [0.001, 0.1]
+                layer_one = [2, 20]
+                layer_two = [2, 20]
+                layer_three = [0, 5]
+                layer_four = [0, 2]
 
                 dict_help = {}
                 for i in range(len(learning_rates)):
@@ -125,6 +125,8 @@ class GeneticAlgorithm:
                     )
                 ].reset_index(drop=True)
 
+                print("Population Size: {}".format(self.initial_population.shape))
+
                 for i in range(self.initial_population.shape[0]):
                     print("Progress: {}".format(i / self.initial_population.shape[0]))
                     training_model = TrainLSTM(
@@ -142,6 +144,16 @@ class GeneticAlgorithm:
 
                     self.initial_population.loc[i, "Fitness"] = training_model.fitness
 
+                    print(
+                        "Network Architecture: LR: {}, L1: {}, L2: {}, L3: {}, L4: {}".format(
+                            self.initial_population.LR[i],
+                            self.initial_population.Layer1[i],
+                            self.initial_population.Layer2[i],
+                            self.initial_population.Layer3[i],
+                            self.initial_population.Layer4[i],
+                        ),
+                    )
+                    tf.keras.backend.clear_session()  # important to clear session!
                     del training_model
 
                 if save_population_to_csv:
@@ -189,6 +201,8 @@ class GeneticAlgorithm:
                     training_model.make_accuracy_measures()
 
                     self.initial_population.loc[i, "Fitness"] = training_model.fitness
+
+                    tf.keras.backend.clear_session()  # important to clear session!
                     del training_model
 
                 if save_population_to_csv:
@@ -302,6 +316,7 @@ class GeneticAlgorithm:
             train_m.make_accuracy_measures()
             self.initial_population.loc[i, "Fitness"] = train_m.fitness
 
+            tf.keras.backend.clear_session()  # important to clear session!
             del train_m
 
     def run_complete_genetic_algorithm(
@@ -309,7 +324,7 @@ class GeneticAlgorithm:
     ):
         if self.initial_population is None:
             self.make_initial_population(
-                save_population_to_csv=True, initial_pop_size=initial_population_size
+                save_population_to_csv=False, initial_pop_size=initial_population_size
             )
 
         for iteration in range(number_of_generations):
