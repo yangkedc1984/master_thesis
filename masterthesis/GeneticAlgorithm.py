@@ -26,7 +26,6 @@ class GeneticAlgorithm:
             ]
         ),
         learning_rate=[0.0001, 0.1, 0.005],
-        batch_size=[20, 50, 5],
         initial_population_source_external=False,
         build_grid_scenarios=True,
     ):
@@ -34,7 +33,6 @@ class GeneticAlgorithm:
         self.testing_set_ga = testing_set_ga
         self.network_architecture = network_architecture
         self.learning_rate = learning_rate
-        self.batch_size = batch_size
         self.initial_population_source_external = initial_population_source_external
         self.build_grid_scenarios = build_grid_scenarios
 
@@ -55,13 +53,7 @@ class GeneticAlgorithm:
                         self.learning_rate[1],
                         self.learning_rate[2],
                     ),
-                ),
-                (
-                    "BS",
-                    np.arange(
-                        self.batch_size[0], self.batch_size[1], self.batch_size[2]
-                    ),
-                ),
+                )
             ]
         )
 
@@ -86,7 +78,7 @@ class GeneticAlgorithm:
 
         if self.initial_population_source_external:
             self.initial_population = pd.read_csv(
-                instance_path.path_input + "/" + "InitialPopulation_sv_1.csv",
+                instance_path.path_input + "/" + "InitialPopulation_all_scenarios.csv",
                 index_col=0,
             )
 
@@ -94,11 +86,11 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.0001, 0.05, 0.1]
-                layer_one = [10, 25, 40]
-                layer_two = [10, 25, 40]
-                layer_three = [0, 5, 10, 20]
-                layer_four = [0, 5, 10, 20]
+                learning_rates = [0.0001, 0.001, 0.05, 0.1]
+                layer_one = [1, 10, 25, 40]
+                layer_two = [1, 10, 25, 40]
+                layer_three = [0, 1, 5, 20]
+                layer_four = [0, 1, 5, 10]
 
                 dict_help = {}
                 for i in range(len(learning_rates)):
@@ -139,7 +131,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=4,
+                        epochs=5,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],
@@ -149,6 +141,7 @@ class GeneticAlgorithm:
                     training_model.make_accuracy_measures()
 
                     self.initial_population.loc[i, "Fitness"] = training_model.fitness
+
                     del training_model
 
                 if save_population_to_csv:
@@ -186,7 +179,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=4,
+                        epochs=5,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],
@@ -251,12 +244,12 @@ class GeneticAlgorithm:
             level=0
         )
 
-        child_one = df_test_parent_one[list(df_test_parent_one.columns[:3])].merge(
-            df_test_parent_two[list(df_test_parent_one.columns[3:7])],
+        child_one = df_test_parent_one[list(df_test_parent_one.columns[:2])].merge(
+            df_test_parent_two[list(df_test_parent_one.columns[2:6])],
             on=df_test_parent_one.index,
         )
-        child_two = df_test_parent_two[list(df_test_parent_one.columns[:3])].merge(
-            df_test_parent_one[list(df_test_parent_one.columns[3:7])],
+        child_two = df_test_parent_two[list(df_test_parent_one.columns[:2])].merge(
+            df_test_parent_one[list(df_test_parent_one.columns[2:6])],
             on=df_test_parent_one.index,
         )
 
@@ -274,14 +267,14 @@ class GeneticAlgorithm:
         )
 
         _random_pick = random.choice(child_two.columns)
-        _random_pick_2 = random.choice(child_two.columns)
+        # _random_pick_2 = random.choice(child_two.columns)
         child_four = child_two.copy()
         child_four[_random_pick] = random.choice(
             self.network_architecture[_random_pick]
         )
-        child_four[_random_pick_2] = random.choice(
-            self.network_architecture[_random_pick_2]
-        )
+        # child_four[_random_pick_2] = random.choice(
+        #     self.network_architecture[_random_pick_2]
+        # )
 
         self.initial_population = self.initial_population.append(child_one, sort=False)
         self.initial_population = self.initial_population.append(child_two, sort=False)
@@ -299,7 +292,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=4,
+                epochs=5,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],

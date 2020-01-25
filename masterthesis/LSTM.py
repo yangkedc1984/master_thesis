@@ -11,6 +11,9 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 
+# Take out all the links within a Class (this might lead to strange behaviour)
+
+
 class DataPreparationLSTM:
     def __init__(
         self,
@@ -51,13 +54,13 @@ class DataPreparationLSTM:
         # Predefined generated output
         self.training_set = None  # data frames
         self.testing_set = None  # data frames
-        self.future_values = None
-        self.historical_values = None
-        self.df_processed_data = None
         self.train_matrix = None
         self.train_y = None
         self.test_matrix = None
         self.test_y = None
+        self.future_values = None
+        self.historical_values = None
+        self.df_processed_data = None
 
     def jump_detection(self):
         df_tmp = self.df.copy()
@@ -166,6 +169,32 @@ class DataPreparationLSTM:
     def prepare_complete_data_set(self):
         self.make_testing_training_set()
 
+    def reshape_input_data(self):
+        if self.training_set is None:
+            self.prepare_complete_data_set()
+
+        self.train_matrix = self.training_set.drop(columns={"DATE", "future"}).values
+        self.train_y = self.training_set[["future"]].values
+
+        self.test_matrix = self.testing_set.drop(columns={"DATE", "future"}).values
+        self.test_y = self.testing_set[["future"]].values
+
+        n_features = 1
+
+        train_shape_rows = self.train_matrix.shape[0]
+        train_shape_columns = self.train_matrix.shape[1]
+
+        self.train_matrix = self.train_matrix.reshape(
+            (train_shape_rows, train_shape_columns, n_features)
+        )
+
+        test_shape_rows = self.test_matrix.shape[0]
+        test_shape_columns = self.train_matrix.shape[1]
+
+        self.test_matrix = self.test_matrix.reshape(
+            (test_shape_rows, test_shape_columns, n_features)
+        )
+
 
 class TrainLSTM:
     def __init__(
@@ -229,7 +258,7 @@ class TrainLSTM:
         if self.train_matrix is None:
             self.reshape_input_data()
 
-        tf.reset_default_graph()
+        # tf.reset_default_graph()
         m = tf.keras.models.Sequential()
         m.add(
             tf.keras.layers.LSTM(
@@ -287,9 +316,17 @@ class TrainLSTM:
             amsgrad=False,
         )
 
-        m.compile(optimizer=o, loss=tf.keras.losses.logcosh)
+        m.compile(
+            optimizer=o, loss=tf.keras.losses.mean_absolute_error
+        )  # is MAE slower than logcosh?
 
-        m.fit(self.train_matrix, self.train_y, epochs=self.epochs, verbose=1)
+        m.fit(
+            self.train_matrix,
+            self.train_y,
+            epochs=self.epochs,
+            verbose=1,
+            # validation_data=(self.test_matrix, self.test_y),  # use it to choose optimal number of epochs
+        )
 
         self.fitted_model = m
 

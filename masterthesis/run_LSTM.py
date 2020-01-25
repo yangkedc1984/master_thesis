@@ -27,16 +27,19 @@ lstm_instance = DataPreparationLSTM(
 )
 lstm_instance.prepare_complete_data_set()
 
-x = TrainLSTM(
+x = TrainLSTM(  # 0.9, 1, 1, 0, 0
     lstm_instance.training_set,
     lstm_instance.testing_set,
-    epochs=20,
-    learning_rate=0.005,
-    layer_one=20,
-    layer_two=10,
-    layer_three=0,
-    layer_four=0,
+    epochs=10,
+    learning_rate=0.0001,
+    layer_one=40,
+    layer_two=40,
+    layer_three=20,
+    layer_four=10,
 )
 x.make_accuracy_measures()
 
+x.fitness
+
 x.make_performance_plot(show_testing_sample=True)
+print(x.fitted_model.summary())
