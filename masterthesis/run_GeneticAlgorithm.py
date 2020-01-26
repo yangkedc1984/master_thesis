@@ -7,7 +7,7 @@ df = load_data()
 # prepare LSTM data
 _lstm_instance = DataPreparationLSTM(
     df=df,
-    future=1,
+    future=20,
     lag=20,
     standard_scaler=False,
     min_max_scaler=True,
@@ -35,21 +35,21 @@ _ga_1 = GeneticAlgorithm(
     testing_set_ga=_lstm_instance.testing_set,
     network_architecture=OrderedDict(
         [
-            ("Layer1", [2, 41, 5]),
-            ("Layer2", [2, 41, 5]),
-            ("Layer3", [0, 21, 2]),
-            ("Layer4", [0, 21, 2]),
+            ("Layer1", [2, 43, 5]),
+            ("Layer2", [1, 42, 4]),
+            ("Layer3", [0, 21, 3]),
+            ("Layer4", [0, 21, 4]),
         ]
     ),
-    learning_rate=[0.00001, 0.1, 0.005],
-    initial_population_source_external=True,
-    build_grid_scenarios=False,
+    learning_rate=[0.00001, 0.2, 0.005],
+    initial_population_source_external=False,
+    build_grid_scenarios=True,
 )
 _ga_1.run_complete_genetic_algorithm(number_of_generations=50)
 
 
 result = _ga_1.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_1_3.csv")
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_20_1.csv")
 
 
 # df_1 = pd.read_csv(

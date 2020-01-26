@@ -5,7 +5,7 @@ df_input = load_data()
 
 lstm_instance = DataPreparationLSTM(
     df=df_input,
-    future=1,
+    future=20,
     lag=20,
     standard_scaler=False,
     min_max_scaler=True,
@@ -27,34 +27,34 @@ lstm_instance = DataPreparationLSTM(
 )
 lstm_instance.prepare_complete_data_set()
 
-x = TrainLSTM(  # 0.9, 1, 1, 0, 0
+tf.keras.backend.clear_session()  # important to clear session!
+x = TrainLSTM(
     lstm_instance.training_set,
     lstm_instance.testing_set,
     epochs=10,
-    learning_rate=0.1,
-    layer_one=20,
-    layer_two=20,
-    layer_three=0,
-    layer_four=0,
+    learning_rate=0.005,
+    layer_one=10,
+    layer_two=10,
+    layer_three=5,
+    layer_four=5,
 )
 x.make_accuracy_measures()
+x.fitness
 
 
-x.make_performance_plot(show_testing_sample=False)
-
-# back transformation:
-plt.close()
-plt.plot(
-    np.exp(lstm_instance.applied_scaler.inverse_transform(x.prediction_train)),
-    np.exp(
-        lstm_instance.applied_scaler.inverse_transform(
-            np.array(x.training_set.future).reshape(-1, 1)
-        )
-    ),
-    "o",
-    alpha=0.25,
-    color="black",
-)
-
-
-print(x.fitted_model.summary())
+# x.make_performance_plot(show_testing_sample=True)
+#
+#
+# # back transformation:
+# plt.close()
+# plt.plot(
+#     np.exp(lstm_instance.applied_scaler.inverse_transform(x.prediction_test)),
+#     np.exp(
+#         lstm_instance.applied_scaler.inverse_transform(
+#             np.array(x.testing_set.future).reshape(-1, 1)
+#         )
+#     ),
+#     "o",
+#     alpha=0.25,
+#     color="black",
+# )

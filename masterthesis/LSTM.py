@@ -314,7 +314,7 @@ class TrainLSTM:
             beta_1=0.9,
             beta_2=0.999,
             epsilon=None,
-            decay=0.0,
+            decay=0.0,  # self.learning_rate/ self.epochs
             amsgrad=False,
         )
 
@@ -406,7 +406,7 @@ class TrainLSTM:
             axs[2].hist(
                 self.testing_set.future
                 - self.prediction_test.reshape(self.prediction_test.shape[0],),
-                bins=50,
+                bins=20,
                 alpha=0.7,
                 color="black",
             )

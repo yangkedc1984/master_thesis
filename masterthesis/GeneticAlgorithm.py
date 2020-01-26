@@ -86,11 +86,11 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.001, 0.1]
-                layer_one = [2, 20]
-                layer_two = [2, 20]
-                layer_three = [0, 5]
-                layer_four = [0, 2]
+                learning_rates = [0.0001, 0.005, 0.1]
+                layer_one = [2, 10, 20]
+                layer_two = [2, 10, 20]
+                layer_three = [0, 5, 20]
+                layer_four = [0, 5, 10]
 
                 dict_help = {}
                 for i in range(len(learning_rates)):
@@ -133,7 +133,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=5,
+                        epochs=7,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],
@@ -160,7 +160,7 @@ class GeneticAlgorithm:
                     self.initial_population.to_csv(
                         instance_path.path_input
                         + "/"
-                        + "InitialPopulation_all_scenarios.csv"
+                        + "InitialPopulation_all_scenarios_future_20.csv"
                     )
 
             else:
@@ -191,7 +191,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=5,
+                        epochs=7,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],
@@ -207,7 +207,9 @@ class GeneticAlgorithm:
 
                 if save_population_to_csv:
                     self.initial_population.to_csv(
-                        instance_path.path_input + "/" + "InitialPopulation.csv"
+                        instance_path.path_input
+                        + "/"
+                        + "InitialPopulation_future_20.csv"
                     )
 
     def select_parents(self):
@@ -306,7 +308,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=5,
+                epochs=7,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],

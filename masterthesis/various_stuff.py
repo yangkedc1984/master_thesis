@@ -108,45 +108,104 @@ initial_population_scenarios = pd.read_csv(
 )
 initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
 
+df_1 = pd.read_csv(
+    instance_path.path_input + "/" + "InitialPopulation_sv_1_3.csv", index_col=0
+)
+df_2 = df_1.iloc[df_1.Fitness.nlargest(20).index]
 
-from mpl_toolkits.mplot3d import Axes3D
+
+plt.close()
+fig, axs = plt.subplots(2, 2)
+axs[0, 0].hist(df_1.LR, bins=20)
+axs[0, 1].hist(df_1.Layer1, bins=20)
+axs[1, 0].hist(df_1.Layer2, bins=20)
+axs[1, 1].hist(df_1.Layer3, bins=20)
+
+df_1.iloc[df_1.Fitness.nlargest(20).index]
+df_1.Fitness.nlargest(20).index
+
+# make some conditional statement:
+aver_learning = df_1[(df_1.Layer4 == 0) & (df_1.Layer3 == 0)]
+
+
+plt.close()
+plt.scatter(
+    aver_learning.LR,
+    aver_learning.Fitness,
+    s=(np.mean(aver_learning[["Layer1", "Layer2"]], axis=1)) ** 2,
+    marker="^",
+    alpha=0.5,
+)
+
 
 # print PCA
-pca = PCA(n_components=3)
+pca = PCA(n_components=5)
 pca.fit(initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 x = pd.DataFrame(
     pca.transform(
         initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]
     ),
-    columns={"one", "two", "three"},
+    columns={"one", "two", "three", "four", "five"},
 ).reset_index(level=0)
 x = x.merge(initial_population_scenarios[["Fitness", "index"]], on="index")
 
-# pca_2 = PCA(n_components=3)
-# pca_2.fit(df_m[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
-#
-# x_2 = pd.DataFrame(
-#     pca.transform(df_m[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
-#     columns={"one", "two", "three"},
-# ).reset_index(level=0)
-#
-# x_2 = x_2.merge(
-#     df_m.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
-# )
+pca_2 = PCA(n_components=5)
+pca_2.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
+
+x_2 = pd.DataFrame(
+    pca.transform(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
+    columns={"one", "two", "three", "four", "five"},
+).reset_index(level=0)
+
+x_2 = x_2.merge(
+    df_1.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
+)
+
+pca_3 = PCA(n_components=5)
+pca_3.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
+
+x_3 = pd.DataFrame(
+    pca.transform(df_2[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
+    columns={"one", "two", "three", "four", "five"},
+).reset_index(level=0)
+
+x_3 = x_3.merge(
+    df_2.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
+)
+
+from mpl_toolkits.mplot3d import Axes3D
 
 plt.close()
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 ax.scatter(
-    x.one, x.two, x.three, marker="^", s=50,  # c=x.Fitness, cmap="viridis",
+    x.one,
+    x.two,
+    x.three,
+    c=x.Fitness,
+    cmap="Greens",
+    marker="^",
+    s=200,  # c=x.Fitness, cmap="viridis",
 )
-# ax.scatter(x_2.one, x_2.two, x_2.three, c=x_2.Fitness, cmap="binary")
+ax.scatter(
+    x_2.one,
+    x_2.two,
+    x_2.three,
+    c=x_2.Fitness,
+    cmap="binary",
+    alpha=0.1,
+    s=(x_2.Fitness ** 4) / 1000000,
+)
+ax.scatter(
+    x_3.one, x_3.two, x_3.three, c="red", alpha=0.2, s=(x_3.Fitness ** 4) / 1000000,
+)
 ax.set_xlabel("PC 1")
 ax.set_ylabel("PC 2")
 ax.set_zlabel("PC 3")
 
 
 # analysis with two components
+plt.close()
 pca = PCA(n_components=2)
 pca.fit(initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 x = pd.DataFrame(
@@ -156,16 +215,23 @@ x = pd.DataFrame(
     columns={"one", "two"},
 ).reset_index(level=0)
 x = x.merge(initial_population_scenarios[["Fitness", "index"]], on="index")
-# pca_2 = PCA(n_components=2)
-# pca_2.fit(df_m[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
-# x_2 = pd.DataFrame(
-#     pca.transform(df_m[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
-#     columns={"one", "two"},
-# ).reset_index(level=0)
-# x_2 = x_2.merge(
-#     df_m.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
-# )
+pca_2 = PCA(n_components=2)
+pca_2.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
+x_2 = pd.DataFrame(
+    pca.transform(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
+    columns={"one", "two"},
+).reset_index(level=0)
+x_2 = x_2.merge(
+    df_1.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
+)
 
 plt.close()
-plt.scatter(x.one, x.two, c=x.Fitness, alpha=0.2)
-# plt.scatter(x_2.one, x_2.two, c=x_2.Fitness, cmap="binary", alpha=0.7)
+plt.scatter(x.one, x.two, c=x.Fitness, cmap="Greens", alpha=0.4)
+plt.scatter(
+    x_2.one,
+    x_2.two,
+    c=x_2.Fitness,
+    cmap="binary",
+    alpha=0.1,
+    s=(x_2.Fitness ** 4) / 1000000,
+)
