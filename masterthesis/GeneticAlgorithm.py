@@ -84,7 +84,7 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.0001, 0.005, 0.1]
+                learning_rates = [0.005, 0.05, 0.1]
                 layer_one = [2, 10, 20]
                 layer_two = [2, 10, 20]
                 layer_three = [0, 5, 20]

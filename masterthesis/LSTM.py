@@ -117,6 +117,8 @@ class DataPreparationLSTM:
         df_output = df[["DATE", "RV"]]
         df_output["future"] = help_df.mean(axis=1)
 
+        df_output = df_output.drop(["RV"], axis=1)
+
         # unit testing
         s = random.randint(0, df_output.shape[0])
         assert (help_df.iloc[s].mean() - df_output.future.iloc[s]) == 0, "Error"
@@ -127,8 +129,6 @@ class DataPreparationLSTM:
         df = self.df[["DATE", "RV"]].copy()
         for i in range((self.lag - 1)):
             df["lag_{}".format(i + 1)] = df.RV.shift(+(i + 1))
-
-        df = df.drop(["RV"], axis=1)
 
         # add unit test
         self.historical_values = df

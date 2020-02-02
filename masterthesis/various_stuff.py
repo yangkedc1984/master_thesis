@@ -104,10 +104,15 @@ plt.plot(x.fitted_model.predict(train_matrix), train_y, "o", color="black", alph
 
 
 initial_population_scenarios = pd.read_csv(
-    instance_path.path_input + "/" + "InitialPopulation_all_scenarios_future_5.csv",
+    instance_path.path_input
+    + "/"
+    + "InitialPopulation_all_scenarios_future_1_newfitness.csv",
     index_col=0,
 )
 initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
+initial_population_scenarios.iloc[
+    initial_population_scenarios.Fitness.nlargest(10).index
+]
 
 df_1 = pd.read_csv(
     instance_path.path_input + "/" + "InitialPopulation_sv_5_1.csv", index_col=0
