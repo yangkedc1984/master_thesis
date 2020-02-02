@@ -1,5 +1,6 @@
 import os
 
+
 """
 Setting up Environment with 'requirements.txt':
 """
@@ -20,9 +21,12 @@ Setting up Environment with 'environment.yml' file:
 """
 Path Architecture
 """
-main_path = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis'
-data_input_path = '/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/Data'
-folder_output = 'Output'
+main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"  # what is the ubuntu path?  (fuck it sideways)
+data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"  # what is the ubuntu path?
+folder_output = "output"
+
+
+# change path architecture such that it works on the VM as well !c
 
 
 class PathArchitecture:
@@ -32,28 +36,25 @@ class PathArchitecture:
     (especially for the input data --> every user has the data located in a different place)
     """
 
-    def __init__(self,
-                 path_main,
-                 path_output,
-                 path_input):
+    def __init__(self, path_main, path_output, path_input):
         self.path_main = path_main
         self.path_output = path_output
         self.path_input = path_input
-        self.HARModel = 'HARModel'
-        self.NN = 'NeuralNet'
+        self.HARModel = "HARModel"
+        self.NN = "NeuralNet"
         self.output_path = None
 
     def make_folder(self):
-        if os.path.exists(self.path_main + '/' + self.path_output) is not True:
-            os.mkdir(self.path_main + '/' + self.path_output)
-        self.output_path = self.path_main + '/' + self.path_output
+        if os.path.exists(self.path_main + "/" + self.path_output) is not True:
+            os.mkdir(self.path_main + "/" + self.path_output)
+        self.output_path = self.path_main + "/" + self.path_output
 
     def make_subfolder(self):
-        if os.path.exists(self.output_path + '/' + 'HARModel') is not True:
-            os.mkdir(self.output_path + '/' + 'HARModel')
+        if os.path.exists(self.output_path + "/" + "HARModel") is not True:
+            os.mkdir(self.output_path + "/" + "HARModel")
 
-        if os.path.exists(self.output_path + '/' + 'NeuralNet') is not True:
-            os.mkdir(self.output_path + '/' + 'NeuralNet')
+        if os.path.exists(self.output_path + "/" + "NeuralNet") is not True:
+            os.mkdir(self.output_path + "/" + "NeuralNet")
 
     def config_folder_structure(self):
         self.make_folder()
@@ -62,5 +63,3 @@ class PathArchitecture:
 
 instance_path = PathArchitecture(main_path, folder_output, data_input_path)
 instance_path.config_folder_structure()
-
-
