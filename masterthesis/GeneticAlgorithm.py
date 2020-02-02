@@ -1,7 +1,5 @@
-from run_HAR_model import load_data
 from LSTM import *
 from collections import OrderedDict
-import mpmath as mp  # used for mathematical optimization of fitness function
 from config import *
 
 """
@@ -160,7 +158,7 @@ class GeneticAlgorithm:
                     self.initial_population.to_csv(
                         instance_path.path_input
                         + "/"
-                        + "InitialPopulation_all_scenarios_future_20.csv"
+                        + "InitialPopulation_all_scenarios_future_1_newfitness.csv"
                     )
 
             else:
@@ -326,7 +324,7 @@ class GeneticAlgorithm:
     ):
         if self.initial_population is None:
             self.make_initial_population(
-                save_population_to_csv=False, initial_pop_size=initial_population_size
+                save_population_to_csv=True, initial_pop_size=initial_population_size
             )
 
         for iteration in range(number_of_generations):

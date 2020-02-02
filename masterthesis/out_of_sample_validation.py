@@ -4,8 +4,6 @@ from config import *
 df = pd.read_csv(instance_path.path_input + "/" + "DataFeatures.csv", index_col=0)
 df.DATE = df.DATE.values
 df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
-df.DATE.min()
-
 
 lstm_validation_data = DataPreparationLSTM(
     df=df,
@@ -75,7 +73,9 @@ axs[2].hist(
     - x.fitted_model.predict(lstm_validation_data.train_matrix).reshape(
         lstm_validation_data.train_y.shape[0],
     ),
-    bins=50,
+    bins=20,
     alpha=0.7,
     color="black",
 )
+
+x.make_performance_plot(show_testing_sample=False)

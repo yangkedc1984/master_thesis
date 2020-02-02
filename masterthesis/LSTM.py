@@ -61,7 +61,8 @@ class DataPreparationLSTM:
         self.future_values = None
         self.historical_values = None
         self.df_processed_data = None
-        self.applied_scaler = None
+        self.applied_scaler_features = None
+        self.applied_scaler_targets = None
 
     def jump_detection(self):
         df_tmp = self.df.copy()
@@ -89,7 +90,7 @@ class DataPreparationLSTM:
 
         if self.min_max_scaler:
             s = MinMaxScaler()
-            self.applied_scaler = s
+            self.applied_scaler_features = s
             self.df.RV = s.fit_transform(self.df.RV.values.reshape(-1, 1))
             if self.semi_variance:
                 self.df.RSV_plus = s.fit_transform(
@@ -99,7 +100,7 @@ class DataPreparationLSTM:
                     self.df.RSV_minus.values.reshape(-1, 1)
                 )
 
-        if self.standard_scaler:
+        if self.standard_scaler:  # implement back transformation method for this
             self.df.RV = normalize(self.df.RV.values.reshape(-1, 1))
             if self.semi_variance:
                 self.df.RSV_plus = normalize(self.df.RSV_plus.values.reshape(-1, 1))
@@ -137,11 +138,19 @@ class DataPreparationLSTM:
         if self.jump_detect:
             self.jump_detection()
 
-        self.data_scaling()
+        self.future_averages()  # future values have to be computed before the targets are engineered
 
-        self.future_averages()
+        self.future_values.future = np.log(self.future_values.future)
+        s_targets = MinMaxScaler()
+        self.applied_scaler_targets = s_targets
+        self.future_values.future = s_targets.fit_transform(
+            self.future_values.future.values.reshape(-1, 1)
+        )
+
+        self.data_scaling()  # data scaling after future value generation
         self.historical_lag_transformation()
 
+        # merging the two data sets
         data_set_complete = self.future_values.merge(
             self.historical_values, how="right", on="DATE"
         )
@@ -170,6 +179,9 @@ class DataPreparationLSTM:
 
     def prepare_complete_data_set(self):
         self.make_testing_training_set()
+
+    def back_transformation(self, input_data):
+        return np.exp(self.applied_scaler_targets.inverse_transform(input_data))
 
     def reshape_input_data(self):
         if self.training_set is None:
@@ -368,7 +380,9 @@ class TrainLSTM:
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
-        self.fitness = 1 / self.test_accuracy["MSE"]
+        self.fitness = (1 / self.test_accuracy["MSE"]) + (
+            1 / self.train_accuracy["MSE"]
+        )
 
     def make_performance_plot(self, show_testing_sample=False):
         if show_testing_sample:

@@ -1,5 +1,6 @@
 from GeneticAlgorithm import *
 from config import *
+from run_HAR_model import load_data
 
 # load data
 df = load_data()
@@ -7,7 +8,7 @@ df = load_data()
 # prepare LSTM data
 _lstm_instance = DataPreparationLSTM(
     df=df,
-    future=20,
+    future=1,
     lag=20,
     standard_scaler=False,
     min_max_scaler=True,
@@ -49,11 +50,11 @@ _ga_1.run_complete_genetic_algorithm(number_of_generations=50)
 
 
 result = _ga_1.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_20_1.csv")
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_1_newfitness.csv")
 
 
 # df_1 = pd.read_csv(
-#     instance_path.path_input + "/" + "InitialPopulation_sv_1_1.csv", index_col=0
+#     instance_path.path_input + "/" + "InitialPopulation_sv_1_3.csv", index_col=0
 # )
 # df_5 = pd.read_csv(
 #    instance_path.path_input + "/" + "InitialPopulation_sv_5.csv", index_col=0

@@ -1,4 +1,4 @@
-from run_HAR_model import load_data
+from run_HAR_model import load_data, results
 from LSTM import *
 
 df_input = load_data()
@@ -10,7 +10,7 @@ lstm_instance = DataPreparationLSTM(
     standard_scaler=False,
     min_max_scaler=True,
     log_transform=True,
-    semi_variance=True,
+    semi_variance=False,
     jump_detect=True,
     period_train=list(
         [
@@ -27,34 +27,67 @@ lstm_instance = DataPreparationLSTM(
 )
 lstm_instance.prepare_complete_data_set()
 
-tf.keras.backend.clear_session()  # important to clear session!
+tf.keras.backend.clear_session()  # clear session
 x = TrainLSTM(
     lstm_instance.training_set,
     lstm_instance.testing_set,
-    epochs=10,
+    epochs=20,
     learning_rate=0.005,
-    layer_one=10,
-    layer_two=10,
+    layer_one=20,
+    layer_two=20,
     layer_three=5,
-    layer_four=5,
+    layer_four=0,
 )
+x.train_lstm()
 x.make_accuracy_measures()
 x.fitness
 
+x.make_performance_plot(show_testing_sample=False)
 
-# x.make_performance_plot(show_testing_sample=True)
-#
-#
-# # back transformation:
-# plt.close()
-# plt.plot(
-#     np.exp(lstm_instance.applied_scaler.inverse_transform(x.prediction_test)),
-#     np.exp(
-#         lstm_instance.applied_scaler.inverse_transform(
-#             np.array(x.testing_set.future).reshape(-1, 1)
-#         )
-#     ),
-#     "o",
-#     alpha=0.25,
-#     color="black",
-# )
+
+plt.close()
+plt.plot(
+    lstm_instance.training_set.DATE,
+    lstm_instance.back_transformation(x.prediction_train),
+    label="Prediction LSTM",
+    lw=0.5,
+)
+plt.plot(
+    lstm_instance.training_set.DATE,
+    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
+    label="Realized Volatility",
+    lw=1,
+)
+plt.plot(
+    results["har_20_False"].training_set.DATE,
+    results["har_20_False"].prediction_train,
+    label="Prediction HAR",
+    lw=0.5,
+)
+plt.plot(
+    results["har_20_False"].training_set.DATE,
+    results["har_20_False"].training_set.future,
+    label="Realized Volatility",
+    lw=1,
+)
+plt.legend()
+
+
+plt.close()
+plt.plot(
+    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
+    lstm_instance.back_transformation(x.prediction_train),
+    "o",
+    color="green",
+    alpha=0.2,
+    label="LSTM Prediction",
+)
+plt.plot(
+    results["har_5_False"].training_set.future,
+    results["har_5_False"].prediction_train,
+    "o",
+    color="black",
+    alpha=0.2,
+    label="HAR Prediction",
+)
+plt.legend()

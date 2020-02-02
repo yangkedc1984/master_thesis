@@ -104,15 +104,19 @@ plt.plot(x.fitted_model.predict(train_matrix), train_y, "o", color="black", alph
 
 
 initial_population_scenarios = pd.read_csv(
-    instance_path.path_input + "/" + "InitialPopulation_all_scenarios.csv", index_col=0
+    instance_path.path_input + "/" + "InitialPopulation_all_scenarios_future_5.csv",
+    index_col=0,
 )
 initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
 
 df_1 = pd.read_csv(
-    instance_path.path_input + "/" + "InitialPopulation_sv_1_3.csv", index_col=0
+    instance_path.path_input + "/" + "InitialPopulation_sv_5_1.csv", index_col=0
 )
-df_2 = df_1.iloc[df_1.Fitness.nlargest(20).index]
+df_2 = df_1.iloc[df_1.Fitness.nlargest(10).index]
+df_2
 
+# initial_population_scenarios = df_1.iloc[0:189]
+# initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
 
 plt.close()
 fig, axs = plt.subplots(2, 2)
@@ -139,34 +143,34 @@ plt.scatter(
 
 
 # print PCA
-pca = PCA(n_components=5)
+pca = PCA(n_components=3)
 pca.fit(initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 x = pd.DataFrame(
     pca.transform(
         initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]
     ),
-    columns={"one", "two", "three", "four", "five"},
+    columns={"one", "two", "three"},
 ).reset_index(level=0)
 x = x.merge(initial_population_scenarios[["Fitness", "index"]], on="index")
 
-pca_2 = PCA(n_components=5)
+pca_2 = PCA(n_components=3)
 pca_2.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 
 x_2 = pd.DataFrame(
     pca.transform(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
-    columns={"one", "two", "three", "four", "five"},
+    columns={"one", "two", "three"},
 ).reset_index(level=0)
 
 x_2 = x_2.merge(
     df_1.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]], on="index"
 )
 
-pca_3 = PCA(n_components=5)
+pca_3 = PCA(n_components=3)
 pca_3.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
 
 x_3 = pd.DataFrame(
     pca.transform(df_2[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
-    columns={"one", "two", "three", "four", "five"},
+    columns={"one", "two", "three"},
 ).reset_index(level=0)
 
 x_3 = x_3.merge(
@@ -193,11 +197,11 @@ ax.scatter(
     x_2.three,
     c=x_2.Fitness,
     cmap="binary",
-    alpha=0.1,
-    s=(x_2.Fitness ** 4) / 1000000,
+    alpha=1,
+    # s=(x_2.Fitness ** 4) / 1000000,
 )
 ax.scatter(
-    x_3.one, x_3.two, x_3.three, c="red", alpha=0.2, s=(x_3.Fitness ** 4) / 1000000,
+    x_3.one, x_3.two, x_3.three, c="red", alpha=0.2, s=(x_3.Fitness ** 4) / 5000000,
 )
 ax.set_xlabel("PC 1")
 ax.set_ylabel("PC 2")
@@ -233,5 +237,5 @@ plt.scatter(
     c=x_2.Fitness,
     cmap="binary",
     alpha=0.1,
-    s=(x_2.Fitness ** 4) / 1000000,
+    s=(x_2.Fitness ** 4) / 10000000,
 )

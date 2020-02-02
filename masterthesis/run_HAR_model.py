@@ -30,12 +30,12 @@ def estimate_and_predict_har_models(df_input, save=True):
                 period_train=list(
                     [
                         pd.to_datetime("20030910", format="%Y%m%d"),
-                        pd.to_datetime("20080208", format="%Y%m%d"),
+                        pd.to_datetime("20091231", format="%Y%m%d"),
                     ]
                 ),
                 period_test=list(
                     [
-                        pd.to_datetime("20080209", format="%Y%m%d"),
+                        pd.to_datetime("20100101", format="%Y%m%d"),
                         pd.to_datetime("20101231", format="%Y%m%d"),
                     ]
                 ),
@@ -68,8 +68,20 @@ def run_all(save_output=True):
     return res
 
 
-# results = run_all(save_output=False)
+results = run_all(save_output=False)
 
 # results["har_1_True"].prediction_test.head()
 # results["har_5_True"].prediction_test.head()
-# results["har_20_True"].prediction_test.head()
+
+# plt.close()
+# plt.plot(
+#     results["har_20_True"].training_set.DATE,
+#     results["har_20_True"].training_set.future,
+#     label="Realized Volatility",
+# )
+# plt.plot(
+#     results["har_20_True"].training_set.DATE,
+#     results["har_20_True"].prediction_train,
+#     label="Prediction",
+# )
+# plt.legend()
