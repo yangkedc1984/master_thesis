@@ -53,7 +53,9 @@ def etl(df):
     df.loc[np.isnan(df.RSV_minus), "RSV_minus"] = 0
 
     rv = df["RV"].sum() * 100
-    rsv_plus = df["RSV_plus"].sum() * 100
+    rsv_plus = (
+        df["RSV_plus"].sum() * 100
+    )  # is * 100 an issue? (not done in previous verison)
     rsv_minus = df["RSV_minus"].sum() * 100
 
     series_help = pd.Series([rv, rsv_plus, rsv_minus])
