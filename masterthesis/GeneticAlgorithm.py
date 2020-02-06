@@ -87,7 +87,7 @@ class GeneticAlgorithm:
                 learning_rates = [0.005, 0.05, 0.1]
                 layer_one = [2, 10, 20]
                 layer_two = [2, 10, 20]
-                layer_three = [0, 5, 20]
+                layer_three = [0, 10, 20]
                 layer_four = [0, 5, 10]
 
                 dict_help = {}
@@ -158,7 +158,7 @@ class GeneticAlgorithm:
                     self.initial_population.to_csv(
                         instance_path.path_input
                         + "/"
-                        + "InitialPopulation_all_scenarios_future_1_newfitness.csv"
+                        + "InitialPopulation_all_scenarios_future_20_newfitness.csv"
                     )
 
             else:

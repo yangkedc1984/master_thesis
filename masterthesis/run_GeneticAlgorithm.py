@@ -8,7 +8,7 @@ df = load_data()
 # prepare LSTM data
 _lstm_instance = DataPreparationLSTM(
     df=df,
-    future=1,
+    future=20,
     lag=20,
     standard_scaler=False,
     min_max_scaler=True,
@@ -50,7 +50,7 @@ _ga_1.run_complete_genetic_algorithm(number_of_generations=50)
 
 
 result = _ga_1.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_1_newfitness.csv")
+result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_20_newfitness.csv")
 
 
 # df_1 = pd.read_csv(

@@ -1,5 +1,6 @@
 from run_HAR_model import load_data, results
 from LSTM import *
+from config import *
 
 df_input = load_data()
 
@@ -26,54 +27,140 @@ lstm_instance = DataPreparationLSTM(
     ),
 )
 lstm_instance.prepare_complete_data_set()
-lstm_instance.future_values
-lstm_instance.historical_values
-lstm_instance.df_processed_data
+lstm_instance.reshape_input_data()
 
-tf.keras.backend.clear_session()  # clear session
+tf.keras.backend.clear_session()
 x = TrainLSTM(
     lstm_instance.training_set,
     lstm_instance.testing_set,
-    epochs=10,
-    learning_rate=0.1,
-    layer_one=2,
+    epochs=20,
+    learning_rate=0.05,
+    layer_one=17,
     layer_two=20,
     layer_three=0,
     layer_four=0,
 )
-x.train_lstm()
 x.make_accuracy_measures()
 x.fitness
 
-x.make_performance_plot(show_testing_sample=False)
+x.make_performance_plot(show_testing_sample=True)
+
+# x.fitted_model.save("LSTM_SV_1.h5")
+# x.fitted_model.save("LSTM_RV_1.h5")
+# x.fitted_model.save("LSTM_SV_5.h5")
+# x.fitted_model.save("LSTM_SV_20.h5")
+
+model_ = tf.keras.models.load_model("LSTM_SV_1.h5")
+predict_model = model_.predict(lstm_instance.train_matrix)
+predict_model = lstm_instance.back_transformation(predict_model)
+
+results["har_1_True"].training_set[["DATE", "future"]].merge()
+
+
+metrics.mean_absolute_error(
+    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
+    lstm_instance.back_transformation(np.array(x.prediction_train).reshape(-1, 1)),
+) < metrics.mean_absolute_error(
+    results["har_1_True"].training_set.future, results["har_1_True"].prediction_train,
+)
+
+metrics.mean_squared_error(
+    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
+    lstm_instance.back_transformation(x.prediction_train),
+) < metrics.mean_squared_error(
+    results["har_1_True"].training_set.future, results["har_1_True"].prediction_train,
+)
+
+from sklearn.linear_model import LinearRegression
+
+reg = LinearRegression().fit(
+    lstm_instance.back_transformation(x.prediction_train),
+    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
+)
+reg.coef_
+reg.intercept_
+reg.score(
+    lstm_instance.back_transformation(x.prediction_train),
+    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
+)
+
+reg_har = LinearRegression().fit(
+    np.array(results["har_20_True"].prediction_train).reshape(-1, 1),
+    results["har_20_True"].training_set.future,
+)
+reg_har.coef_
+reg_har.intercept_
+reg_har.score(
+    np.array(results["har_1_True"].prediction_train).reshape(-1, 1),
+    results["har_1_True"].training_set.future,
+)
 
 
 plt.close()
 plt.plot(
+    np.array(results["har_20_True"].prediction_test).reshape(-1, 1),
+    results["har_20_True"].testing_set.future,
+    "o",
+    alpha=0.3,
+    color="darkred",
+)
+plt.plot(
+    np.array(results["har_20_True"].prediction_train).reshape(-1, 1),
+    results["har_20_True"].training_set.future,
+    "o",
+    alpha=0.1,
+    color="black",
+)
+
+
+# performance plot that shows actual performance and then the bias of the two models --> indicates where LSTM works
+# better than HAR and vice versa
+
+plt.close()
+fig, axs = plt.subplots(2)
+axs[0].plot(
     lstm_instance.training_set.DATE,
     lstm_instance.back_transformation(x.prediction_train),
     label="Prediction LSTM",
-    lw=0.5,
-)
-plt.plot(
-    lstm_instance.training_set.DATE,
-    lstm_instance.back_transformation(np.array(x.training_set.future).reshape(-1, 1)),
-    label="Realized Volatility",
     lw=1,
 )
-plt.plot(
+axs[0].plot(
     results["har_1_True"].training_set.DATE,
     results["har_1_True"].prediction_train,
     label="Prediction HAR",
-    lw=0.5,
+    lw=1,
 )
-plt.plot(
+axs[0].plot(
     results["har_1_True"].training_set.DATE,
     results["har_1_True"].training_set.future,
     label="Realized Volatility",
-    lw=1,
+    lw=0.5,
+    color="black",
 )
-plt.legend()
+axs[0].legend()
+axs[1].plot(
+    results["har_1_True"].training_set.DATE,
+    (
+        results["har_1_True"].training_set.future
+        - results["har_1_True"].prediction_train
+    ),
+    label="Error HAR",
+    lw=0.5,
+)
+# axs[1].plot(
+#     lstm_instance.training_set.DATE,
+#     (
+#         lstm_instance.back_transformation(
+#             np.array(x.training_set.future).reshape(-1, 1)
+#         )
+#         - lstm_instance.back_transformation(x.prediction_train).reshape(
+#             x.prediction_train.shape[0],
+#         )
+#     ),
+#     label="Error LSTM",
+#     lw=0.5,
+# )
+axs[1].legend()
 
 
 plt.close()
@@ -86,11 +173,38 @@ plt.plot(
     label="LSTM Prediction",
 )
 plt.plot(
-    results["har_1_True"].training_set.future,
-    results["har_1_True"].prediction_train,
+    results["har_20_True"].training_set.future,
+    results["har_20_True"].prediction_train,
     "o",
     color="black",
     alpha=0.2,
     label="HAR Prediction",
+)
+plt.legend()
+
+plt.close()
+plt.plot(
+    lstm_instance.testing_set.DATE,
+    lstm_instance.back_transformation(x.prediction_test),
+    color="green",
+    lw=0.5,
+    alpha=1,
+    label="LSTM Prediction",
+)
+plt.plot(
+    results["har_20_True"].testing_set.DATE,
+    results["har_20_True"].prediction_test,
+    lw=0.5,
+    color="black",
+    alpha=1,
+    label="HAR Prediction",
+)
+plt.plot(
+    results["har_20_True"].testing_set.DATE,
+    results["har_20_True"].testing_set.future,
+    lw=1,
+    color="red",
+    alpha=1,
+    label="Realized Volatility",
 )
 plt.legend()

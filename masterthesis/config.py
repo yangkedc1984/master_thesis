@@ -21,7 +21,9 @@ Setting up Environment with 'environment.yml' file:
 """
 Path Architecture
 """
-main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"  # what is the ubuntu path?  (fuck it sideways)
+main_path = (
+    "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"  # what is the ubuntu path?
+)
 data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"  # what is the ubuntu path?
 folder_output = "output"
 
@@ -43,6 +45,8 @@ class PathArchitecture:
         self.HARModel = "HARModel"
         self.NN = "NeuralNet"
         self.output_path = None
+        self.output_HAR = None
+        self.output_LSTM = None
 
     def make_folder(self):
         if os.path.exists(self.path_main + "/" + self.path_output) is not True:
@@ -56,6 +60,9 @@ class PathArchitecture:
         if os.path.exists(self.output_path + "/" + "NeuralNet") is not True:
             os.mkdir(self.output_path + "/" + "NeuralNet")
 
+        self.output_HAR = self.output_path + "/" + "HARModel"
+        self.output_LSTM = self.output_path + "/" + "NeuralNet"
+
     def config_folder_structure(self):
         self.make_folder()
         self.make_subfolder()
@@ -63,3 +70,5 @@ class PathArchitecture:
 
 instance_path = PathArchitecture(main_path, folder_output, data_input_path)
 instance_path.config_folder_structure()
+instance_path.output_LSTM
+instance_path.output_HAR
