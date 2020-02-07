@@ -1,13 +1,11 @@
 from run_HAR_model import results
 from HAR_Model import *
 from LSTM import *
-from config import *
+from config import folder_structure, os, time
 
 
 class ResultOutput:
-    def __init__(
-        self, forecast_period: int = 1,
-    ):
+    def __init__(self, forecast_period: int = 1):
         self.forecast_period = forecast_period
 
         self.data_train_test = None
@@ -21,14 +19,14 @@ class ResultOutput:
 
     def load_data(self):
         df_m = pd.read_csv(
-            instance_path.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
+            folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
         )
         df_m.DATE = df_m.DATE.values
         df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
         self.data_train_test = df_m
 
         df = pd.read_csv(
-            instance_path.path_input + "/" + "DataFeatures.csv", index_col=0
+            folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0
         )
         df.DATE = df.DATE.values
         df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
@@ -37,11 +35,16 @@ class ResultOutput:
     def load_saved_models(self):
 
         model_lstm_sv = tf.keras.models.load_model(
-            "LSTM_SV_{}.h5".format(self.forecast_period)
-        )  # HARD CODED NAMES !!!
+            folder_structure.output_LSTM
+            + "/"
+            + "LSTM_SV_{}.h5".format(self.forecast_period)
+        )
+
         model_lstm_rv = tf.keras.models.load_model(
-            "LSTM_RV_{}.h5".format(self.forecast_period)
-        )  # this model is not saved yet (hyperparameter optimization)
+            folder_structure.output_LSTM
+            + "/"
+            + "LSTM_RV_{}.h5".format(self.forecast_period)
+        )
 
         model_har_sv = results["har_{}_True".format(self.forecast_period)]
         model_har_rv = results["har_{}_False".format(self.forecast_period)]
@@ -179,7 +182,7 @@ class ResultOutput:
                     "{}_{}".format(data_frame, semi_variance_indication)
                 ] = har_instance
 
-    def make_prediction(self):
+    def make_prediction_accuracy_measurement(self):
         mapping_help = {
             "LSTM_RV": ["train_test_False", "validation_False"],
             "LSTM_SV": ["train_test_True", "validation_True"],
@@ -341,18 +344,181 @@ class ResultOutput:
 
         self.accuracy_measure_data_frame = df_
 
+    def export_result_tables(self, save: bool = True):
+        df = self.accuracy_measure_data_frame.copy()
+        df["RV"] = df.apply(lambda x: "RV" in x.Model, axis=1)
+        df_rv = df[df.RV == True].drop(columns="RV")
+        df_sv = df[df.RV == False].drop(columns="RV")
 
-result_instance = ResultOutput(forecast_period=20)
-result_instance.prepare_lstm_data()
-result_instance.prepare_har_data()
-result_instance.make_prediction()
+        if save:
+            os.chdir(folder_structure.output_Tables)
 
-df = result_instance.accuracy_measure_data_frame.copy()
-df["RV"] = df.apply(lambda x: "RV" in x.Model, axis=1)
-df_RV = df[df.RV == True].drop(columns="RV")
-df_SV = df[df.RV == False].drop(columns="RV")
+            accuracy_measures_export_rv = open(
+                "{}_RV_models_{}".format(time.ctime(), self.forecast_period), "a+"
+            )
+            accuracy_measures_export_rv.write(df_rv.to_latex())
 
-print(df_RV.to_latex())
-print(
-    df_SV.to_latex()
-)  # export it to text document in this format (similar to estimation results of HAR model)
+            accuracy_measures_export_sv = open(
+                "{}_SV_models_{}".format(time.ctime(), self.forecast_period), "a+"
+            )
+            accuracy_measures_export_sv.write(df_sv.to_latex())
+
+    @staticmethod
+    def make_plot(
+        df_input,
+        save_plot: bool = False,
+        identifier_1="L",
+        identifier_2="T",
+        identifier_3="train",
+        identifier_4=1,
+    ):
+        plt.close()
+        fig3 = plt.figure(constrained_layout=True)
+        gs = fig3.add_gridspec(3, 2)
+        f3_ax1 = fig3.add_subplot(gs[0, :])
+        f3_ax1.set_title("Time Series")
+        f3_ax1.plot(
+            df_input.DATE,
+            df_input.LSTM_prediction,
+            lw=1,
+            color="darkgreen",
+            label="LSTM Prediction",
+        )
+        f3_ax1.plot(
+            df_input.DATE,
+            df_input.HAR_prediction,
+            lw=1,
+            color="mediumseagreen",
+            label="HAR Prediction",
+        )
+        f3_ax1.plot(
+            df_input.DATE,
+            df_input.future,
+            lw=0.5,
+            alpha=0.5,
+            color="black",
+            label="Realized Volatility",
+        )
+        f3_ax1.legend()
+        f3_ax2 = fig3.add_subplot(gs[1, 0])
+        f3_ax2.set_title("Mincer-Zarnowitz Regression")
+        f3_ax2.plot(
+            df_input.future,
+            df_input.LSTM_prediction,
+            "o",
+            color="darkgreen",
+            alpha=0.2,
+            label="LSTM Prediction vs Realized Volatility",
+        )
+        f3_ax2.legend()
+        f3_ax3 = fig3.add_subplot(gs[1, 1])
+        f3_ax3.set_title("Mincer-Zarnowitz Regression")
+        f3_ax3.plot(
+            df_input.future,
+            df_input.HAR_prediction,
+            "o",
+            color="mediumseagreen",
+            alpha=0.2,
+            label="LSTM Prediction vs Realized Volatility",
+        )
+        f3_ax3.legend()
+        f3_ax4 = fig3.add_subplot(gs[2, 0])
+        f3_ax4.set_title("Bias Histogram")
+        f3_ax4.hist(
+            df_input.future - df_input.LSTM_prediction,
+            bins=50,
+            color="darkgreen",
+            alpha=0.7,
+            label="LSTM Bias",
+        )
+        f3_ax4.hist(
+            df_input.future - df_input.HAR_prediction,
+            bins=50,
+            color="mediumseagreen",
+            alpha=0.4,
+            label="HAR Bias",
+        )
+        f3_ax4.legend()
+        f3_ax5 = fig3.add_subplot(gs[2, 1])
+        f3_ax5.set_title("Bias Time Series")
+        f3_ax5.plot(
+            df_input.DATE,
+            df_input.future - df_input.LSTM_prediction,
+            lw=0.5,
+            color="darkgreen",
+            alpha=1,
+            label="LSTM Bias",
+        )
+        f3_ax5.plot(
+            df_input.DATE,
+            df_input.future - df_input.HAR_prediction,
+            lw=0.5,
+            color="mediumseagreen",
+            alpha=1,
+            label="HAR Bias",
+        )
+        f3_ax5.legend()
+
+        if save_plot:
+            os.chdir(folder_structure.output_Graphs)
+            fig3.savefig(
+                "{}_{}_{}_{}.png".format(
+                    identifier_1, identifier_2, identifier_3, identifier_4
+                )
+            )
+
+    def make_all_plot(self, save_all_plots: bool = False):
+
+        mapping_data = {
+            "RV": ["train_test_False", "validation_False"],
+            "SV": ["train_test_True", "validation_True"],
+        }
+        mapping_graph = {"RV": ["LSTM_RV", "HAR_RV"], "SV": ["LSTM_SV", "HAR_SV"]}
+
+        for i_model_type in mapping_graph.keys():  # for i in [RV, SV]:
+            for i_data in mapping_data[
+                i_model_type
+            ]:  # for i in ["train_test_False", "validation_False"]:
+                data_lstm = self.lstm_data_dictionary[i_data]  # self converts to self
+                data_har = self.har_data_dictionary[i_data]
+
+                selection_model_lstm = self.models_all[mapping_graph[i_model_type][0]]
+                selection_model_har = self.models_all[mapping_graph[i_model_type][1]]
+
+                df_lstm_help = data_lstm.training_set.DATE.to_frame(name="DATE")
+                model_prediction = selection_model_lstm.predict(data_lstm.train_matrix)
+                df_lstm_help["LSTM_prediction"] = data_lstm.back_transformation(
+                    model_prediction
+                )
+                df_lstm_help["LSTM_future"] = data_lstm.back_transformation(
+                    np.array(data_lstm.training_set.future).reshape(-1, 1)
+                )
+
+                df_har_help = data_har.training_set[["future", "DATE"]]
+
+                if i_model_type == "RV":
+                    df_har_help["HAR_prediction"] = selection_model_har.model.predict(
+                        data_har.training_set[["RV_t", "RV_w", "RV_m"]]
+                    )
+                else:
+                    df_har_help["HAR_prediction"] = selection_model_har.model.predict(
+                        data_har.training_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+                    )
+
+                df_complete = df_lstm_help.merge(df_har_help, on="DATE")
+
+                self.make_plot(
+                    df_complete,
+                    save_plot=save_all_plots,
+                    identifier_1=i_model_type,
+                    identifier_2=i_data,
+                    identifier_3="train",
+                    identifier_4=self.forecast_period,
+                )
+
+    def run_all(self, save_: bool = True, save_plots: bool = True):
+        self.prepare_lstm_data()
+        self.prepare_har_data()
+        self.make_prediction_accuracy_measurement()
+        self.export_result_tables(save=save_)
+        self.make_all_plot(save_all_plots=save_plots)

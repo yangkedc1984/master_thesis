@@ -50,7 +50,9 @@ _ga_1.run_complete_genetic_algorithm(number_of_generations=50)
 
 
 result = _ga_1.initial_population.copy()
-result.to_csv(instance_path.path_input + "/" + "InitialPopulation_sv_20_newfitness.csv")
+result.to_csv(
+    folder_structure.path_input + "/" + "InitialPopulation_sv_20_newfitness.csv"
+)
 
 
 # df_1 = pd.read_csv(

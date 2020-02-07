@@ -1,7 +1,7 @@
 from LSTM import *
 from run_HAR_model import *
 
-df = pd.read_csv(instance_path.path_input + "/" + "DataFeatures.csv", index_col=0)
+df = pd.read_csv(folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0)
 df.DATE = df.DATE.values
 df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
 

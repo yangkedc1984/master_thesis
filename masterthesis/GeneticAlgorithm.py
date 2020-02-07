@@ -2,13 +2,6 @@ from LSTM import *
 from collections import OrderedDict
 from config import *
 
-"""
-- Make Summary Statistics for the whole population (eg. conditional average and so on) --> call it, NETWORK ANALYSIS
-- how many epochs to choose? (chose epochs such that RMSE is becoming stable in the testing set
-- produce over-fitted model, to prove that the methodology actually has potential
-
-"""
-
 
 class GeneticAlgorithm:
     def __init__(
@@ -76,7 +69,9 @@ class GeneticAlgorithm:
 
         if self.initial_population_source_external:
             self.initial_population = pd.read_csv(
-                instance_path.path_input + "/" + "InitialPopulation_all_scenarios.csv",
+                folder_structure.path_input
+                + "/"
+                + "InitialPopulation_all_scenarios.csv",
                 index_col=0,
             )
 
@@ -156,7 +151,7 @@ class GeneticAlgorithm:
 
                 if save_population_to_csv:
                     self.initial_population.to_csv(
-                        instance_path.path_input
+                        folder_structure.path_input
                         + "/"
                         + "InitialPopulation_all_scenarios_future_20_newfitness.csv"
                     )
@@ -205,7 +200,7 @@ class GeneticAlgorithm:
 
                 if save_population_to_csv:
                     self.initial_population.to_csv(
-                        instance_path.path_input
+                        folder_structure.path_input
                         + "/"
                         + "InitialPopulation_future_20.csv"
                     )
@@ -219,9 +214,7 @@ class GeneticAlgorithm:
         parent1_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index,
-                    int(df_help.shape[0] * 0.05),
-                    replace=False,  # might want to change 0.1 to 0.05
+                    df_help.index, int(df_help.shape[0] * 0.05), replace=False,
                 )
             ]
             .nlargest(1)
@@ -231,9 +224,7 @@ class GeneticAlgorithm:
         parent2_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index,
-                    int(df_help.shape[0] * 0.05),
-                    replace=False,  # might want to change 0.1 to 0.05
+                    df_help.index, int(df_help.shape[0] * 0.05), replace=False,
                 )
             ]
             .nlargest(1)
@@ -281,14 +272,10 @@ class GeneticAlgorithm:
         )
 
         _random_pick = random.choice(child_two.columns)
-        # _random_pick_2 = random.choice(child_two.columns)
         child_four = child_two.copy()
         child_four[_random_pick] = random.choice(
             self.network_architecture[_random_pick]
         )
-        # child_four[_random_pick_2] = random.choice(
-        #     self.network_architecture[_random_pick_2]
-        # )
 
         self.initial_population = self.initial_population.append(child_one, sort=False)
         self.initial_population = self.initial_population.append(child_two, sort=False)

@@ -15,7 +15,7 @@ tqdm.pandas()
 
 def load_raw_data():
     hf_data = pd.read_csv(
-        instance_path.path_input
+        folder_structure.path_input
         + "/"
         + "SPY2011.csv",  # nrows=10000000  # use nrows for only a selection of the data
     )
@@ -75,9 +75,9 @@ def make_all_features(high_frequency_data_set):
 
 def save_data_features(df):
     df.to_csv(
-        instance_path.path_input + "/" + "DataFeatures.csv"
+        folder_structure.path_input + "/" + "DataFeatures.csv"
     )  # adding a unique identifier?
-    print("Data exported in {}".format(instance_path.path_input))
+    print("Data exported in {}".format(folder_structure.path_input))
 
 
 def run_feature_engineering():

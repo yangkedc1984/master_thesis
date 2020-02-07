@@ -30,15 +30,15 @@ lstm_instance = DataPreparationLSTM(
 lstm_instance.prepare_complete_data_set()
 lstm_instance.reshape_input_data()
 
-model_ = tf.keras.models.load_model("LSTM_SV_1.h5")
-predict_model = model_.predict(lstm_instance.test_matrix)
+model_ = tf.keras.models.load_model(folder_structure.output_LSTM + "/" + "LSTM_SV_1.h5")
+predict_model = model_.predict(lstm_instance.train_matrix)
 predict_model = lstm_instance.back_transformation(predict_model)
 
-df_test = lstm_instance.testing_set.DATE.to_frame(name="DATE")
+df_test = lstm_instance.training_set.DATE.to_frame(name="DATE")
 df_test["LSTM_pred"] = predict_model
 
-df_test_2 = results["har_1_True"].testing_set[["future", "DATE"]]
-df_test_2["HAR_pred"] = results["har_1_True"].prediction_test
+df_test_2 = results["har_1_True"].training_set[["future", "DATE"]]
+df_test_2["HAR_pred"] = results["har_1_True"].prediction_train
 
 df_test = df_test.merge(df_test_2, on="DATE")
 df_test["indicator"] = df_test.DATE.map(lambda x: 100 * x.year + x.month)
@@ -55,27 +55,28 @@ for i in ["LSTM_pred", "HAR_pred", "future"]:
 df_test["performance_check"] = np.where(
     np.abs(df_test.LSTM_pred_average - df_test.future_average)
     > np.abs(df_test.HAR_pred_average - df_test.future_average),
-    1,
-    -1,  # if == 1, then HAR Model is superior
+    "HAR Model",
+    "LSTM",  # if == 1, then HAR Model is superior
 )
 
+colors = ["darkgreen", "green", "darkred"]
+models = ["LSTM_pred_average", "HAR_pred_average", "future_average"]
 plt.close()
 fig, axs = plt.subplots(2)
-for i in ["LSTM_pred_average", "HAR_pred_average", "future_average"]:
-    axs[0].plot(df_test.DATE, df_test[i], label=i, alpha=1, lw=0.5)
+for i in range(3):
+    axs[0].plot(
+        df_test.DATE,
+        df_test[models[i]],
+        label=models[i],
+        alpha=1,
+        lw=1,
+        color=colors[i],
+    )
 axs[0].legend()
-axs[1].plot(df_test.DATE, df_test.performance_check, alpha=1, lw=0.5)
+axs[1].plot(
+    df_test.DATE, df_test.performance_check, "o", alpha=0.3, lw=1, color="black"
+)
 
-
-df_test["new"] = np.where(
-    np.abs(df_test.future - df_test.LSTM_pred)
-    > np.abs(df_test.future - df_test.HAR_pred),
-    0,
-    1,
-)  # 1 == LSTM is better
-
-plt.close()
-plt.plot(df_test.DATE, df_test.new, ".", c="red", alpha=0.1)
 
 # for 1 day ahead prediction out of sample we perform better with LSTM for all measurements
 metrics.mean_absolute_error(
@@ -135,7 +136,7 @@ titles_set = [
 
 
 df_1 = pd.read_csv(
-    instance_path.path_input + "/" + "InitialPopulation_sv_1_newfitness.csv",
+    folder_structure.path_input + "/" + "InitialPopulation_sv_1_newfitness.csv",
     index_col=0,
 )
 df_2 = df_1.iloc[df_1.Fitness.nlargest(40).index]
@@ -145,11 +146,13 @@ fig = plt.figure()
 fig.suptitle("Hyperparameter Optimization using Genetic Algorithm", fontsize=16)
 for i in range(3):
     initial_population_scenarios = pd.read_csv(
-        instance_path.path_input + "/" + direc_links[i], index_col=0,
+        folder_structure.path_input + "/" + direc_links[i], index_col=0,
     )
     initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
 
-    df_1 = pd.read_csv(instance_path.path_input + "/" + direc_links_2[i], index_col=0,)
+    df_1 = pd.read_csv(
+        folder_structure.path_input + "/" + direc_links_2[i], index_col=0,
+    )
     df_2 = df_1.iloc[df_1.Fitness.nlargest(5).index]
 
     # print PCA

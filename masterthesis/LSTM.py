@@ -1,6 +1,3 @@
-"""
-Class makes volatility predictions by applying deep learning
-"""
 from sklearn import metrics
 import pandas as pd
 import numpy as np
@@ -9,9 +6,6 @@ from sklearn.preprocessing import normalize
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
-
-# Take out all the links within a Class (this might lead to strange behaviour)
 
 
 class DataPreparationLSTM:

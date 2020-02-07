@@ -4,7 +4,7 @@ from HAR_Model import *
 
 def load_data():
     df_m = pd.read_csv(
-        instance_path.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
+        folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
     )
     df_m.DATE = df_m.DATE.values
     df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
@@ -16,7 +16,7 @@ def estimate_and_predict_har_models(df_input, save=True):
     all_models = {"future": [1, 5, 20], "semi_variance": [True, False]}
     all_results = {}
 
-    os.chdir(instance_path.output_path + "/" + instance_path.HARModel)
+    os.chdir(folder_structure.output_path + "/" + folder_structure.HARModel)
 
     for i in all_models["future"]:
         for k in all_models["semi_variance"]:
@@ -69,19 +69,3 @@ def run_all(save_output=True):
 
 
 results = run_all(save_output=False)
-
-# results["har_1_True"].prediction_test.head()
-# results["har_5_True"].prediction_test.head()
-
-# plt.close()
-# plt.plot(
-#     results["har_20_True"].training_set.DATE,
-#     results["har_20_True"].training_set.future,
-#     label="Realized Volatility",
-# )
-# plt.plot(
-#     results["har_20_True"].training_set.DATE,
-#     results["har_20_True"].prediction_train,
-#     label="Prediction",
-# )
-# plt.legend()

@@ -1,5 +1,5 @@
 import os
-
+import time
 
 """
 Setting up Environment with 'requirements.txt':
@@ -21,54 +21,56 @@ Setting up Environment with 'environment.yml' file:
 """
 Path Architecture
 """
-main_path = (
-    "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"  # what is the ubuntu path?
-)
-data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"  # what is the ubuntu path?
-folder_output = "output"
 
+"main_path: path where all the python files are located and where the output is placed later on"
+main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"
 
-# change path architecture such that it works on the VM as well !c
+"data_input_path: folder path where the data is located on your local machine - the data consists of"
+"the engineered features. As the raw data is too large (~50GB of data) it was not possible to place on the local"
+"machine"
+data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"
 
 
 class PathArchitecture:
-
-    """
-    This seems to be a weird way to handle folder paths
-    (especially for the input data --> every user has the data located in a different place)
-    """
-
-    def __init__(self, path_main, path_output, path_input):
+    def __init__(self, path_main, path_input):
         self.path_main = path_main
-        self.path_output = path_output
+        self.output_folder_name = "output"
         self.path_input = path_input
         self.HARModel = "HARModel"
         self.NN = "NeuralNet"
         self.output_path = None
         self.output_HAR = None
         self.output_LSTM = None
+        self.output_Tables = None
+        self.output_Graphs = None
 
     def make_folder(self):
-        if os.path.exists(self.path_main + "/" + self.path_output) is not True:
-            os.mkdir(self.path_main + "/" + self.path_output)
-        self.output_path = self.path_main + "/" + self.path_output
+        if os.path.exists(self.path_main + "/" + self.output_folder_name) is not True:
+            os.mkdir(self.path_main + "/" + self.output_folder_name)
+        self.output_path = self.path_main + "/" + self.output_folder_name
 
-    def make_subfolder(self):
+    def make_sub_folder(self):
         if os.path.exists(self.output_path + "/" + "HARModel") is not True:
             os.mkdir(self.output_path + "/" + "HARModel")
 
         if os.path.exists(self.output_path + "/" + "NeuralNet") is not True:
             os.mkdir(self.output_path + "/" + "NeuralNet")
 
+        if os.path.exists(self.output_path + "/" + "Tables") is not True:
+            os.mkdir(self.output_path + "/" + "Tables")
+
+        if os.path.exists(self.output_path + "/" + "Graphs") is not True:
+            os.mkdir(self.output_path + "/" + "Graphs")
+
         self.output_HAR = self.output_path + "/" + "HARModel"
         self.output_LSTM = self.output_path + "/" + "NeuralNet"
+        self.output_Tables = self.output_path + "/" + "Tables"
+        self.output_Graphs = self.output_path + "/" + "Graphs"
 
     def config_folder_structure(self):
         self.make_folder()
-        self.make_subfolder()
+        self.make_sub_folder()
 
 
-instance_path = PathArchitecture(main_path, folder_output, data_input_path)
-instance_path.config_folder_structure()
-instance_path.output_LSTM
-instance_path.output_HAR
+folder_structure = PathArchitecture(main_path, data_input_path)
+folder_structure.config_folder_structure()
