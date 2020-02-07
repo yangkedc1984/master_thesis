@@ -16,6 +16,7 @@ class ResultOutput:
         self.all_predictions_dic = dict()
         self.accuracy_measure = dict()
         self.accuracy_measure_data_frame = None
+        self.data_frame_for_plot = None
 
     def load_data(self):
         df_m = pd.read_csv(
@@ -347,8 +348,8 @@ class ResultOutput:
     def export_result_tables(self, save: bool = True):
         df = self.accuracy_measure_data_frame.copy()
         df["RV"] = df.apply(lambda x: "RV" in x.Model, axis=1)
-        df_rv = df[df.RV == True].drop(columns="RV")
-        df_sv = df[df.RV == False].drop(columns="RV")
+        df_rv = df[df.RV is True].drop(columns="RV")
+        df_sv = df[df.RV is False].drop(columns="RV")
 
         if save:
             os.chdir(folder_structure.output_Tables)
@@ -467,6 +468,52 @@ class ResultOutput:
                 )
             )
 
+    @staticmethod
+    def make_plot_2(
+        df,
+        save_plot: bool = False,
+        identifier_1="L",
+        identifier_2="T",
+        identifier_3="train",
+        identifier_4=1,
+    ):
+
+        df["indicator"] = df.DATE.map(lambda x: 100 * x.year + x.month)
+
+        for i in ["LSTM_prediction", "HAR_prediction", "future"]:
+            df = df.merge(
+                df.groupby("indicator")
+                .apply(lambda x: x[i].mean())
+                .to_frame(name="{}_average".format(i))
+                .reset_index(level=0),
+                on="indicator",
+            )
+
+        df["performance_check"] = np.where(
+            np.abs(df.LSTM_prediction_average - df.future_average)
+            > np.abs(df.HAR_prediction_average - df.future_average),
+            "HAR Model",
+            "LSTM",  # if == 1, then HAR Model is superior
+        )
+        models = ["LSTM_prediction_average", "HAR_prediction_average", "future_average"]
+        colors = ["darkgreen", "mediumseagreen", "black"]
+        plt.close()
+        fig, axs = plt.subplots(2)
+        for i in range(3):
+            axs[0].plot(
+                df.DATE, df[models[i]], label=models[i], alpha=1, lw=1, color=colors[i]
+            )
+        axs[0].legend()
+        axs[1].plot(df.DATE, df.performance_check, alpha=0.3, lw=1, color="black")
+
+        if save_plot:
+            os.chdir(folder_structure.output_Graphs)
+            fig.savefig(
+                "Aggregated_{}_{}_{}_{}.png".format(
+                    identifier_1, identifier_2, identifier_3, identifier_4
+                )
+            )
+
     def make_all_plot(self, save_all_plots: bool = False):
 
         mapping_data = {
@@ -507,6 +554,8 @@ class ResultOutput:
 
                 df_complete = df_lstm_help.merge(df_har_help, on="DATE")
 
+                self.data_frame_for_plot = df_complete
+
                 self.make_plot(
                     df_complete,
                     save_plot=save_all_plots,
@@ -515,6 +564,77 @@ class ResultOutput:
                     identifier_3="train",
                     identifier_4=self.forecast_period,
                 )
+
+                self.make_plot_2(
+                    df_complete,
+                    save_plot=save_all_plots,
+                    identifier_1=i_model_type,
+                    identifier_2=i_data,
+                    identifier_3="train",
+                    identifier_4=self.forecast_period,
+                )
+
+                for i_model_type_test in mapping_graph.keys():
+                    for i_data_test in mapping_data[i_model_type_test]:
+                        data_lstm = self.lstm_data_dictionary[i_data_test]
+                        data_har = self.har_data_dictionary[i_data_test]
+
+                        selection_model_lstm = self.models_all[
+                            mapping_graph[i_model_type_test][0]
+                        ]
+                        selection_model_har = self.models_all[
+                            mapping_graph[i_model_type_test][1]
+                        ]
+
+                        df_lstm_help = data_lstm.testing_set.DATE.to_frame(name="DATE")
+                        model_prediction = selection_model_lstm.predict(
+                            data_lstm.test_matrix
+                        )
+                        df_lstm_help["LSTM_prediction"] = data_lstm.back_transformation(
+                            model_prediction
+                        )
+                        df_lstm_help["LSTM_future"] = data_lstm.back_transformation(
+                            np.array(data_lstm.testing_set.future).reshape(-1, 1)
+                        )
+
+                        df_har_help = data_har.testing_set[["future", "DATE"]]
+
+                        if i_model_type_test == "RV":
+                            df_har_help[
+                                "HAR_prediction"
+                            ] = selection_model_har.model.predict(
+                                data_har.testing_set[["RV_t", "RV_w", "RV_m"]]
+                            )
+                        else:
+                            df_har_help[
+                                "HAR_prediction"
+                            ] = selection_model_har.model.predict(
+                                data_har.testing_set[
+                                    ["RSV_plus", "RSV_minus", "RV_w", "RV_m"]
+                                ]
+                            )
+
+                        df_complete = df_lstm_help.merge(df_har_help, on="DATE")
+
+                        self.data_frame_for_plot = df_complete
+
+                        self.make_plot(
+                            df_complete,
+                            save_plot=save_all_plots,
+                            identifier_1=i_model_type_test,
+                            identifier_2=i_data_test,
+                            identifier_3="test",
+                            identifier_4=self.forecast_period,
+                        )
+
+                        self.make_plot_2(
+                            df_complete,
+                            save_plot=save_all_plots,
+                            identifier_1=i_model_type_test,
+                            identifier_2=i_data_test,
+                            identifier_3="test",
+                            identifier_4=self.forecast_period,
+                        )
 
     def run_all(self, save_: bool = True, save_plots: bool = True):
         self.prepare_lstm_data()
