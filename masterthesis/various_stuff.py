@@ -1,1 +1,1 @@
-# Spielplatz für neue Ideen :
+# Playground

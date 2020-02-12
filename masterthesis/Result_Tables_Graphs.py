@@ -1,4 +1,4 @@
-from run_HAR_model import results
+from run_HAR_model import results_har
 from HAR_Model import *
 from LSTM import *
 from config import folder_structure, os, time
@@ -47,8 +47,8 @@ class ResultOutput:
             + "LSTM_RV_{}.h5".format(self.forecast_period)
         )
 
-        model_har_sv = results["har_{}_True".format(self.forecast_period)]
-        model_har_rv = results["har_{}_False".format(self.forecast_period)]
+        model_har_sv = results_har["har_{}_True".format(self.forecast_period)]
+        model_har_rv = results_har["har_{}_False".format(self.forecast_period)]
 
         self.models_all = {
             "LSTM_SV": model_lstm_sv,

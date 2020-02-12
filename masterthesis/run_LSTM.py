@@ -1,4 +1,4 @@
-from run_HAR_model import load_data, results
+from run_HAR_model import load_data
 from LSTM import *
 from config import *
 
@@ -44,6 +44,7 @@ x.make_accuracy_measures()
 
 # x.make_performance_plot(show_testing_sample=False)
 
+x.fitted_model.save(folder_structure.output_LSTM + "/" + "new_run_model.h5")
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_SV_1.h5")
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_RV_1.h5")
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_SV_5.h5")

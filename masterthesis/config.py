@@ -43,6 +43,7 @@ class PathArchitecture:
         self.output_LSTM = None
         self.output_Tables = None
         self.output_Graphs = None
+        self.output_AR = None
 
     def make_folder(self):
         if os.path.exists(self.path_main + "/" + self.output_folder_name) is not True:
@@ -56,6 +57,9 @@ class PathArchitecture:
         if os.path.exists(self.output_path + "/" + "NeuralNet") is not True:
             os.mkdir(self.output_path + "/" + "NeuralNet")
 
+        if os.path.exists(self.output_path + "/" + "AutoRegression") is not True:
+            os.mkdir(self.output_path + "/" + "AutoRegression")
+
         if os.path.exists(self.output_path + "/" + "Tables") is not True:
             os.mkdir(self.output_path + "/" + "Tables")
 
@@ -66,6 +70,7 @@ class PathArchitecture:
         self.output_LSTM = self.output_path + "/" + "NeuralNet"
         self.output_Tables = self.output_path + "/" + "Tables"
         self.output_Graphs = self.output_path + "/" + "Graphs"
+        self.output_AR = self.output_path + "/" + "AutoRegression"
 
     def config_folder_structure(self):
         self.make_folder()
