@@ -5,7 +5,7 @@ df = pd.read_csv(folder_structure.path_input + "/" + "DataFeatures.csv", index_c
 df.DATE = df.DATE.values
 df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
 
-lstm_validation_data = DataPreparationLSTM(
+lstm_validation_data = TimeSeriesDataPreparationLSTM(
     df=df,
     future=20,
     lag=20,

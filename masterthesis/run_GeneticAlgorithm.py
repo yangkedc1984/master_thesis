@@ -6,7 +6,7 @@ from run_HAR_model import load_data
 df = load_data()
 
 # prepare LSTM data
-_lstm_instance = DataPreparationLSTM(
+_lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df,
     future=20,
     lag=20,

@@ -11,12 +11,12 @@ class AutoRegressionModel:
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
-                pd.to_datetime("20080208", format="%Y%m%d"),
+                pd.to_datetime("20091231", format="%Y%m%d"),
             ]
         ),
         period_test=list(
             [
-                pd.to_datetime("20080209", format="%Y%m%d"),
+                pd.to_datetime("20100101", format="%Y%m%d"),
                 pd.to_datetime("20101231", format="%Y%m%d"),
             ]
         ),
@@ -37,7 +37,7 @@ class AutoRegressionModel:
         self.test_accuracy = None
 
     def prepare_data(self):
-        self.data_instance = DataPreparationLSTM(
+        self.data_instance = TimeSeriesDataPreparationLSTM(
             df=self.data,
             future=self.future,
             lag=self.ar_lag,

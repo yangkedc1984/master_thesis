@@ -16,6 +16,7 @@ class HARModel:
         feature="RV",
         semi_variance=False,
         jump_detect=True,
+        scaling=False,
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
@@ -36,6 +37,7 @@ class HARModel:
         self.semi_variance = semi_variance
         self.jump_detect = jump_detect
         self.period_train = period_train
+        self.scaling = scaling
         self.period_test = period_test
         self.training_set = None  # data frames
         self.testing_set = None  # data frames
@@ -56,8 +58,11 @@ class HARModel:
 
         df_tmp.drop(columns={"threshold", "larger"}, axis=1, inplace=True)
 
-        # unit test
+        # add unit test
         self.df = df_tmp.copy()
+
+        if self.scaling:
+            self.df.RV = np.log(self.df.RV)
 
     def lag_average(self):
 
@@ -114,6 +119,8 @@ class HARModel:
             self.future_average()
             df = self.output_df.copy()
             df = df.merge(self.df[["DATE", "RSV_plus", "RSV_minus"]], on="DATE")
+            df.RSV_plus = np.log(df.RSV_plus)
+            df.RSV_minus = np.log(df.RSV_minus)
 
         else:
             self.future_average()

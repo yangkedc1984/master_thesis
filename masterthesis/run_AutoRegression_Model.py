@@ -1,6 +1,4 @@
-from AutoRegression_Model import AutoRegressionModel
-from run_HAR_model import *
-from config import folder_structure
+from AutoRegression_Model import *
 
 
 def load_data():
@@ -32,21 +30,7 @@ def estimate_and_predict_ar_models(df_input, save: bool = False):
     for i in all_models["future"]:
         for k in all_models["lag"]:
             all_results["AR_{}_{}".format(i, k)] = AutoRegressionModel(
-                df=df_input,
-                future=i,
-                ar_lag=k,
-                period_train=list(
-                    [
-                        pd.to_datetime("20030910", format="%Y%m%d"),
-                        pd.to_datetime("20080208", format="%Y%m%d"),
-                    ]
-                ),
-                period_test=list(
-                    [
-                        pd.to_datetime("20080209", format="%Y%m%d"),
-                        pd.to_datetime("20101231", format="%Y%m%d"),
-                    ]
-                ),
+                df=df_input, future=i, ar_lag=k,
             )
             all_results["AR_{}_{}".format(i, k)].make_accuracy()
 
@@ -64,11 +48,120 @@ def estimate_and_predict_ar_models(df_input, save: bool = False):
     return all_results
 
 
+def validation_accuracy(df_input, model_dictionaries, save: bool = False):
+    os.chdir(folder_structure.output_AR)
+
+    all_models = {"future": [1, 5, 20], "lag": [1, 3]}
+
+    for i in all_models["future"]:
+        for k in all_models["lag"]:
+            validation_instance = TimeSeriesDataPreparationLSTM(
+                df=df_input,
+                future=i,
+                lag=k,
+                standard_scaler=False,
+                min_max_scaler=False,
+                log_transform=False,
+                semi_variance=False,
+                jump_detect=True,
+                period_train=list(
+                    [
+                        pd.to_datetime("20110103", format="%Y%m%d"),
+                        pd.to_datetime("20111231", format="%Y%m%d"),
+                    ]
+                ),
+                period_test=list(
+                    [
+                        pd.to_datetime("20110103", format="%Y%m%d"),
+                        pd.to_datetime("20111231", format="%Y%m%d"),
+                    ]
+                ),
+            )
+            validation_instance.prepare_complete_data_set()
+            validation_set = validation_instance.training_set
+
+            validation_set.future = validation_instance.back_transformation(
+                np.array(validation_instance.training_set.future).reshape(-1, 1)
+            )
+
+            if k == 1:
+                prediction = model_dictionaries[
+                    "AR_{}_{}".format(i, k)
+                ].ar_model.predict(validation_set["RV"])
+
+            else:
+                prediction = model_dictionaries[
+                    "AR_{}_{}".format(i, k)
+                ].ar_model.predict(validation_set[["RV", "lag_1", "lag_2"]])
+
+            train_accuracy = {
+                "MSE": metrics.mean_squared_error(validation_set["future"], prediction),
+                "MAE": metrics.mean_absolute_error(
+                    validation_set["future"], prediction
+                ),
+                "RSquared": metrics.r2_score(validation_set["future"], prediction),
+            }
+
+            if save:
+                accuracy_results = open("AR_{}_{}_accuracy.txt".format(i, k), "a+")
+                accuracy_results.write("Validation Accuracy:")
+                accuracy_results.write(str(train_accuracy))
+
+
 def run_all(save_output: bool = False):
     df = load_data()
+    df_validation = load_validation_data()
     res = estimate_and_predict_ar_models(df_input=df, save=save_output)
+    validation_accuracy(
+        df_input=df_validation, model_dictionaries=res, save=save_output
+    )
 
     return res
 
 
-results_ar = run_all(save_output=False)
+results_auto_regression = run_all(save_output=True)
+
+
+df_input = load_validation_data()
+
+validation_instance = TimeSeriesDataPreparationLSTM(
+    df=df_input,
+    future=1,
+    lag=3,
+    standard_scaler=False,
+    min_max_scaler=False,
+    log_transform=False,
+    semi_variance=False,
+    jump_detect=True,
+    period_train=list(
+        [
+            pd.to_datetime("20110103", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
+        ]
+    ),
+    period_test=list(
+        [
+            pd.to_datetime("20110103", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
+        ]
+    ),
+)
+
+validation_instance.prepare_complete_data_set()
+
+validation_set = validation_instance.training_set
+
+validation_set.future = validation_instance.back_transformation(
+    np.array(validation_instance.training_set.future).reshape(-1, 1)
+)
+
+df = load_data()
+res = estimate_and_predict_ar_models(df_input=df, save=False)
+
+prediction = res["AR_1_3"].ar_model.predict(validation_set[["RV", "lag_1", "lag_2"]])
+
+metrics.mean_absolute_error(validation_set.future, prediction)
+
+metrics.mean_squared_error(validation_set.future, prediction)
+
+metrics.r2_score(validation_set.future, prediction)

@@ -102,7 +102,7 @@ class ResultOutput:
             for semi_variance_indication in [True, False]:
 
                 # LSTM instance initiation
-                lstm_instance = DataPreparationLSTM(
+                lstm_instance = TimeSeriesDataPreparationLSTM(
                     df=data_frame_map[data_frame],
                     future=self.forecast_period,
                     lag=20,

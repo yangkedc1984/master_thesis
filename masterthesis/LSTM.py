@@ -8,7 +8,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 
-class DataPreparationLSTM:
+class TimeSeriesDataPreparationLSTM:
     def __init__(
         self,
         df: pd.DataFrame,
@@ -134,12 +134,13 @@ class DataPreparationLSTM:
 
         self.future_averages()  # future values have to be computed before the targets are engineered
 
-        self.future_values.future = np.log(self.future_values.future)
-        s_targets = MinMaxScaler()
-        self.applied_scaler_targets = s_targets
-        self.future_values.future = s_targets.fit_transform(
-            self.future_values.future.values.reshape(-1, 1)
-        )
+        if self.log_transform:
+            self.future_values.future = np.log(self.future_values.future)
+            s_targets = MinMaxScaler()
+            self.applied_scaler_targets = s_targets
+            self.future_values.future = s_targets.fit_transform(
+                self.future_values.future.values.reshape(-1, 1)
+            )
 
         self.data_scaling()  # data scaling after future value generation
         self.historical_lag_transformation()
@@ -174,8 +175,12 @@ class DataPreparationLSTM:
     def prepare_complete_data_set(self):
         self.make_testing_training_set()
 
-    def back_transformation(self, input_data):
-        return np.exp(self.applied_scaler_targets.inverse_transform(input_data))
+    def back_transformation(self, input_data):  # check whether this functionality works
+        if self.log_transform:
+            if self.min_max_scaler:
+                return np.exp(self.applied_scaler_targets.inverse_transform(input_data))
+            else:
+                return np.exp(input_data)
 
     def reshape_input_data(self):
         if self.training_set is None:
@@ -320,7 +325,7 @@ class TrainLSTM:
             beta_1=0.9,
             beta_2=0.999,
             epsilon=None,
-            decay=0.0,  # self.learning_rate/ self.epochs
+            decay=0.0,
             amsgrad=False,
         )
 
@@ -376,7 +381,7 @@ class TrainLSTM:
         self.train_accuracy = train_accuracy
         self.fitness = (1 / self.test_accuracy["MSE"]) + (
             1 / self.train_accuracy["MSE"]
-        )
+        )  # just R-Squared as Fitness function as an alternative option?
 
     def make_performance_plot(self, show_testing_sample=False):
         if show_testing_sample:
