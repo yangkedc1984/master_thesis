@@ -51,13 +51,7 @@ class AutoRegressionModel:
         )
         self.data_instance.prepare_complete_data_set()
         self.training_set = self.data_instance.training_set
-        self.training_set.future = self.data_instance.back_transformation(
-            np.array(self.data_instance.training_set.future).reshape(-1, 1)
-        )
         self.testing_set = self.data_instance.testing_set
-        self.testing_set.future = self.data_instance.back_transformation(
-            np.array(self.data_instance.testing_set.future).reshape(-1, 1)
-        )
 
     def estimate_model(self):
         if self.testing_set is None:

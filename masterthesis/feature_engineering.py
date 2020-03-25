@@ -1,10 +1,3 @@
-"""
-Realized Volatility is computed here (only the basic version though)
-    - Update: Check how outliers and extreme values are treated
-    - Update: Check what re-sampling does and whether it improves the results (10 fold business time sampling)
-
-"""
-
 from config import *
 import pandas as pd
 import numpy as np
@@ -52,15 +45,13 @@ def etl(df):
     df.RSV_minus = (df.Returns.loc[df.Returns < 0]) ** 2
     df.loc[np.isnan(df.RSV_minus), "RSV_minus"] = 0
 
-    rv = df["RV"].sum() * 100
-    rsv_plus = (
-        df["RSV_plus"].sum() * 100
-    )  # is * 100 an issue? (not done in previous verison)
-    rsv_minus = df["RSV_minus"].sum() * 100
+    rv = df["RV"].sum()
+    rsv_plus = df["RSV_plus"].sum()
+    rsv_minus = df["RSV_minus"].sum()
 
     series_help = pd.Series([rv, rsv_plus, rsv_minus])
 
-    return series_help  # df_output  # pd.Series([rv, rsv_plus, rsv_minus])
+    return series_help
 
 
 def make_all_features(high_frequency_data_set):
@@ -75,7 +66,7 @@ def make_all_features(high_frequency_data_set):
 
 def save_data_features(df):
     df.to_csv(
-        folder_structure.path_input + "/" + "DataFeatures.csv"
+        folder_structure.path_input + "/" + "DataFeatures_2.csv"
     )  # adding a unique identifier?
     print("Data exported in {}".format(folder_structure.path_input))
 

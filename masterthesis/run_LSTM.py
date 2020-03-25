@@ -2,16 +2,14 @@ from run_HAR_model import *
 from LSTM import *
 
 df_input = load_data()
-df_input.RV = np.log(df_input.RV)
-df_input.RSV_minus = np.log(df_input.RSV_minus)
 
 lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df_input,
-    future=5,
-    lag=40,
+    future=1,
+    lag=20,
     standard_scaler=False,
-    min_max_scaler=False,
-    log_transform=False,
+    min_max_scaler=True,
+    log_transform=True,
     semi_variance=True,
     jump_detect=True,
     period_train=list(
@@ -28,33 +26,32 @@ lstm_instance = TimeSeriesDataPreparationLSTM(
     ),
 )
 lstm_instance.prepare_complete_data_set()
-lstm_instance.training_set
-
 
 tf.keras.backend.clear_session()
 x = TrainLSTM(
     lstm_instance.training_set,
     lstm_instance.testing_set,
-    epochs=10,
-    learning_rate=0.001,
+    epochs=20,
+    learning_rate=0.01,
     layer_one=40,
-    layer_two=20,
-    layer_three=10,
-    layer_four=2,
+    layer_two=37,
+    layer_three=6,
+    layer_four=0,
+    adam_optimizer=True,
 )
-# x.make_accuracy_measures()
+x.make_accuracy_measures()
 
-# x.train_accuracy
-# x.test_accuracy
+x.fitness
+x.train_accuracy
+x.test_accuracy
 
-# x.make_performance_plot(show_testing_sample=False)
+x.make_performance_plot(show_testing_sample=False)
 
+# {'MSE': 0.004486546327296942, 'MAE': 0.051842309968481576, 'RSquared': 0.8052563696263175}  :: train accuracy
+# {'MSE': 0.00580020601640592, 'MAE': 0.05804518833227246, 'RSquared': 0.5745797767210921} :: test accuracy
+# 0.00125 45.0 3.0 15.0 20.0  (from first Genetic algorithm)
 
-# print(
-#    x.test_accuracy, x.train_accuracy
-# )  # this accuracy measure is based on scaled data!!!  (got a massively better R squared)
-
-
+# x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_hist40_sv_1_aftergeneticalgorithm.h5")
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "new_run_model.h5")
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_SV_1.h5")
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_RV_1.h5")

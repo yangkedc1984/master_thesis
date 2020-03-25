@@ -72,9 +72,7 @@ class GeneticAlgorithm:
 
         if self.initial_population_source_external:
             self.initial_population = pd.read_csv(
-                folder_structure.path_input
-                + "/"
-                + "InitialPopulation_all_scenarios.csv",
+                folder_structure.path_input + "/" + "GeneticAlgorithm_20_hist_40.csv",
                 index_col=0,
             )
 
@@ -82,11 +80,11 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.005, 0.05, 0.1]
-                layer_one = [2, 10, 20]
-                layer_two = [2, 10, 20]
-                layer_three = [0, 10, 20]
-                layer_four = [0, 5, 10]
+                learning_rates = [0.001, 0.01]
+                layer_one = [2, 20, 40]
+                layer_two = [2, 10, 20, 40]
+                layer_three = [0, 2, 10, 20]
+                layer_four = [0, 2, 10, 20]
 
                 dict_help = {}
                 for i in range(len(learning_rates)):
@@ -129,7 +127,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=7,
+                        epochs=10,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],
@@ -154,9 +152,7 @@ class GeneticAlgorithm:
 
                 if save_population_to_csv:
                     self.initial_population.to_csv(
-                        folder_structure.path_input
-                        + "/"
-                        + "InitialPopulation_all_scenarios_future_20_newfitness.csv"
+                        folder_structure.path_input + "/" + "InitialPopulation_all.csv"
                     )
 
             else:
@@ -296,7 +292,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=7,
+                epochs=10,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],
@@ -418,4 +414,4 @@ def make_genetic_algorithm_plot(save_plot: bool = False):
         fig.savefig("Genetic_Algorithm_Output.png")
 
 
-# make_genetic_algorithm_plot(save_plot=True)
+# make_genetic_algorithm_plot(save_plot=True)  # plotting results of Genetic Algorithm

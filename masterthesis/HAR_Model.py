@@ -5,6 +5,7 @@ from sklearn import metrics
 import matplotlib.pyplot as plt
 
 plt.style.use("seaborn")
+# add method to implement weighted least squares (instead of OLS) --> results will be closer to the true value
 
 
 class HARModel:
@@ -16,7 +17,7 @@ class HARModel:
         feature="RV",
         semi_variance=False,
         jump_detect=True,
-        scaling=False,
+        log_transformation=False,
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
@@ -36,8 +37,8 @@ class HARModel:
         self.feature = feature
         self.semi_variance = semi_variance
         self.jump_detect = jump_detect
+        self.log_transformation = log_transformation
         self.period_train = period_train
-        self.scaling = scaling
         self.period_test = period_test
         self.training_set = None  # data frames
         self.testing_set = None  # data frames
@@ -61,8 +62,11 @@ class HARModel:
         # add unit test
         self.df = df_tmp.copy()
 
-        if self.scaling:
-            self.df.RV = np.log(self.df.RV)
+    def log_transform(self):
+        df_tmp = self.df.copy()
+        df_tmp["RV"] = np.log(df_tmp["RV"])
+
+        self.df = df_tmp.copy()
 
     def lag_average(self):
 
@@ -115,12 +119,18 @@ class HARModel:
         if self.jump_detect:
             self.jump_detection()
 
+        if self.log_transformation:
+            self.log_transform()
+
         if self.semi_variance:
             self.future_average()
             df = self.output_df.copy()
+
+            if self.log_transformation:
+                self.df["RSV_plus"] = np.log(self.df["RSV_plus"])
+                self.df["RSV_minus"] = np.log(self.df["RSV_minus"])
+
             df = df.merge(self.df[["DATE", "RSV_plus", "RSV_minus"]], on="DATE")
-            df.RSV_plus = np.log(df.RSV_plus)
-            df.RSV_minus = np.log(df.RSV_minus)
 
         else:
             self.future_average()
@@ -162,24 +172,47 @@ class HARModel:
             ).fit()
 
         self.model = result
-        self.estimation_results = result.summary().as_latex()
+        results_robust = result.get_robustcov_results(
+            cov_type="HAC", maxlags=2 * (self.future - 1)
+        )
+        self.estimation_results = results_robust.summary().as_latex()
 
     def predict_values(self):
         self.estimate_model()
-        if self.semi_variance:
-            self.prediction_train = self.model.predict(
-                self.training_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
-            )
-            self.prediction_test = self.model.predict(
-                self.testing_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
-            )
+        if self.log_transformation:
+            if self.semi_variance:
+                self.prediction_train = np.exp(
+                    self.model.predict(
+                        self.training_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+                    )
+                )
+                self.prediction_test = np.exp(
+                    self.model.predict(
+                        self.testing_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+                    )
+                )
+            else:
+                self.prediction_train = np.exp(
+                    self.model.predict(self.training_set[["RV_t", "RV_w", "RV_m"]])
+                )
+                self.prediction_test = np.exp(
+                    self.model.predict(self.testing_set[["RV_t", "RV_w", "RV_m"]])
+                )
         else:
-            self.prediction_train = self.model.predict(
-                self.training_set[["RV_t", "RV_w", "RV_m"]]
-            )
-            self.prediction_test = self.model.predict(
-                self.testing_set[["RV_t", "RV_w", "RV_m"]]
-            )
+            if self.semi_variance:
+                self.prediction_train = self.model.predict(
+                    self.training_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+                )
+                self.prediction_test = self.model.predict(
+                    self.testing_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
+                )
+            else:
+                self.prediction_train = self.model.predict(
+                    self.training_set[["RV_t", "RV_w", "RV_m"]]
+                )
+                self.prediction_test = self.model.predict(
+                    self.testing_set[["RV_t", "RV_w", "RV_m"]]
+                )
 
     def make_accuracy_measures(self):
         """

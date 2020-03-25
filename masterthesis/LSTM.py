@@ -23,12 +23,12 @@ class TimeSeriesDataPreparationLSTM:
         period_train=list(
             [
                 pd.to_datetime("20030910", format="%Y%m%d"),
-                pd.to_datetime("20080208", format="%Y%m%d"),
+                pd.to_datetime("20091231", format="%Y%m%d"),
             ]
         ),
         period_test=list(
             [
-                pd.to_datetime("20080209", format="%Y%m%d"),
+                pd.to_datetime("20100101", format="%Y%m%d"),
                 pd.to_datetime("20101231", format="%Y%m%d"),
             ]
         ),
@@ -67,7 +67,7 @@ class TimeSeriesDataPreparationLSTM:
 
         df_tmp.drop(columns={"threshold", "larger"}, axis=1, inplace=True)
 
-        # unit test
+        # add unit test
         self.df = df_tmp.copy()
 
     def data_scaling(self):
@@ -221,6 +221,7 @@ class TrainLSTM:
         layer_two=15,
         layer_three=8,
         layer_four=4,
+        adam_optimizer: bool = True,
     ):
         self.training_set = training_set
         self.testing_set = testing_set
@@ -231,6 +232,7 @@ class TrainLSTM:
         self.layer_two = int(layer_two)
         self.layer_three = int(layer_three)
         self.layer_four = int(layer_four)
+        self.adam_optimizer = adam_optimizer
 
         # Predefined output
         self.train_matrix = None
@@ -320,14 +322,20 @@ class TrainLSTM:
                 m.add(tf.keras.layers.LSTM(self.layer_two, activation=self.activation))
         m.add(tf.keras.layers.Dense(1, activation="linear"))
 
-        o = tf.keras.optimizers.Adam(
-            lr=self.learning_rate,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=None,
-            decay=0.0,
-            amsgrad=False,
-        )
+        if self.adam_optimizer:
+            o = tf.keras.optimizers.Adam(
+                lr=self.learning_rate,
+                beta_1=0.9,
+                beta_2=0.999,
+                epsilon=None,
+                decay=0.0,
+                amsgrad=False,
+            )
+
+        else:
+            o = tf.keras.optimizers.SGD(
+                lr=self.learning_rate, momentum=0.9, nesterov=True
+            )
 
         m.compile(
             optimizer=o, loss=tf.keras.losses.logcosh

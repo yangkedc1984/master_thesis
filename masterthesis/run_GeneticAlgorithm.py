@@ -5,11 +5,11 @@ from run_HAR_model import load_data
 # load data
 df = load_data()
 
-# prepare LSTM data
+
 _lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df,
     future=20,
-    lag=20,
+    lag=40,
     standard_scaler=False,
     min_max_scaler=True,
     log_transform=True,
@@ -30,7 +30,7 @@ _lstm_instance = TimeSeriesDataPreparationLSTM(
 )
 _lstm_instance.prepare_complete_data_set()
 
-# Run Genetic Algorithm
+
 _ga_1 = GeneticAlgorithm(
     training_set_ga=_lstm_instance.training_set,
     testing_set_ga=_lstm_instance.testing_set,
@@ -42,29 +42,17 @@ _ga_1 = GeneticAlgorithm(
             ("Layer4", [0, 21, 4]),
         ]
     ),
-    learning_rate=[0.00001, 0.2, 0.005],
-    initial_population_source_external=False,
-    build_grid_scenarios=True,
+    learning_rate=[0.001, 0.02, 0.005],
+    initial_population_source_external=True,
+    build_grid_scenarios=False,
 )
+
 _ga_1.run_complete_genetic_algorithm(number_of_generations=50)
 
+result = _ga_1.initial_population
 
-result = _ga_1.initial_population.copy()
 result.to_csv(
-    folder_structure.path_input + "/" + "InitialPopulation_sv_20_newfitness.csv"
+    folder_structure.path_input
+    + "/"
+    + "GeneticAlgorithm_{}_hist_40_GeneticAlgorithm50generations.csv".format(1)
 )
-
-
-# df_1 = pd.read_csv(
-#     instance_path.path_input + "/" + "InitialPopulation_sv_1_3.csv", index_col=0
-# )
-# df_5 = pd.read_csv(
-#    instance_path.path_input + "/" + "InitialPopulation_sv_5.csv", index_col=0
-# )
-# df_20 = pd.read_csv(
-#     instance_path.path_input + "/" + "InitialPopulation_sv_20.csv", index_col=0
-# )
-#
-# df_run = pd.read_csv(
-#     instance_path.path_input + "/" + "InitialPopulation_run_test.csv", index_col=0
-# )

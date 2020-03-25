@@ -1,15 +1,22 @@
 # Playground
-from run_LSTM import *
-from HAR_Model import HARModel
+from LSTM import *
+from run_HAR_model import *
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LinearRegression
+from statsmodels.stats import sandwich_covariance
+import statsmodels.stats.api as sms
+from statsmodels.compat import lzip
 
-df = load_data()
 
-har_data_prep = HARModel(
-    df=df,
+df_input = load_data()
+har_model_heteroskedasticity = HARModel(
+    df=df_input,
     future=1,
+    lags=[4, 20],
+    feature="RV",
     semi_variance=True,
     jump_detect=True,
-    scaling=True,
+    log_transformation=False,
     period_train=list(
         [
             pd.to_datetime("20030910", format="%Y%m%d"),
@@ -23,164 +30,281 @@ har_data_prep = HARModel(
         ]
     ),
 )
-har_data_prep.make_testing_training_set()
-check = har_data_prep.training_set
+har_model_heteroskedasticity.predict_values()
+print(har_model_heteroskedasticity.estimation_results)
 
-output_test = TrainLSTM(
-    training_set=har_data_prep.training_set,
-    testing_set=har_data_prep.testing_set,
-    epochs=20,
-    learning_rate=0.001,
-    layer_one=40,
-    layer_two=20,
-    layer_three=10,
-    layer_four=2,
+
+results_robust = har_model_heteroskedasticity.model.get_robustcov_results(
+    cov_type="HAC", maxlags=20
 )
-output_test.make_accuracy_measures()
+print(results_robust.summary())  # you should use more data to obtain better results
 
-output_test.make_performance_plot(show_testing_sample=True)
 
-train_real = np.exp(output_test.training_set.future)
-train_pred = np.exp(output_test.prediction_train)
-
-test_real = np.exp(output_test.testing_set.future)
-test_pred = np.exp(output_test.prediction_test)
-
-metrics.mean_squared_error(train_real, train_pred)
-metrics.mean_absolute_error(train_real, train_pred)
-metrics.r2_score(train_real, train_pred)
-
-metrics.mean_squared_error(test_real, test_pred)
-metrics.mean_absolute_error(test_real, test_pred)
-metrics.r2_score(test_real, test_pred)
-
+residuals = har_model_heteroskedasticity.prediction_train - np.exp(
+    har_model_heteroskedasticity.training_set.future
+)
 
 plt.close()
-fig, axs = plt.subplots(2)
-axs[0].plot(
-    output_test.training_set.DATE, train_real, lw=0.5, label="Realized Volatility"
+plt.plot(
+    har_model_heteroskedasticity.training_set.RV_t,
+    residuals,
+    "o",
+    color="black",
+    alpha=0.2,
 )
-axs[0].plot(output_test.training_set.DATE, train_pred, lw=0.5, label="Prediction")
-axs[0].legend()
 
-axs[1].plot(
-    output_test.testing_set.DATE, test_real, lw=0.5, label="Realized Volatility"
+# colors_ = ["palegreen", "green", "black"]
+
+# Breusch-Pagan Test
+name = ["Lagrange multiplier statistic", "p-value", "f-value", "f p-value"]
+test = sms.het_breuschpagan(
+    har_model_heteroskedasticity.model.resid,
+    har_model_heteroskedasticity.model.model.exog,
 )
-axs[1].plot(output_test.testing_set.DATE, test_pred, lw=0.5, label="Prediction")
-axs[1].legend()
+lzip(
+    name, test
+)  # p-value is very small, thus heteroskedasticity is present :: Null Hypothesis --> Homoskedasticity is present
 
-
-### VALIDATION SET
-
-df_v = pd.read_csv(folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0)
-df_v.DATE = df.DATE.values
-df_v.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
-
-har_validation = HARModel(
-    df=df_v,
-    future=1,
-    jump_detect=True,
-    scaling=True,
-    semi_variance=True,
-    period_train=list(
-        [
-            pd.to_datetime("20110103", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-    period_test=list(
-        [
-            pd.to_datetime("20110103", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
+# Heteroskedastic-robust Standard errors
+results_robust = har_model_heteroskedasticity.model.get_robustcov_results(
+    cov_type="HAC", maxlags=20
 )
-har_validation.make_testing_training_set()
+
+print(results_robust.summary())  # you should use more data to obtain better results
+
+print(results_robust.summary().as_latex())
 
 
-train_matrix = har_validation.training_set.drop(columns={"DATE", "future"}).values
-train_shape_rows = train_matrix.shape[0]
-train_shape_columns = train_matrix.shape[1]
+import sklearn
 
-train_matrix = train_matrix.reshape((train_shape_rows, train_shape_columns, 1))
+sklearn.metrics.r2_score(
+    np.exp(har_model_heteroskedasticity.training_set.future),
+    har_model_heteroskedasticity.prediction_train,
+)
+sklearn.metrics.mean_squared_error(
+    np.exp(har_model_heteroskedasticity.training_set.future),
+    har_model_heteroskedasticity.prediction_train,
+)
+sklearn.metrics.mean_absolute_error(
+    np.exp(har_model_heteroskedasticity.training_set.future),
+    har_model_heteroskedasticity.prediction_train,
+)
 
-validation_pred = np.exp(output_test.fitted_model.predict(train_matrix))
-validation_real = np.exp(har_validation.training_set.future)
-
+# Plotting the shit
 plt.close()
-plt.plot(har_validation.training_set.DATE, validation_real, lw=0.5, label="real")
-plt.plot(har_validation.training_set.DATE, validation_pred, lw=0.5, label="pred")
+plt.plot(
+    har_model_heteroskedasticity.training_set.DATE,
+    np.exp(har_model_heteroskedasticity.training_set.future),
+    label="Realized Volatility",
+    lw=0.6,
+)
+plt.plot(
+    har_model_heteroskedasticity.training_set.DATE,
+    har_model_heteroskedasticity.prediction_train,
+    label="Predicted Volatility",
+    lw=0.6,
+)
 plt.legend()
 
-
-metrics.r2_score(validation_real, validation_pred)
-metrics.mean_absolute_error(validation_real, validation_pred)
-metrics.mean_squared_error(validation_real, validation_pred)
+plt.plot()
 
 
-"""
-class TrainLSTM:
-    def __init__(
-        self,
-        training_set,
-        testing_set,
-        activation=tf.nn.elu,
-        epochs=20,
-        learning_rate=0.001,
-        layer_one=20,
-        layer_two=15,
-        layer_three=8,
-        layer_four=4,
-    ):
-"""
+dft = train_set[["RV_t", "RSV_plus", "RSV_minus"]].head()
+dft["sum"] = dft.RSV_plus + dft.RSV_minus
+dft
 
-x = AutoRegressionModel(df=df, future=5, ar_lag=3)
-x.estimate_model()
-x.make_accuracy()
-x.train_accuracy
+# construct weighted least squares
+input_regression = train_set[["RV_t", "RV_w", "RV_m"]]
+input_regression = train_set[["RSV_plus", "RSV_minus", "RV_w", "RV_m"]]
 
-# Fitness Function
-def fitness_final(output, validation_data):
-    """
-    Fitness function that counts the number of observations in a given interval around the realized volatility
-    :param output: array of prediction (which shape?)
-    :param validation_data: array of validation data (which shape?)
-    :return: fitness value function that maps prediction and actuals to a number of (0, 1)
-    :return: lower and upper bound vectors
-    """
-    _margin_0 = (
-        np.std(validation_data) / 10
-    )  # can you do this on a rolling window of 200 days?
-    _margin_1 = 0.05
+model = LinearRegression()
+model.fit(input_regression, train_set.future)
+prediction_train_sklearn = model.predict(input_regression)
 
-    _gamma_0 = 0 - _margin_0
-    _delta_0 = 0 + _margin_0
-
-    _gamma_1 = 1 - _margin_1
-    _delta_1 = 1 + _margin_1
-
-    _lower_vector = _gamma_0 + _gamma_1 * validation_data
-    _upper_vector = _delta_0 + _delta_1 * validation_data
-
-    count_total = np.where((_lower_vector < output) & (_upper_vector > output), 1, 0,)
-    np.sum(count_total) / len(prediction)
-
-    fitness = np.sum(count_total) / len(output)
-
-    return fitness, _lower_vector, _upper_vector
-
-
-actuals = lstm_instance.back_transformation(
-    np.array(x.training_set.future).reshape(-1, 1)
-)
-prediction = lstm_instance.back_transformation(
-    np.array(x.prediction_train).reshape(-1, 1)
+model_wls_sklearn = LinearRegression()
+model_wls_sklearn.fit(
+    input_regression, train_set.future, sample_weight=1 / prediction_train_sklearn,
 )
 
-fitness_final(prediction, actuals)[0]
+print("Regular OLS:", model.intercept_, model.coef_)
+print("Weighted OLS:", model_wls_sklearn.intercept_, model_wls_sklearn.coef_)
+
+
+periods_ = [1, 5, 20]
+plt.close()
+fig, axs = plt.subplots(3)
+for i in range(3):
+    har_model_heteroskedasticity = HARModel(
+        df=df_input,
+        future=periods_[i],
+        lags=[4, 20],
+        feature="RV",
+        semi_variance=True,
+        jump_detect=True,
+        period_train=list(
+            [
+                pd.to_datetime("20030910", format="%Y%m%d"),
+                pd.to_datetime("20091231", format="%Y%m%d"),
+            ]
+        ),
+        period_test=list(
+            [
+                pd.to_datetime("20100101", format="%Y%m%d"),
+                pd.to_datetime("20101231", format="%Y%m%d"),
+            ]
+        ),
+    )
+    har_model_heteroskedasticity.make_testing_training_set()
+    har_model_heteroskedasticity.predict_values()
+    train_set = har_model_heteroskedasticity.training_set
+    prediction_train = har_model_heteroskedasticity.prediction_train
+    res = train_set.future - prediction_train
+    axs[i].plot(
+        prediction_train,
+        res,
+        ".",
+        color="black",
+        alpha=0.5,
+        label="HAR Model {}".format(periods_[i]),
+    )
+    axs[i].legend()
+
+
+df_v = pd.read_csv(
+    folder_structure.path_input
+    + "/"
+    + "GeneticAlgorithm_1_hist_40_GeneticAlgorithm50generations_real_1.csv",
+    index_col=0,
+)
+
+# fittest for lr == 0.001
+df_001 = df_v.loc[df_v.LR == 0.001]
+df_001_fittest = df_001.iloc[df_001.Fitness.nlargest(20).index]
+
+# the fittest individuals
+df_fit = df_v.iloc[df_v.Fitness.nlargest(20).index]
+df_t = df_fit.copy()
+df_t = df_t.iloc[0:10]
+df_fit.head()
+
+# NETWORK ANALYSIS:
+# best network with all four layers
+plt.close()
+plt.plot(df_v.Fitness, ".")
+
+df_34 = df_v.loc[(df_v.Layer3 != 0) & (df_v.Layer4 != 0)].reset_index(
+    drop=True
+)  # & (df_v.LR == 0.001)
+df_34_fitness = df_34.iloc[df_34.Fitness.nlargest(20).index]
+
+
+xlist = np.linspace(-3.0, 3.0, 20)
+xlist = xlist.reshape(20, 1)
+# ELU
+
+data_ = np.linspace(-2.5, 2.5, 41)
+import math
+
+_mse = data_ ** 2
+_mae = np.abs(data_)
+
+_logcosh = list()
+for i in data_:
+    _logcosh.append(np.log(math.cosh(i)))
 
 plt.close()
-plt.plot(lstm_instance.training_set.DATE, prediction)
-plt.plot(lstm_instance.training_set.DATE, actuals)
-plt.plot(lstm_instance.training_set.DATE, fitness_final(prediction, actuals)[1], lw=0.5)
-plt.plot(lstm_instance.training_set.DATE, fitness_final(prediction, actuals)[2], lw=0.5)
+plt.plot(data_, _mse, color="darkgreen", label="Mean Squared Error")
+plt.plot(data_, _mae, color="mediumseagreen", label="Mean Absolut Error")
+plt.plot(
+    data_, _logcosh, color="green", label="Hyperbolic Cosine Logarithm ", alpha=0.5
+)
+plt.ylabel("Loss")
+plt.legend()
+plt.savefig("Loss_Functions.png")
+
+
+def elu(alpha, *args):
+    if args < 0:
+        return alpha * (np.exp(args) - 1)
+    else:
+        return args
+
+
+y = elu(0.01, xlist)
+
+y
+
+# contour plot with plt
+def f_hyper(x, y):
+    return x ** 2 + y ** 2 + x * y
+
+
+import matplotlib.mlab as mlab
+import numpy as np
+import matplotlib.pyplot as plt
+
+xlist = np.linspace(-5.0, 5.0, 20)
+ylist = np.linspace(-5.0, 5.0, 20)
+X, Y = np.meshgrid(xlist, ylist)
+Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
+Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
+z = f_hyper(X, Y)
+z = 10.0 * (Z1 - Z2)
+
+levels = np.arange(0, 70, 2)
+
+plt.close()
+plt.figure()
+cp = plt.contour(X, Y, z, levels=levels, cmap="viridis")
+plt.clabel(cp)
+plt.plot(X, Y, ".", color="gray")
+plt.show()
+
+
+delta = 0.25
+x = np.arange(-3.0, 3.0, delta)
+y = np.arange(-2.0, 2.0, delta)
+X, Y = np.meshgrid(x, y)
+Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
+Z2 = mlab.bivariate_normal(X, Y, 1.5, 0.5, 1, 1)
+# difference of Gaussians
+Z = 10.0 * (Z2 - Z1)
+
+plt.close()
+plt.figure()
+levels = np.arange(-1.0, 1.5, 0.1)
+CS = plt.contour(X, Y, Z, levels=levels, cmap="summer")
+plt.clabel(CS, inline=1, fontsize=10)
+plt.plot(X, Y, ".", color="black", alpha=0.3)
+plt.axis("off")
+plt.show()
+plt.savefig("GridSearch.png")
+
+
+# self implemented gradient descent: for the function: x**2 + x*y + y**2
+def f_grad(x, y):
+    grad = np.array([[2 * x + y], [2 * y + x]])
+    return grad
+
+
+theta = np.array([[4], [3]])
+grad = f_grad(int(theta[0]), int(theta[1]))
+eta = 0.001
+
+theta_list0 = list(theta[0])
+theta_list1 = list(theta[1])
+n_iterations = 5000
+
+for i in range(n_iterations):
+    grad = f_grad(float(theta[0]), float(theta[1]))
+    print(grad)
+    theta = theta - eta * grad
+    print(theta)
+    theta_list0.append(theta[0])
+    theta_list1.append(theta[1])
+
+theta  # solution for the function
+
+plt.close()
+plt.plot(theta_list0)
+plt.plot(theta_list1)

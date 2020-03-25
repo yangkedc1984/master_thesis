@@ -55,7 +55,7 @@ class ResultOutput:
             "LSTM_RV": model_lstm_rv,
             "HAR_SV": model_har_sv,
             "HAR_RV": model_har_rv,
-        }
+        }  # should we also load the AR(1) & AR(3) models?
 
     def prepare_lstm_data(self):
 
@@ -165,7 +165,6 @@ class ResultOutput:
                 )
 
             for semi_variance_indication in [True, False]:
-                # LSTM instance initiation
                 har_instance = HARModel(
                     df=data_frame_map[data_frame],
                     future=self.forecast_period,
