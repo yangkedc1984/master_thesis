@@ -124,4 +124,4 @@ def run_all(save_output: bool = False):
     return res
 
 
-results_auto_regression = run_all(save_output=False)
+results_auto_regression = run_all(save_output=True)

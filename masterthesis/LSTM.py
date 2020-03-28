@@ -341,12 +341,17 @@ class TrainLSTM:
             optimizer=o, loss=tf.keras.losses.logcosh
         )  # choose: R-MSE, MAE, logCosh
 
+        es = tf.keras.callbacks.EarlyStopping(  # added
+            monitor="val_loss", mode="min", patience=5, verbose=1,
+        )
+
         m.fit(
             self.train_matrix,
             self.train_y,
             epochs=self.epochs,
             verbose=1,
-            # validation_data=(self.test_matrix, self.test_y),  # use it to choose optimal number of epochs
+            callbacks=[es],  # added
+            validation_data=(self.test_matrix, self.test_y,),
         )
 
         self.fitted_model = m
@@ -387,9 +392,10 @@ class TrainLSTM:
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
-        self.fitness = (1 / self.test_accuracy["MSE"]) + (
-            1 / self.train_accuracy["MSE"]
-        )  # just R-Squared as Fitness function as an alternative option?
+        self.fitness = (self.test_accuracy["RSquared"]) + (
+            self.train_accuracy["RSquared"]
+        )
+        # just R-Squared as Fitness function as an alternative option?
 
     def make_performance_plot(self, show_testing_sample=False):
         if show_testing_sample:

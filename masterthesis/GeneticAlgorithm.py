@@ -80,7 +80,7 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.001, 0.01]
+                learning_rates = [0.01]
                 layer_one = [2, 20, 40]
                 layer_two = [2, 10, 20, 40]
                 layer_three = [0, 2, 10, 20]
@@ -127,7 +127,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=10,
+                        epochs=50,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],

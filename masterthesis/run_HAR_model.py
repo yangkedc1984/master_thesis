@@ -27,6 +27,7 @@ def estimate_and_predict_har_models(df_input, save=True):
                 feature="RV",
                 semi_variance=k,
                 jump_detect=True,
+                log_transformation=False,
                 period_train=list(
                     [
                         pd.to_datetime("20030910", format="%Y%m%d"),

@@ -97,6 +97,7 @@ class HARModel:
 
         self.lag_average()
         df = self.output_df.copy()
+
         df_help = pd.DataFrame()
 
         for i in range(self.future):

@@ -105,7 +105,7 @@ class ResultOutput:
                 lstm_instance = TimeSeriesDataPreparationLSTM(
                     df=data_frame_map[data_frame],
                     future=self.forecast_period,
-                    lag=20,
+                    lag=40,  # have to be changed
                     standard_scaler=False,
                     min_max_scaler=True,
                     log_transform=True,
@@ -347,8 +347,8 @@ class ResultOutput:
     def export_result_tables(self, save: bool = True):
         df = self.accuracy_measure_data_frame.copy()
         df["RV"] = df.apply(lambda x: "RV" in x.Model, axis=1)
-        df_rv = df[df.RV is True].drop(columns="RV")
-        df_sv = df[df.RV is False].drop(columns="RV")
+        df_rv = df[df.RV == True].drop(columns="RV")
+        df_sv = df[df.RV == False].drop(columns="RV")
 
         if save:
             os.chdir(folder_structure.output_Tables)

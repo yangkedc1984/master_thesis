@@ -1,0 +1,289 @@
+\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.594   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.593   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     458.1   \\
+\textbf{Date:}             & Tue, 14 Jan 2020 & \textbf{  Prob (F-statistic):} & 3.71e-243   \\
+\textbf{Time:}             &     17:18:32     & \textbf{  Log-Likelihood:    } &    10419.   \\
+\textbf{No. Observations:} &        1255      & \textbf{  AIC:               } & -2.083e+04  \\
+\textbf{Df Residuals:}     &        1250      & \textbf{  BIC:               } & -2.080e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                       & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}     &    -4.09e-09  &     2.52e-06     &    -0.002  &         0.999        &    -4.94e-06    &     4.94e-06     \\
+\textbf{RSV\_s\_plus}  &       0.2512  &        0.071     &     3.517  &         0.000        &        0.111    &        0.391     \\
+\textbf{RSV\_s\_minus} &       0.3004  &        0.072     &     4.182  &         0.000        &        0.159    &        0.441     \\
+\textbf{RV\_w}         &       0.5740  &        0.033     &    17.295  &         0.000        &        0.509    &        0.639     \\
+\textbf{RV\_m}         &       0.2194  &        0.042     &     5.182  &         0.000        &        0.136    &        0.302     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 1214.388 & \textbf{  Durbin-Watson:     } &     0.431   \\
+\textbf{Prob(Omnibus):} &   0.000  & \textbf{  Jarque-Bera (JB):  } & 118459.043  \\
+\textbf{Skew:}          &   4.210  & \textbf{  Prob(JB):          } &      0.00   \\
+\textbf{Kurtosis:}      &  49.845  & \textbf{  Cond. No.          } &  5.66e+04   \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 5.66e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.594   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.593   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     458.1   \\
+\textbf{Date:}             & Wed, 15 Jan 2020 & \textbf{  Prob (F-statistic):} & 3.71e-243   \\
+\textbf{Time:}             &     22:42:14     & \textbf{  Log-Likelihood:    } &    10419.   \\
+\textbf{No. Observations:} &        1255      & \textbf{  AIC:               } & -2.083e+04  \\
+\textbf{Df Residuals:}     &        1250      & \textbf{  BIC:               } & -2.080e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                       & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}     &    -4.09e-09  &     2.52e-06     &    -0.002  &         0.999        &    -4.94e-06    &     4.94e-06     \\
+\textbf{RSV\_s\_plus}  &       0.2512  &        0.071     &     3.517  &         0.000        &        0.111    &        0.391     \\
+\textbf{RSV\_s\_minus} &       0.3004  &        0.072     &     4.182  &         0.000        &        0.159    &        0.441     \\
+\textbf{RV\_w}         &       0.5740  &        0.033     &    17.295  &         0.000        &        0.509    &        0.639     \\
+\textbf{RV\_m}         &       0.2194  &        0.042     &     5.182  &         0.000        &        0.136    &        0.302     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 1214.388 & \textbf{  Durbin-Watson:     } &     0.431   \\
+\textbf{Prob(Omnibus):} &   0.000  & \textbf{  Jarque-Bera (JB):  } & 118459.043  \\
+\textbf{Skew:}          &   4.210  & \textbf{  Prob(JB):          } &      0.00   \\
+\textbf{Kurtosis:}      &  49.845  & \textbf{  Cond. No.          } &  5.66e+04   \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 5.66e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.594   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.593   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     458.1   \\
+\textbf{Date:}             & Wed, 15 Jan 2020 & \textbf{  Prob (F-statistic):} & 3.71e-243   \\
+\textbf{Time:}             &     22:43:40     & \textbf{  Log-Likelihood:    } &    10419.   \\
+\textbf{No. Observations:} &        1255      & \textbf{  AIC:               } & -2.083e+04  \\
+\textbf{Df Residuals:}     &        1250      & \textbf{  BIC:               } & -2.080e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                       & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}     &    -4.09e-09  &     2.52e-06     &    -0.002  &         0.999        &    -4.94e-06    &     4.94e-06     \\
+\textbf{RSV\_s\_plus}  &       0.2512  &        0.071     &     3.517  &         0.000        &        0.111    &        0.391     \\
+\textbf{RSV\_s\_minus} &       0.3004  &        0.072     &     4.182  &         0.000        &        0.159    &        0.441     \\
+\textbf{RV\_w}         &       0.5740  &        0.033     &    17.295  &         0.000        &        0.509    &        0.639     \\
+\textbf{RV\_m}         &       0.2194  &        0.042     &     5.182  &         0.000        &        0.136    &        0.302     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 1214.388 & \textbf{  Durbin-Watson:     } &     0.431   \\
+\textbf{Prob(Omnibus):} &   0.000  & \textbf{  Jarque-Bera (JB):  } & 118459.043  \\
+\textbf{Skew:}          &   4.210  & \textbf{  Prob(JB):          } &      0.00   \\
+\textbf{Kurtosis:}      &  49.845  & \textbf{  Cond. No.          } &  5.66e+04   \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 5.66e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.594   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.593   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     458.1   \\
+\textbf{Date:}             & Thu, 16 Jan 2020 & \textbf{  Prob (F-statistic):} & 3.71e-243   \\
+\textbf{Time:}             &     10:22:49     & \textbf{  Log-Likelihood:    } &    10419.   \\
+\textbf{No. Observations:} &        1255      & \textbf{  AIC:               } & -2.083e+04  \\
+\textbf{Df Residuals:}     &        1250      & \textbf{  BIC:               } & -2.080e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                       & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}     &    -4.09e-09  &     2.52e-06     &    -0.002  &         0.999        &    -4.94e-06    &     4.94e-06     \\
+\textbf{RSV\_s\_plus}  &       0.2512  &        0.071     &     3.517  &         0.000        &        0.111    &        0.391     \\
+\textbf{RSV\_s\_minus} &       0.3004  &        0.072     &     4.182  &         0.000        &        0.159    &        0.441     \\
+\textbf{RV\_w}         &       0.5740  &        0.033     &    17.295  &         0.000        &        0.509    &        0.639     \\
+\textbf{RV\_m}         &       0.2194  &        0.042     &     5.182  &         0.000        &        0.136    &        0.302     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 1214.388 & \textbf{  Durbin-Watson:     } &     0.431   \\
+\textbf{Prob(Omnibus):} &   0.000  & \textbf{  Jarque-Bera (JB):  } & 118459.043  \\
+\textbf{Skew:}          &   4.210  & \textbf{  Prob(JB):          } &      0.00   \\
+\textbf{Kurtosis:}      &  49.845  & \textbf{  Cond. No.          } &  5.66e+04   \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 5.66e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.594   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.593   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     458.1   \\
+\textbf{Date:}             & Thu, 16 Jan 2020 & \textbf{  Prob (F-statistic):} & 3.71e-243   \\
+\textbf{Time:}             &     11:00:47     & \textbf{  Log-Likelihood:    } &    10419.   \\
+\textbf{No. Observations:} &        1255      & \textbf{  AIC:               } & -2.083e+04  \\
+\textbf{Df Residuals:}     &        1250      & \textbf{  BIC:               } & -2.080e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                       & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}     &    -4.09e-09  &     2.52e-06     &    -0.002  &         0.999        &    -4.94e-06    &     4.94e-06     \\
+\textbf{RSV\_s\_plus}  &       0.2512  &        0.071     &     3.517  &         0.000        &        0.111    &        0.391     \\
+\textbf{RSV\_s\_minus} &       0.3004  &        0.072     &     4.182  &         0.000        &        0.159    &        0.441     \\
+\textbf{RV\_w}         &       0.5740  &        0.033     &    17.295  &         0.000        &        0.509    &        0.639     \\
+\textbf{RV\_m}         &       0.2194  &        0.042     &     5.182  &         0.000        &        0.136    &        0.302     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 1214.388 & \textbf{  Durbin-Watson:     } &     0.431   \\
+\textbf{Prob(Omnibus):} &   0.000  & \textbf{  Jarque-Bera (JB):  } & 118459.043  \\
+\textbf{Skew:}          &   4.210  & \textbf{  Prob(JB):          } &      0.00   \\
+\textbf{Kurtosis:}      &  49.845  & \textbf{  Cond. No.          } &  5.66e+04   \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 5.66e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.555   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.554   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     339.3   \\
+\textbf{Date:}             & Fri, 17 Jan 2020 & \textbf{  Prob (F-statistic):} & 1.62e-189   \\
+\textbf{Time:}             &     10:22:21     & \textbf{  Log-Likelihood:    } &    9742.5   \\
+\textbf{No. Observations:} &        1092      & \textbf{  AIC:               } & -1.948e+04  \\
+\textbf{Df Residuals:}     &        1087      & \textbf{  BIC:               } & -1.945e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                    & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}  &    1.068e-05  &     1.59e-06     &     6.714  &         0.000        &     7.56e-06    &     1.38e-05     \\
+\textbf{RSV\_plus}  &      -0.1912  &        0.058     &    -3.321  &         0.001        &       -0.304    &       -0.078     \\
+\textbf{RSV\_minus} &       0.9407  &        0.071     &    13.316  &         0.000        &        0.802    &        1.079     \\
+\textbf{RV\_w}      &       0.3441  &        0.030     &    11.400  &         0.000        &        0.285    &        0.403     \\
+\textbf{RV\_m}      &       0.0666  &        0.034     &     1.946  &         0.052        &       -0.001    &        0.134     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 906.121 & \textbf{  Durbin-Watson:     } &     0.535  \\
+\textbf{Prob(Omnibus):} &   0.000 & \textbf{  Jarque-Bera (JB):  } & 42994.587  \\
+\textbf{Skew:}          &   3.467 & \textbf{  Prob(JB):          } &      0.00  \\
+\textbf{Kurtosis:}      &  32.947 & \textbf{  Cond. No.          } &  8.75e+04  \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 8.75e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.555   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.554   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     339.3   \\
+\textbf{Date:}             & Fri, 17 Jan 2020 & \textbf{  Prob (F-statistic):} & 1.62e-189   \\
+\textbf{Time:}             &     11:02:33     & \textbf{  Log-Likelihood:    } &    9742.5   \\
+\textbf{No. Observations:} &        1092      & \textbf{  AIC:               } & -1.948e+04  \\
+\textbf{Df Residuals:}     &        1087      & \textbf{  BIC:               } & -1.945e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                    & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}  &    1.068e-05  &     1.59e-06     &     6.714  &         0.000        &     7.56e-06    &     1.38e-05     \\
+\textbf{RSV\_plus}  &      -0.1912  &        0.058     &    -3.321  &         0.001        &       -0.304    &       -0.078     \\
+\textbf{RSV\_minus} &       0.9407  &        0.071     &    13.316  &         0.000        &        0.802    &        1.079     \\
+\textbf{RV\_w}      &       0.3441  &        0.030     &    11.400  &         0.000        &        0.285    &        0.403     \\
+\textbf{RV\_m}      &       0.0666  &        0.034     &     1.946  &         0.052        &       -0.001    &        0.134     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 906.121 & \textbf{  Durbin-Watson:     } &     0.535  \\
+\textbf{Prob(Omnibus):} &   0.000 & \textbf{  Jarque-Bera (JB):  } & 42994.587  \\
+\textbf{Skew:}          &   3.467 & \textbf{  Prob(JB):          } &      0.00  \\
+\textbf{Kurtosis:}      &  32.947 & \textbf{  Cond. No.          } &  8.75e+04  \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 8.75e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}    &      future      & \textbf{  R-squared:         } &     0.555   \\
+\textbf{Model:}            &       OLS        & \textbf{  Adj. R-squared:    } &     0.554   \\
+\textbf{Method:}           &  Least Squares   & \textbf{  F-statistic:       } &     339.3   \\
+\textbf{Date:}             & Fri, 17 Jan 2020 & \textbf{  Prob (F-statistic):} & 1.62e-189   \\
+\textbf{Time:}             &     16:51:10     & \textbf{  Log-Likelihood:    } &    9742.5   \\
+\textbf{No. Observations:} &        1092      & \textbf{  AIC:               } & -1.948e+04  \\
+\textbf{Df Residuals:}     &        1087      & \textbf{  BIC:               } & -1.945e+04  \\
+\textbf{Df Model:}         &           4      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                    & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}  &    1.068e-05  &     1.59e-06     &     6.714  &         0.000        &     7.56e-06    &     1.38e-05     \\
+\textbf{RSV\_plus}  &      -0.1912  &        0.058     &    -3.321  &         0.001        &       -0.304    &       -0.078     \\
+\textbf{RSV\_minus} &       0.9407  &        0.071     &    13.316  &         0.000        &        0.802    &        1.079     \\
+\textbf{RV\_w}      &       0.3441  &        0.030     &    11.400  &         0.000        &        0.285    &        0.403     \\
+\textbf{RV\_m}      &       0.0666  &        0.034     &     1.946  &         0.052        &       -0.001    &        0.134     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 906.121 & \textbf{  Durbin-Watson:     } &     0.535  \\
+\textbf{Prob(Omnibus):} &   0.000 & \textbf{  Jarque-Bera (JB):  } & 42994.587  \\
+\textbf{Skew:}          &   3.467 & \textbf{  Prob(JB):          } &      0.00  \\
+\textbf{Kurtosis:}      &  32.947 & \textbf{  Cond. No.          } &  8.75e+04  \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}
+
+Warnings: \newline
+ [1] Standard Errors assume that the covariance matrix of the errors is correctly specified. \newline
+ [2] The condition number is large, 8.75e+04. This might indicate that there are \newline
+ strong multicollinearity or other numerical problems.
