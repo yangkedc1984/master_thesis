@@ -6,12 +6,12 @@ from run_HAR_model import load_data
 df = load_data()
 
 print("__________________________________________________")
-print("Future = 20 // Lag = 40 // Model = Sermi-Variance _ ADAPTED")
+print("Future = 1 // Lag = 40 // Model = Sermi-Variance _ ADAPTED")
 print("__________________________________________________")
 
 _lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df,
-    future=20,
+    future=1,
     lag=40,
     standard_scaler=False,
     min_max_scaler=True,
@@ -46,18 +46,16 @@ _ga_1 = GeneticAlgorithm(
         ]
     ),
     learning_rate=[0.001, 0.062, 0.02],
-    initial_population_source_external=True,
-    build_grid_scenarios=False,
+    initial_population_source_external=False,
+    build_grid_scenarios=True,
 )
 
-_ga_1.run_complete_genetic_algorithm(number_of_generations=50)
+_ga_1.run_complete_genetic_algorithm(number_of_generations=0)
 
 result = _ga_1.initial_population
 
 result.to_csv(
-    folder_structure.path_input
-    + "/"
-    + "GeneticAlgorithm_{}_hist40_True_afterGA.csv".format(20)
+    folder_structure.path_input + "/" + "GeneticAlgorithm_{}_hist40_True.csv".format(1)
 )
 
 
