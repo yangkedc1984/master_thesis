@@ -6,7 +6,7 @@ df_input = load_data()
 lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df_input,
     future=5,
-    lag=40,
+    lag=20,
     standard_scaler=False,
     min_max_scaler=True,
     log_transform=True,
@@ -62,6 +62,9 @@ x.make_performance_plot(show_testing_sample=True)
 # SV_5_hist20:
 # {'RSquared': 0.8487892767074003, 'MSE': 0.004222057442180422, 'MAE': 0.05100818664132991}  0.005, 20, 20
 # {'RSquared': 0.5501721215202318, 'MSE': 0.006624525669466637, 'MAE': 0.06152399637172061}
+# {'MAE': 0.061450006169662084, 'RSquared': 0.5550299015668898, 'MSE': 0.0065529861092142455}  0.01, 2, 40, 2, 2
+# {'MAE': 0.05201189886945681, 'RSquared': 0.8393594223436639, 'MSE': 0.0044853548190341135}
+
 
 # SV_5_hist40:
 # {'RSquared': 0.8387270309102819, 'MSE': 0.004559721622979651, 'MAE': 0.052498139008333305} train  0.01, 20, 20
@@ -98,23 +101,23 @@ best_model = TrainLSTM(
     lstm_instance.testing_set,
     epochs=50,
     learning_rate=0.01,
-    layer_one=20,
-    layer_two=20,
+    layer_one=2,
+    layer_two=40,
     layer_three=2,
-    layer_four=0,
+    layer_four=2,
     adam_optimizer=True,
 )
 best_model.make_accuracy_measures()
 
-best_model.fitted_model.save(
-    folder_structure.output_LSTM + "/" + "LSTM_RV_1_new_lift.h5"
-)
-
-best_model.fitness
-best_model.test_accuracy
-best_model.train_accuracy
-
-best_model.make_performance_plot(False)
+# best_model.fitted_model.save(
+#     folder_structure.output_LSTM + "/" + "LSTM_RV_1_new_lift.h5"
+# )
+#
+# best_model.fitness
+# best_model.test_accuracy
+# best_model.train_accuracy
+#
+# best_model.make_performance_plot(False)
 
 model_dict = {"model_first": best_model}
 fitness_list = [best_model.fitness]
@@ -127,10 +130,10 @@ for i in range(5):
         lstm_instance.testing_set,
         epochs=50,
         learning_rate=0.01,
-        layer_one=20,
-        layer_two=20,
+        layer_one=2,
+        layer_two=40,
         layer_three=2,
-        layer_four=0,
+        layer_four=2,
         adam_optimizer=True,
     )
     x.make_accuracy_measures()
@@ -145,13 +148,17 @@ for i in range(5):
         best_model = best_model
         fitness_list.append(best_model.fitness)
 
+
+# 2 40 2 2
+# 40 40 0 0
+
 plt.close()
 plt.plot(fitness_list)
 
 best_model.test_accuracy
 best_model.train_accuracy
 best_model.fitted_model
-best_model.make_performance_plot(False)
+best_model.make_performance_plot(True)
 x = best_model
 
 best_model.fitted_model.save(

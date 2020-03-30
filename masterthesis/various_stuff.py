@@ -142,7 +142,7 @@ print(results_robust.summary().as_latex())
 
 
 df_v = pd.read_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_5_hist40_True.csv",
+    folder_structure.path_input + "/" + "GeneticAlgorithm_20_hist40_True.csv",
     index_col=0,
 )
 
@@ -156,15 +156,3 @@ df_fit.head()
 # colorscheme: darkgreen mediumseagreen green
 
 # solution finder ::
-
-
-tf.keras.callbacks.EarlyStopping
-
-tf.keras.callbacks.callbacks.EarlyStopping
-
-
-from tensorflow.keras.callbacks import EarlyStopping
-
-es = EarlyStopping(monitor="val_loss", mode="min", verbose=1)
-
-es = tf.keras.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=5,)

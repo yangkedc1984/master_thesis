@@ -19,7 +19,7 @@ class GeneticAlgorithm:
                 ("Layer4", [0, 5, 1]),
             ]
         ),
-        learning_rate=[0.0001, 0.1, 0.005],
+        learning_rate=[0.001, 0.1, 0.005],
         initial_population_source_external=False,
         build_grid_scenarios=True,
     ):
@@ -72,7 +72,9 @@ class GeneticAlgorithm:
 
         if self.initial_population_source_external:
             self.initial_population = pd.read_csv(
-                folder_structure.path_input + "/" + "GeneticAlgorithm_20_hist_40.csv",
+                folder_structure.path_input
+                + "/"
+                + "GeneticAlgorithm_20_hist40_True.csv",
                 index_col=0,
             )
 

@@ -115,7 +115,9 @@ class TimeSeriesDataPreparationLSTM:
 
         # unit testing
         s = random.randint(0, df_output.shape[0])
-        assert (help_df.iloc[s].mean() - df_output.future.iloc[s]) == 0, "Error"
+        assert (
+            help_df.iloc[s].mean() - df_output.future.iloc[s]
+        ) == 0, "Error: Future averages of realized volatility in TimeSeriesDataPreparationLSTM"
 
         self.future_values = df_output
 

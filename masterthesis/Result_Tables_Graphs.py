@@ -17,6 +17,8 @@ class ResultOutput:
         self.accuracy_measure = dict()
         self.accuracy_measure_data_frame = None
         self.data_frame_for_plot = None
+        self.unit_test_lstm = None
+        self.unit_test_har = None
 
     def load_data(self):
         df_m = pd.read_csv(
@@ -105,7 +107,7 @@ class ResultOutput:
                 lstm_instance = TimeSeriesDataPreparationLSTM(
                     df=data_frame_map[data_frame],
                     future=self.forecast_period,
-                    lag=40,  # have to be changed
+                    lag=20,  # have to be changed
                     standard_scaler=False,
                     min_max_scaler=True,
                     log_transform=True,
@@ -121,6 +123,8 @@ class ResultOutput:
                 self.lstm_data_dictionary[
                     "{}_{}".format(data_frame, semi_variance_indication)
                 ] = lstm_instance
+
+        self.unit_test_lstm = self.lstm_data_dictionary["train_test_True"]  # added
 
     def prepare_har_data(self):
 
@@ -181,6 +185,8 @@ class ResultOutput:
                 self.har_data_dictionary[
                     "{}_{}".format(data_frame, semi_variance_indication)
                 ] = har_instance
+
+        self.unit_test_har = self.har_data_dictionary["train_test_True"]
 
     def make_prediction_accuracy_measurement(self):
         mapping_help = {
@@ -638,6 +644,28 @@ class ResultOutput:
     def run_all(self, save_: bool = True, save_plots: bool = True):
         self.prepare_lstm_data()
         self.prepare_har_data()
+
+        # unit test: data pre processing
+        assert (
+            round(
+                sum(
+                    (
+                        self.unit_test_lstm.back_transformation(
+                            np.array(self.unit_test_lstm.testing_set.future).reshape(
+                                -1, 1
+                            )
+                        ).reshape(self.unit_test_lstm.testing_set.shape[0],)
+                        - self.unit_test_har.testing_set.future
+                    )
+                ),
+                10,
+            )
+            == 0
+        ), (
+            "Error: Unequal future realized volatility for LSTM- and HAR Model"
+            "(unequal dependent variable in the models)"
+        )
+
         self.make_prediction_accuracy_measurement()
         self.export_result_tables(save=save_)
         self.make_all_plot(save_all_plots=save_plots)
