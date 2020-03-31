@@ -5,12 +5,12 @@ df_input = load_data()
 
 lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df_input,
-    future=5,
-    lag=20,
+    future=20,
+    lag=40,
     standard_scaler=False,
     min_max_scaler=True,
     log_transform=True,
-    semi_variance=False,
+    semi_variance=True,
     jump_detect=True,
     period_train=list(
         [
@@ -45,7 +45,7 @@ x.fitness
 x.train_accuracy
 x.test_accuracy
 
-x.make_performance_plot(show_testing_sample=True)
+x.make_performance_plot(show_testing_sample=False)
 
 # RV_1_hist20
 # {'RSquared': 0.7986528505525539, 'MSE': 0.004583299293052354, 'MAE': 0.0517652077364555} train  0.01 40, 40
@@ -101,8 +101,8 @@ best_model = TrainLSTM(
     lstm_instance.testing_set,
     epochs=50,
     learning_rate=0.01,
-    layer_one=2,
-    layer_two=40,
+    layer_one=40,
+    layer_two=2,
     layer_three=2,
     layer_four=2,
     adam_optimizer=True,
@@ -130,7 +130,7 @@ for i in range(5):
         lstm_instance.testing_set,
         epochs=50,
         learning_rate=0.01,
-        layer_one=2,
+        layer_one=40,
         layer_two=40,
         layer_three=2,
         layer_four=2,
@@ -158,20 +158,20 @@ plt.plot(fitness_list)
 best_model.test_accuracy
 best_model.train_accuracy
 best_model.fitted_model
-best_model.make_performance_plot(True)
+best_model.make_performance_plot(show_testing_sample=True)
 x = best_model
 
-best_model.fitted_model.save(
-    folder_structure.output_LSTM + "/" + "LSTM_RV_1_new_lift.h5"
-)
-
-model_test = tf.keras.models.load_model(
-    folder_structure.output_LSTM + "/" + "LSTM_SV_1.h5"
-)
-
-model_dict["model_1"].fitted_model.save(
-    folder_structure.output_LSTM + "/" + "LSTM_RV_1_TRYTOEXPORT.h5"
-)
+# best_model.fitted_model.save(
+#     folder_structure.output_LSTM + "/" + "LSTM_RV_1_new_lift.h5"
+# )
+#
+# model_test = tf.keras.models.load_model(
+#     folder_structure.output_LSTM + "/" + "LSTM_SV_1.h5"
+# )
+#
+# model_dict["model_1"].fitted_model.save(
+#     folder_structure.output_LSTM + "/" + "LSTM_RV_1_TRYTOEXPORT.h5"
+# )
 
 model_dict["model_4"].make_performance_plot(False)
 

@@ -142,14 +142,12 @@ print(results_robust.summary().as_latex())
 
 
 df_v = pd.read_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_20_hist40_True.csv",
+    folder_structure.path_input + "/" + "GeneticAlgorithm_20_hist40_True_afterGA.csv",
     index_col=0,
 )
 
 # the fittest individuals
-df_fit = df_v.iloc[df_v.Fitness.nlargest(20).index]
-df_t = df_fit.copy()
-df_t = df_t.iloc[0:10]
+df_fit = df_v.iloc[df_v.Fitness.nlargest(50).index]
 df_fit.head()
 
 

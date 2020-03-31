@@ -29,52 +29,42 @@ app.config.suppress_callback_exceptions = True
 app.layout = html.Div(
     children=[
         html.H1(
-            className="bg-blue",
+            className="title bg-grey",
             children=[
-                "Results: LSTM Neural Networks and HAR Models for Realized Volatility - "
+                "LSTM Neural Networks and HAR Models for Realized Volatility - "
+                "An Application to Financial Volatility Forecasting"
             ],
-        ),
-        html.H1(
-            className="bg-blue",
-            children=["An Application to Financial Volatility Forecasting"],
         ),
         html.Div(
             className="row",
             children=[
                 html.Div(
-                    className="two columns div-user-controls",
+                    className="pretty_container three columns",
                     children=[
                         html.Div(
                             children=[
-                                html.Div(
-                                    className="Select-control",
-                                    children=[
-                                        dcc.Dropdown(
-                                            id="stockselector",
-                                            options=get_options(df.columns[1:]),
-                                            multi=True,
-                                            value=list(df.columns[1:]),
-                                        ),
-                                    ],
-                                ),
-                                html.P(
-                                    "Pick one or more measures from the dropdown below."
-                                ),
-                                html.Div(
-                                    children=[
-                                        dcc.Checklist(
-                                            id="checklist",
-                                            options=get_options(df.columns[1:]),
-                                            value=list(["RV"]),
-                                        )
-                                    ],
+                                dcc.Dropdown(
+                                    id="stockselector",
+                                    options=get_options(df.columns[1:]),
+                                    multi=True,
+                                    value=list(df.columns[1:]),
                                 ),
                             ],
-                        )
+                        ),
+                        html.P("Pick one or more measures from the dropdown below."),
+                        html.Div(
+                            children=[
+                                dcc.Checklist(
+                                    id="checklist",
+                                    options=get_options(df.columns[1:]),
+                                    value=list(["RV"]),
+                                )
+                            ],
+                        ),
                     ],
                 ),
                 html.Div(
-                    className="five columns div-for-charts",
+                    className="pretty_container nine columns",
                     children=[
                         # html.H3("Result Time Series One"),
                         dcc.Graph(
@@ -84,8 +74,17 @@ app.layout = html.Div(
                         ),
                     ],
                 ),
+            ],
+        ),
+        html.Div(
+            className="row",
+            children=[
+                html.P(
+                    className="pretty_container three columns",
+                    children=["Add another checkbox here"],
+                ),
                 html.Div(
-                    className="five columns div-for-charts",
+                    className="pretty_container nine columns",
                     children=[
                         dcc.Graph(
                             id="updatechange",
@@ -94,14 +93,6 @@ app.layout = html.Div(
                         )
                     ],
                 ),
-            ],
-        ),
-        html.Div(
-            className="row",
-            children=[
-                html.P(className="two columns", children=["Hoi du spasst 1"]),
-                html.P(className="five columns", children=["Hoi du spasst 2"]),
-                html.P(className="five columns", children=["Hoi du spasst 3"]),
             ],
         ),
     ],
@@ -121,7 +112,7 @@ def update_graph(selected_dropdown_value):
                 opacity=0.7,
                 name=stock,
                 #  textposition="bottom center",
-                line={"width": 0.5},
+                line={"width": 2},
             )
         )
     traces = [trace1]
@@ -129,7 +120,7 @@ def update_graph(selected_dropdown_value):
     figure = {
         "data": data,
         "layout": go.Layout(
-            colorway=["#31302F", "#62C331", "#060606"],
+            colorway=["#31302F", "#2AA3FB", "#014678"],
             # template="plotly_dark",
             paper_bgcolor="rgba(0, 0, 0, 0)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
@@ -165,7 +156,7 @@ def update_change(selection_checklist):
                 opacity=0.7,
                 name=stock,
                 # textposition="bottom center",
-                line={"width": 0.5},
+                line={"width": 2},
             )
         )
     traces = [trace1]
@@ -173,7 +164,7 @@ def update_change(selection_checklist):
     figure = {
         "data": data,
         "layout": go.Layout(
-            colorway=["#31302F", "#62C331", "#060606"],
+            colorway=["#31302F", "#2AA3FB", "#014678"],
             # template="plotly_dark",
             paper_bgcolor="rgba(0, 0, 0, 0)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
