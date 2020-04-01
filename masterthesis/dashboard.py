@@ -3,6 +3,7 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import plotly.graph_objects as go
+import dash_table
 import pandas as pd
 from dash.dependencies import Input, Output
 
@@ -12,6 +13,8 @@ df = pd.read_csv(
 )
 df.DATE = df.DATE.values
 df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
+
+df_ = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/solar.csv")
 
 
 def get_options(list_stocks):
@@ -41,6 +44,7 @@ app.layout = html.Div(
                 html.Div(
                     className="pretty_container three columns",
                     children=[
+                        html.P("Pick one or more measures from the Dropdown below."),
                         html.Div(
                             children=[
                                 dcc.Dropdown(
@@ -51,13 +55,13 @@ app.layout = html.Div(
                                 ),
                             ],
                         ),
-                        html.P("Pick one or more measures from the dropdown below."),
+                        html.P("Pick one or more measures from the Checklist below."),
                         html.Div(
                             children=[
                                 dcc.Checklist(
                                     id="checklist",
                                     options=get_options(df.columns[1:]),
-                                    value=list(["RV"]),
+                                    value=list(df.columns[1:]),
                                 )
                             ],
                         ),
@@ -66,7 +70,6 @@ app.layout = html.Div(
                 html.Div(
                     className="pretty_container nine columns",
                     children=[
-                        # html.H3("Result Time Series One"),
                         dcc.Graph(
                             id="timeseries",
                             config={"displayModeBar": False},
@@ -95,6 +98,39 @@ app.layout = html.Div(
                 ),
             ],
         ),
+        html.Div(
+            className="row",
+            children=[
+                html.Div(
+                    className="pretty_container five columns",
+                    children=[
+                        dcc.Graph(
+                            id="histogram",
+                            config={"displayModeBar": False},
+                            animate=True,
+                        )
+                    ],
+                ),
+                html.Div(
+                    className="pretty_container five columns offset-by-one column",
+                    children=[
+                        dcc.Graph(
+                            id="mincer", config={"displayModeBar": False}, animate=True,
+                        )
+                    ],
+                ),
+            ],
+        ),
+        html.Div(
+            className="twelve columns offset-by-one column",
+            children=[
+                dash_table.DataTable(
+                    id="table_das",
+                    columns=[{"name": i, "id": i} for i in df_.columns],
+                    data=df_.to_dict("records"),
+                )
+            ],
+        ),
     ],
 )
 
@@ -111,7 +147,6 @@ def update_graph(selected_dropdown_value):
                 mode="lines",
                 opacity=0.7,
                 name=stock,
-                #  textposition="bottom center",
                 line={"width": 2},
             )
         )
@@ -121,27 +156,25 @@ def update_graph(selected_dropdown_value):
         "data": data,
         "layout": go.Layout(
             colorway=["#31302F", "#2AA3FB", "#014678"],
-            # template="plotly_dark",
             paper_bgcolor="rgba(0, 0, 0, 0)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
-            margin={"b": 1},
+            margin={"b": 20, "t": 0.5, "l": 50},
             hovermode="x",
-            autosize=False,
-            # title={
-            #     "text": "Different Realized Volatility Measures",
-            #     "font": {"color": "white"},
-            #     "x": 0.5,
-            # },
+            autosize=True,
+            title={
+                "text": "Prediction versus Realized Volatility",
+                "font": {"color": "black", "size": 10},
+                "x": 0,
+                "pad": {"t": 100, "l": 1},
+                "xanchor": "left",
+                "yanchor": "top",
+            },
             xaxis={"range": [df.DATE.min(), df.DATE.max()]},
-            height=400,
+            height=300,
         ),
     }
 
     return figure
-
-
-#'height': 400,
-# 'margin': {'l': 10, 'b': 20, 't': 0, 'r': 0}
 
 
 @app.callback(Output("updatechange", "figure"), [Input("checklist", "value")])
@@ -165,19 +198,21 @@ def update_change(selection_checklist):
         "data": data,
         "layout": go.Layout(
             colorway=["#31302F", "#2AA3FB", "#014678"],
-            # template="plotly_dark",
             paper_bgcolor="rgba(0, 0, 0, 0)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
-            margin={"b": 1},
+            margin={"b": 20, "t": 0.5, "l": 50},
             hovermode="x",
             autosize=True,
-            # title={
-            #     "text": "Different Realized Volatility Measures 2.0",
-            #     "font": {"color": "white"},
-            #     "x": 0.5,
-            # },
+            title={
+                "text": "Prediction versus Realized Volatility",
+                "font": {"color": "black", "size": 10},
+                "x": 0,
+                "pad": {"t": 100, "l": 1},
+                "xanchor": "left",
+                "yanchor": "top",
+            },
             xaxis={"range": [df.DATE.min(), df.DATE.max()]},
-            height=400,
+            height=200,
         ),
     }
 

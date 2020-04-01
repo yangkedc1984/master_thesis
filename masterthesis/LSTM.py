@@ -344,7 +344,7 @@ class TrainLSTM:
         )  # choose: R-MSE, MAE, logCosh
 
         es = tf.keras.callbacks.EarlyStopping(  # added
-            monitor="val_loss", mode="min", patience=10, verbose=1,
+            monitor="val_loss", mode="min", patience=5, verbose=1,
         )
 
         m.fit(

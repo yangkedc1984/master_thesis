@@ -142,7 +142,7 @@ print(results_robust.summary().as_latex())
 
 
 df_v = pd.read_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_20_hist40_True_afterGA.csv",
+    folder_structure.path_input + "/" + "GeneticAlgorithm_1_hist40_True.csv",
     index_col=0,
 )
 

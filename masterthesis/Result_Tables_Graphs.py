@@ -5,8 +5,9 @@ from config import folder_structure, os, time
 
 
 class ResultOutput:
-    def __init__(self, forecast_period: int = 1):
+    def __init__(self, forecast_period: int = 1, log_transformation: bool = False):
         self.forecast_period = forecast_period
+        self.log_transformation = log_transformation
 
         self.data_train_test = None
         self.data_validation = None
@@ -49,15 +50,19 @@ class ResultOutput:
             + "LSTM_RV_{}.h5".format(self.forecast_period)
         )
 
-        model_har_sv = results_har["har_{}_True".format(self.forecast_period)]
-        model_har_rv = results_har["har_{}_False".format(self.forecast_period)]
+        model_har_sv = results_har[
+            "har_{}_True_{}".format(self.forecast_period, self.log_transformation)
+        ]
+        model_har_rv = results_har[
+            "har_{}_False_{}".format(self.forecast_period, self.log_transformation)
+        ]
 
         self.models_all = {
             "LSTM_SV": model_lstm_sv,
             "LSTM_RV": model_lstm_rv,
             "HAR_SV": model_har_sv,
             "HAR_RV": model_har_rv,
-        }  # should we also load the AR(1) & AR(3) models?
+        }  # should we also load the AR(1) & AR(3) models?  # we should load har log models aswell!!!
 
     def prepare_lstm_data(self):
 
@@ -169,13 +174,14 @@ class ResultOutput:
                 )
 
             for semi_variance_indication in [True, False]:
-                har_instance = HARModel(
+                har_instance = HARModelLogTransformed(
                     df=data_frame_map[data_frame],
                     future=self.forecast_period,
                     lags=[4, 20],
                     feature="RV",
                     semi_variance=semi_variance_indication,
                     jump_detect=True,
+                    log_transformation=self.log_transformation,
                     period_train=period_train_,
                     period_test=period_test_,
                 )

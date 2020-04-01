@@ -105,6 +105,8 @@ body {
 
 .bg-grey{
   background-color: #2AA3FB;
+  border-radius: 5px;
+  box-shadow: 2px 2px 2px lightgrey;
 }
 
 #right-column {
