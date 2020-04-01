@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import dash_table
 import pandas as pd
 from dash.dependencies import Input, Output
-
+import numpy as np
 
 df = pd.read_csv(
     folder_structure.path_input + "/DataFeatures.csv", index_col=0, parse_dates=True
@@ -15,6 +15,12 @@ df.DATE = df.DATE.values
 df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
 
 df_ = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/solar.csv")
+
+df_c = pd.read_csv(
+    folder_structure.path_input + "/DashboardData.csv", index_col=0, parse_dates=True
+)
+df_c = df_c.dropna()
+df_tmp = df_c.drop(["period", "DATE", "dataset"], axis=1)
 
 
 def get_options(list_stocks):
@@ -49,19 +55,31 @@ app.layout = html.Div(
                             children=[
                                 dcc.Dropdown(
                                     id="stockselector",
-                                    options=get_options(df.columns[1:]),
+                                    options=get_options(df_tmp.columns),
                                     multi=True,
-                                    value=list(df.columns[1:]),
+                                    value=["RV"],
                                 ),
                             ],
                         ),
                         html.P("Pick one or more measures from the Checklist below."),
                         html.Div(
                             children=[
-                                dcc.Checklist(
+                                dcc.Dropdown(
                                     id="checklist",
-                                    options=get_options(df.columns[1:]),
-                                    value=list(df.columns[1:]),
+                                    options=get_options(df_c.period.unique()),
+                                    multi=False,
+                                    value=df_c.period.unique()[1],
+                                )
+                            ],
+                        ),
+                        html.P("Testing Training Validation"),
+                        html.Div(
+                            children=[
+                                dcc.Dropdown(
+                                    id="trainingselector",
+                                    options=get_options(df_c.dataset.unique()),
+                                    multi=False,
+                                    value="training",
                                 )
                             ],
                         ),
@@ -72,7 +90,7 @@ app.layout = html.Div(
                     children=[
                         dcc.Graph(
                             id="timeseries",
-                            config={"displayModeBar": False},
+                            config={"displayModeBar": True},
                             animate=True,
                         ),
                     ],
@@ -136,8 +154,19 @@ app.layout = html.Div(
 
 
 # Callback for timeseries price
-@app.callback(Output("timeseries", "figure"), [Input("stockselector", "value")])
-def update_graph(selected_dropdown_value):
+@app.callback(
+    Output("timeseries", "figure"),
+    [
+        Input("stockselector", "value"),
+        Input("checklist", "value"),
+        Input("trainingselector", "value"),
+    ],
+)
+def update_graph(selected_dropdown_value, checklist_value, data_selection):
+
+    df_tmp = df_c[(df_c.dataset == str(data_selection))]
+    df = df_tmp[df_tmp.period == checklist_value]
+
     trace1 = []
     for stock in selected_dropdown_value:
         trace1.append(
@@ -155,7 +184,7 @@ def update_graph(selected_dropdown_value):
     figure = {
         "data": data,
         "layout": go.Layout(
-            colorway=["#31302F", "#2AA3FB", "#014678"],
+            #  colorway=["#31302F", "#2AA3FB", "#014678"],
             paper_bgcolor="rgba(0, 0, 0, 0)",
             plot_bgcolor="rgba(0, 0, 0, 0)",
             margin={"b": 20, "t": 0.5, "l": 50},
@@ -177,46 +206,46 @@ def update_graph(selected_dropdown_value):
     return figure
 
 
-@app.callback(Output("updatechange", "figure"), [Input("checklist", "value")])
-def update_change(selection_checklist):
-    trace1 = []
-    for stock in selection_checklist:
-        trace1.append(
-            go.Scatter(
-                x=df.DATE,
-                y=df[stock],
-                mode="lines",
-                opacity=0.7,
-                name=stock,
-                # textposition="bottom center",
-                line={"width": 2},
-            )
-        )
-    traces = [trace1]
-    data = [val for sublist in traces for val in sublist]
-    figure = {
-        "data": data,
-        "layout": go.Layout(
-            colorway=["#31302F", "#2AA3FB", "#014678"],
-            paper_bgcolor="rgba(0, 0, 0, 0)",
-            plot_bgcolor="rgba(0, 0, 0, 0)",
-            margin={"b": 20, "t": 0.5, "l": 50},
-            hovermode="x",
-            autosize=True,
-            title={
-                "text": "Prediction versus Realized Volatility",
-                "font": {"color": "black", "size": 10},
-                "x": 0,
-                "pad": {"t": 100, "l": 1},
-                "xanchor": "left",
-                "yanchor": "top",
-            },
-            xaxis={"range": [df.DATE.min(), df.DATE.max()]},
-            height=200,
-        ),
-    }
-
-    return figure
+# @app.callback(Output("updatechange", "figure"), [Input("checklist", "value")])
+# def update_change(selection_checklist):
+#     trace1 = []
+#     for stock in selection_checklist:
+#         trace1.append(
+#             go.Scatter(
+#                 x=df.DATE,
+#                 y=df[stock],
+#                 mode="lines",
+#                 opacity=0.7,
+#                 name=stock,
+#                 # textposition="bottom center",
+#                 line={"width": 2},
+#             )
+#         )
+#     traces = [trace1]
+#     data = [val for sublist in traces for val in sublist]
+#     figure = {
+#         "data": data,
+#         "layout": go.Layout(
+#             colorway=["#31302F", "#2AA3FB", "#014678"],
+#             paper_bgcolor="rgba(0, 0, 0, 0)",
+#             plot_bgcolor="rgba(0, 0, 0, 0)",
+#             margin={"b": 20, "t": 0.5, "l": 50},
+#             hovermode="x",
+#             autosize=True,
+#             title={
+#                 "text": "Prediction versus Realized Volatility",
+#                 "font": {"color": "black", "size": 10},
+#                 "x": 0,
+#                 "pad": {"t": 100, "l": 1},
+#                 "xanchor": "left",
+#                 "yanchor": "top",
+#             },
+#             xaxis={"range": [df.DATE.min(), df.DATE.max()]},
+#             height=200,
+#         ),
+#     }
+#
+#     return figure
 
 
 if __name__ == "__main__":
