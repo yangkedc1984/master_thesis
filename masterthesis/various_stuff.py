@@ -154,3 +154,35 @@ df_fit.head()
 # colorscheme: darkgreen mediumseagreen green
 
 # solution finder ::
+
+import plotly.graph_objects as go
+
+df = pd.read_csv(
+    "https://raw.githubusercontent.com/plotly/datasets/master/violin_data.csv"
+)
+
+fig = go.Figure()
+df.columns
+df.day.unique()
+
+days = ["Thur", "Fri", "Sat", "Sun"]
+
+day = "Thur"
+
+df["day"][df["day"] == day]
+
+df["total_bill"][df["day"] == day]
+
+
+for day in days:
+    fig.add_trace(
+        go.Violin(
+            x=df["day"][df["day"] == day],
+            y=df["total_bill"][df["day"] == day],
+            name=day,
+            box_visible=True,
+            meanline_visible=True,
+        )
+    )
+
+fig.show()

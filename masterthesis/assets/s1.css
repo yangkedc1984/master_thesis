@@ -78,7 +78,7 @@
     width: 22%;
   }
   .four.columns {
-    width: 30.6666666667%;
+    width: 21.6666666667%;
   }
   .five.columns {
     width: 39.3333333333%;
@@ -441,7 +441,7 @@ th,
 td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #e1e1e1;
+  border-bottom: 10px solid #e1e1e1;
 }
 th:first-child,
 td:first-child {
@@ -541,7 +541,7 @@ there.
     width: 22%;
   }
   .four.columns {
-    width: calc(100% / 3);
+    width: calc(100% / 3.15);
   }
   .five.columns {
     width: calc(100% * 5 / 12);
@@ -560,7 +560,7 @@ there.
     display: block !important;
   }
   .pretty_container {
-    margin: 0 !important;
+    margin: 5 !important;
     margin-bottom: 25px !important;
   }
   #individual_graph,
