@@ -142,7 +142,7 @@ print(results_robust.summary().as_latex())
 
 
 df_v = pd.read_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_1_hist40_True.csv",
+    folder_structure.path_input + "/" + "GeneticAlgorithm_1_hist40_False.csv",
     index_col=0,
 )
 
@@ -186,3 +186,78 @@ for day in days:
     )
 
 fig.show()
+
+
+# Primer in Bayesian Optimization
+
+df_input = load_data()
+
+lstm_instance = TimeSeriesDataPreparationLSTM(
+    df=df_input,
+    future=1,
+    lag=20,
+    standard_scaler=False,
+    min_max_scaler=True,
+    log_transform=True,
+    semi_variance=False,
+    jump_detect=True,
+    period_train=list(
+        [
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20091231", format="%Y%m%d"),
+        ]
+    ),
+    period_test=list(
+        [
+            pd.to_datetime("20100101", format="%Y%m%d"),
+            pd.to_datetime("20101231", format="%Y%m%d"),
+        ]
+    ),
+)
+lstm_instance.prepare_complete_data_set()
+
+
+def fit_with_for_bayesian(lr_for_optimization):
+    model = TrainLSTM(
+        training_set=lstm_instance.training_set,
+        testing_set=lstm_instance.testing_set,
+        epochs=5,
+        learning_rate=lr_for_optimization,
+        layer_one=40,
+        layer_two=20,
+        layer_three=20,
+        layer_four=2,
+        adam_optimizer=True,
+    )
+    model.make_accuracy_measures()
+
+    return model.fitness
+
+
+fit_with_for_bayesian(lr_for_optimization=0.01)
+
+from functools import partial
+from bayes_opt import BayesianOptimization
+
+verbose = 1
+fit_with_partial = partial(fit_with_for_bayesian)
+
+
+# Bounded region of parameter space
+pbounds = {"lr_for_optimization": (1e-4, 1e-2)}
+pbounds
+
+
+optimizer = BayesianOptimization(
+    f=fit_with_partial, pbounds=pbounds, verbose=2, random_state=1,
+)
+
+optimizer.maximize(
+    init_points=2, n_iter=10,
+)
+optimizer.max
+
+for i, res in enumerate(optimizer.res):
+    print("Iteration {}: \n\t{}".format(i, res))
+
+print(optimizer.max)

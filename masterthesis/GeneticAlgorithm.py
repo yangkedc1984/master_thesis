@@ -185,7 +185,7 @@ class GeneticAlgorithm:
                         training_set=self.training_set_ga,
                         testing_set=self.testing_set_ga,
                         activation=tf.nn.elu,
-                        epochs=7,
+                        epochs=50,
                         learning_rate=self.initial_population.LR[i],
                         layer_one=self.initial_population["Layer1"][i],
                         layer_two=self.initial_population["Layer2"][i],
@@ -294,7 +294,7 @@ class GeneticAlgorithm:
             train_m = TrainLSTM(
                 training_set=self.training_set_ga,
                 testing_set=self.testing_set_ga,
-                epochs=10,
+                epochs=50,
                 learning_rate=individuals_help.LR[i],
                 layer_one=individuals_help.Layer1[i],
                 layer_two=individuals_help.Layer2[i],

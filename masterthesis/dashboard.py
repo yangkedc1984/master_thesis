@@ -256,14 +256,21 @@ def update_graph(selected_dropdown_value, checklist_value, data_selection):
 
     trace1 = []
     for stock in selected_dropdown_value:
+        if stock == "future":
+            mark = "lines + markers"
+            wid = 2
+        else:
+            mark = "lines"
+            wid = 1
+
         trace1.append(
             go.Scatter(
                 x=df.DATE,
                 y=df[stock],
-                mode="lines",
+                mode=mark,
                 opacity=0.7,
                 name=stock,
-                line={"width": 2},
+                line={"width": wid},
             )
         )
 

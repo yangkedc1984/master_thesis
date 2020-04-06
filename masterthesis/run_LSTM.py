@@ -1,59 +1,61 @@
+print("run LSTM with RV 1 40 is it do???ne? ")
+
 from run_HAR_model import load_data
 from config import folder_structure
 from LSTM import *
 
 df_input = load_data()
 
-print("CHECK CHECK CHECK")
 
-for i in [False]:
+lstm_instance = TimeSeriesDataPreparationLSTM(
+    df=df_input,
+    future=1,
+    lag=20,
+    standard_scaler=False,
+    min_max_scaler=True,
+    log_transform=True,
+    semi_variance=False,
+    jump_detect=True,
+    period_train=list(
+        [
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20091231", format="%Y%m%d"),
+        ]
+    ),
+    period_test=list(
+        [
+            pd.to_datetime("20100101", format="%Y%m%d"),
+            pd.to_datetime("20101231", format="%Y%m%d"),
+        ]
+    ),
+)
+lstm_instance.prepare_complete_data_set()
 
-    lstm_instance = TimeSeriesDataPreparationLSTM(
-        df=df_input,
-        future=1,
-        lag=40,
-        standard_scaler=False,
-        min_max_scaler=True,
-        log_transform=True,
-        semi_variance=i,
-        jump_detect=True,
-        period_train=list(
-            [
-                pd.to_datetime("20030910", format="%Y%m%d"),
-                pd.to_datetime("20091231", format="%Y%m%d"),
-            ]
-        ),
-        period_test=list(
-            [
-                pd.to_datetime("20100101", format="%Y%m%d"),
-                pd.to_datetime("20101231", format="%Y%m%d"),
-            ]
-        ),
-    )
-    lstm_instance.prepare_complete_data_set()
-
-    tf.keras.backend.clear_session()
-    x = TrainLSTM(
-        lstm_instance.training_set,
-        lstm_instance.testing_set,
-        epochs=50,
-        learning_rate=0.01,
-        layer_one=40,
-        layer_two=10,
-        layer_three=2,
-        layer_four=2,
-        adam_optimizer=True,
-    )
-    x.make_accuracy_measures()
-
-    x.fitted_model.save(
-        folder_structure.output_LSTM + "/" + "LSTM_{}_1_hist40.h5".format(i)
-    )
+# tf.keras.backend.clear_session()
+# x = TrainLSTM(
+#     lstm_instance.training_set,
+#     lstm_instance.testing_set,
+#     epochs=50,
+#     learning_rate=0.01,
+#     layer_one=40,
+#     layer_two=10,
+#     layer_three=2,
+#     layer_four=2,
+#     adam_optimizer=True,
+# )
+# x.make_accuracy_measures()
+#
+# x.fitted_model.save(
+#     folder_structure.output_LSTM + "/" + "LSTM_{}_1_hist40.h5".format(i)
+# )
 
 
 # RV_1_hist20
 # {'RSquared': 0.7986528505525539, 'MSE': 0.004583299293052354, 'MAE': 0.0517652077364555} train  0.01 40, 40
 # {'RSquared': 0.5949158052675401, 'MSE': 0.005522943327256374, 'MAE': 0.057722057633606105} test
+
+
+# SV_1_hist20
 
 
 # SV_1_hist40 :: already exported  0.01, 40, 40, 0, 0
@@ -98,77 +100,84 @@ for i in [False]:
 # x.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_RV_20.h5")
 
 
-# # best model finder:
-# tf.keras.backend.clear_session()
-# best_model = TrainLSTM(
-#     lstm_instance.training_set,
-#     lstm_instance.testing_set,
-#     epochs=50,
-#     learning_rate=0.01,
-#     layer_one=40,
-#     layer_two=2,
-#     layer_three=2,
-#     layer_four=20,
-#     adam_optimizer=True,
+# best model finder:
+tf.keras.backend.clear_session()
+best_model = TrainLSTM(
+    lstm_instance.training_set,
+    lstm_instance.testing_set,
+    epochs=80,
+    learning_rate=0.01,
+    layer_one=40,
+    layer_two=20,
+    layer_three=20,
+    layer_four=2,
+    adam_optimizer=True,
+)
+best_model.make_accuracy_measures()
+
+model_dict = {"model_first": best_model}
+fitness_list = [best_model.fitness]
+
+for i in range(20):
+    print("Model {}".format(i))
+    print("---------------------------------------------")
+    tf.keras.backend.clear_session()
+    x = TrainLSTM(
+        lstm_instance.training_set,
+        lstm_instance.testing_set,
+        epochs=50,
+        learning_rate=0.01,
+        layer_one=20,
+        layer_two=2,
+        layer_three=10,
+        layer_four=0,
+        adam_optimizer=True,
+    )
+    x.make_accuracy_measures()
+
+    model_dict["model_{}".format(i)] = x
+
+    if x.fitness > best_model.fitness:
+        del best_model
+        best_model = x
+        fitness_list.append(best_model.fitness)
+    else:
+        best_model = best_model
+        fitness_list.append(best_model.fitness)
+
+    # if best_model.fitness > 35:
+    #     best_model.fitted_model.save(
+    #         folder_structure.output_LSTM + "/" + "LSTM_RV20_1_best_run_test.h5"
+    #     )
+    #     break
+
+
+# 2 40 2 2
+# 40 40 0 0
+
+
+#
+# model_dict["model_1"].fitted_model.save(
+#     folder_structure.output_LSTM + "/" + "LSTM_RV_1_TRYTOEXPORT.h5"
 # )
-# best_model.make_accuracy_measures()
-#
-# model_dict = {"model_first": best_model}
-# fitness_list = [best_model.fitness]
-#
-# for i in range(5):
-#     print("Model {}".format(i))
-#     print("---------------------------------------------")
-#     tf.keras.backend.clear_session()
-#     x = TrainLSTM(
-#         lstm_instance.training_set,
-#         lstm_instance.testing_set,
-#         epochs=50,
-#         learning_rate=0.01,
-#         layer_one=40,
-#         layer_two=2,
-#         layer_three=2,
-#         layer_four=20,
-#         adam_optimizer=True,
-#     )
-#     x.make_accuracy_measures()
-#
-#     model_dict["model_{}".format(i)] = x
-#
-#     if x.fitness > best_model.fitness:
-#         del best_model
-#         best_model = x
-#         fitness_list.append(best_model.fitness)
-#     else:
-#         best_model = best_model
-#         fitness_list.append(best_model.fitness)
-#
-#
-# # 2 40 2 2
-# # 40 40 0 0
-#
-# #
-# # model_test = tf.keras.models.load_model(
-# #     folder_structure.output_LSTM + "/" + "LSTM_SV_1.h5"
-# # )
-# #
-# # model_dict["model_1"].fitted_model.save(
-# #     folder_structure.output_LSTM + "/" + "LSTM_RV_1_TRYTOEXPORT.h5"
-# # )
-#
-#
-# print(model_dict["model_first"].fitness)
-# print(model_dict["model_first"].train_accuracy)
-# print(model_dict["model_first"].test_accuracy)
-#
-# for i in range(5):
-#     print("model_{}".format(i))
-#     print(model_dict["model_{}".format(i)].fitness)
-#     print(model_dict["model_{}".format(i)].train_accuracy)
-#     print(model_dict["model_{}".format(i)].test_accuracy)
-#     print("---------------------------------------------")
-#
-#
-# best_model.fitted_model.save(
-#     folder_structure.output_LSTM + "/" + "LSTM_RV40_1_best_run_test.h5"
-# )
+
+
+print(model_dict["model_first"].fitness)
+print(model_dict["model_first"].train_accuracy)
+print(model_dict["model_first"].test_accuracy)
+
+for i in range(20):
+    print("model_{}".format(i))
+    print(model_dict["model_{}".format(i)].fitness)
+    print(model_dict["model_{}".format(i)].train_accuracy)
+    print(model_dict["model_{}".format(i)].test_accuracy)
+    print("---------------------------------------------")
+
+
+print(best_model.fitness)
+print(best_model.test_accuracy)
+print(best_model.train_accuracy)
+
+best_model.make_performance_plot(show_testing_sample=True)
+
+# best_model.fitted_model.save(folder_structure.output_LSTM + "/" + "LSTM_False_1_40.h5")

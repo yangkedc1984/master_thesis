@@ -1,3 +1,7 @@
+print("__________________________________________________")
+print("Future = 1 // Lag = 40 // Model = RV // Fitness Function")
+print("__________________________________________________")
+
 from GeneticAlgorithm import *
 from config import *
 from run_HAR_model import load_data
@@ -5,9 +9,6 @@ from run_HAR_model import load_data
 # load data
 df = load_data()
 
-print("__________________________________________________")
-print("Future = 1 // Lag = 40 // Model = Sermi-Variance _ ADAPTED")
-print("__________________________________________________")
 
 _lstm_instance = TimeSeriesDataPreparationLSTM(
     df=df,
@@ -16,7 +17,7 @@ _lstm_instance = TimeSeriesDataPreparationLSTM(
     standard_scaler=False,
     min_max_scaler=True,
     log_transform=True,
-    semi_variance=True,
+    semi_variance=False,
     jump_detect=True,
     period_train=list(
         [
@@ -55,7 +56,9 @@ _ga_1.run_complete_genetic_algorithm(number_of_generations=0)
 result = _ga_1.initial_population
 
 result.to_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_{}_hist40_True.csv".format(1)
+    folder_structure.path_input
+    + "/"
+    + "GeneticAlgorithm_{}_hist40_True_new_model.csv".format(1)
 )
 
 

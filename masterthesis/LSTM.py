@@ -217,12 +217,12 @@ class TrainLSTM:
         training_set,
         testing_set,
         activation=tf.nn.elu,
-        epochs=20,
-        learning_rate=0.001,
-        layer_one=20,
-        layer_two=15,
-        layer_three=8,
-        layer_four=4,
+        epochs=50,
+        learning_rate=0.01,
+        layer_one=40,
+        layer_two=40,
+        layer_three=0,
+        layer_four=0,
         adam_optimizer: bool = True,
     ):
         self.training_set = training_set
@@ -339,12 +339,10 @@ class TrainLSTM:
                 lr=self.learning_rate, momentum=0.9, nesterov=True
             )
 
-        m.compile(
-            optimizer=o, loss=tf.keras.losses.logcosh
-        )  # choose: R-MSE, MAE, logCosh
+        m.compile(optimizer=o, loss=tf.keras.losses.logcosh)
 
-        es = tf.keras.callbacks.EarlyStopping(  # added
-            monitor="val_loss", mode="min", patience=5, verbose=1,
+        es = tf.keras.callbacks.EarlyStopping(
+            monitor="val_loss", mode="min", patience=4, verbose=1,
         )
 
         m.fit(
@@ -394,10 +392,10 @@ class TrainLSTM:
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
-        self.fitness = (self.test_accuracy["RSquared"]) + (
-            self.train_accuracy["RSquared"]
+        self.fitness = 1 / (self.test_accuracy["MAE"]) + (
+            1 / self.train_accuracy["MAE"]
         )
-        # just R-Squared as Fitness function as an alternative option?
+        # just R-Squared as Fitness function as an alternative option? or just 1/MAE
 
     def make_performance_plot(self, show_testing_sample=False):
         if show_testing_sample:
