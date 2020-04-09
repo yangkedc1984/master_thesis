@@ -1,7 +1,11 @@
+print("CHECK 50")
+
 from run_HAR_model import load_data
 from LSTM import *
 from functools import partial
 from bayes_opt import BayesianOptimization
+from config import *
+
 
 df_input = load_data()
 
@@ -63,12 +67,28 @@ optimizer = BayesianOptimization(
     f=fit_with_partial, pbounds=pbounds, verbose=2, random_state=1,
 )
 
+init_points = 20
+n_iter = 50
 optimizer.maximize(
-    init_points=5, n_iter=5,
+    init_points=init_points, n_iter=n_iter,
 )
 
-for i, res in enumerate(optimizer.res):
-    print("Iteration {}: \n\t{}".format(i, res))
+target_list = list([])
+for i in range(init_points + n_iter):
+    target_list.append(optimizer.res[i]["target"])
 
-print("-------------------------------------------")
-print(optimizer.max)
+
+results_iterative = pd.Series(target_list, name="value")
+results_iterative.to_csv(
+    folder_structure.output_Bayesian
+    + "/"
+    + "bayesian_results_iterative_{}_{}_{}.csv".format("RV", 1, 20)
+)
+
+
+results_max = pd.DataFrame(optimizer.max)
+results_max.to_csv(
+    folder_structure.output_Bayesian
+    + "/"
+    + "bayesian_results{}_{}_{}.csv".format("RV", 1, 20)
+)

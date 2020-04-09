@@ -142,16 +142,28 @@ print(results_robust.summary().as_latex())
 
 
 df_v = pd.read_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_1_hist40_False.csv",
+    folder_structure.path_input + "/" + "GeneticAlgorithm_5_hist40_True.csv",
     index_col=0,
 )
 
-# the fittest individuals
-df_fit = df_v.iloc[df_v.Fitness.nlargest(50).index]
+df_fit_1 = df_v.iloc[df_v.Fitness.nlargest(50).index]
+
+df_fit = df_v.iloc[df_v.Fitness.nlargest(10).index]
+df_fit.Layer1.mode()
+df_fit.Layer2.mode()
+df_fit.Layer3.mode()
+df_fit.Layer4.mode()
+
+
 df_fit.head()
+
+model_test = tf.keras.models.load_model(
+    folder_structure.output_LSTM + "/" + "LSTM_{}_{}_{}.h5".format(False, 1, 20)
+)
 
 
 # colorscheme: darkgreen mediumseagreen green
+
 
 # solution finder ::
 
@@ -174,90 +186,128 @@ df["day"][df["day"] == day]
 df["total_bill"][df["day"] == day]
 
 
-for day in days:
-    fig.add_trace(
-        go.Violin(
-            x=df["day"][df["day"] == day],
-            y=df["total_bill"][df["day"] == day],
-            name=day,
-            box_visible=True,
-            meanline_visible=True,
-        )
+def load_dashboard_data():
+    df_m = pd.read_csv(
+        folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
     )
+    df_m.DATE = df_m.DATE.values
+    df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
 
-fig.show()
+    df = pd.read_csv(
+        folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0
+    )
+    df.DATE = df.DATE.values
+    df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
+
+    return df_m, df
 
 
-# Primer in Bayesian Optimization
+df_m, df = load_dashboard_data()
 
-df_input = load_data()
+data_input = pd.concat(
+    [df_m[["DATE", "RV", "RSV_minus", "RSV_plus"]], df], sort=True,
+).reset_index(drop=True)
 
-lstm_instance = TimeSeriesDataPreparationLSTM(
-    df=df_input,
-    future=1,
-    lag=20,
-    standard_scaler=False,
-    min_max_scaler=True,
-    log_transform=True,
-    semi_variance=False,
+
+har_instance = HARModelLogTransformed(
+    df=data_input,
+    future=5,
+    lags=[4, 20],
+    feature="RV",
+    semi_variance=True,
     jump_detect=True,
+    log_transformation=False,
     period_train=list(
         [
             pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20091231", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
         ]
     ),
     period_test=list(
         [
-            pd.to_datetime("20100101", format="%Y%m%d"),
-            pd.to_datetime("20101231", format="%Y%m%d"),
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
+        ]
+    ),
+)
+har_instance.make_testing_training_set()
+
+
+lstm_instance = TimeSeriesDataPreparationLSTM(
+    df=df_m,
+    future=5,
+    lag=20,
+    standard_scaler=False,
+    min_max_scaler=True,
+    log_transform=True,
+    semi_variance=True,
+    jump_detect=True,
+    period_train=list(
+        [
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
+        ]
+    ),
+    period_test=list(
+        [
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
         ]
     ),
 )
 lstm_instance.prepare_complete_data_set()
 
-
-def fit_with_for_bayesian(lr_for_optimization):
-    model = TrainLSTM(
-        training_set=lstm_instance.training_set,
-        testing_set=lstm_instance.testing_set,
-        epochs=5,
-        learning_rate=lr_for_optimization,
-        layer_one=40,
-        layer_two=20,
-        layer_three=20,
-        layer_four=2,
-        adam_optimizer=True,
-    )
-    model.make_accuracy_measures()
-
-    return model.fitness
-
-
-fit_with_for_bayesian(lr_for_optimization=0.01)
-
-from functools import partial
-from bayes_opt import BayesianOptimization
-
-verbose = 1
-fit_with_partial = partial(fit_with_for_bayesian)
-
-
-# Bounded region of parameter space
-pbounds = {"lr_for_optimization": (1e-4, 1e-2)}
-pbounds
-
-
-optimizer = BayesianOptimization(
-    f=fit_with_partial, pbounds=pbounds, verbose=2, random_state=1,
+lstm_instance_2 = TimeSeriesDataPreparationLSTM(
+    df=df,
+    future=5,
+    lag=20,
+    standard_scaler=False,
+    min_max_scaler=True,
+    log_transform=True,
+    semi_variance=True,
+    jump_detect=True,
+    period_train=list(
+        [
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
+        ]
+    ),
+    period_test=list(
+        [
+            pd.to_datetime("20030910", format="%Y%m%d"),
+            pd.to_datetime("20111231", format="%Y%m%d"),
+        ]
+    ),
 )
+lstm_instance_2.prepare_complete_data_set()
 
-optimizer.maximize(
-    init_points=2, n_iter=10,
+
+lstm_instance.training_set["future"] = lstm_instance.back_transformation(
+    np.array(lstm_instance.training_set.future).reshape(1, -1)
+).reshape(lstm_instance.training_set["future"].shape[0],)
+lstm_instance_2.training_set["future"] = lstm_instance_2.back_transformation(
+    np.array(lstm_instance_2.training_set.future).reshape(1, -1)
+).reshape(lstm_instance_2.training_set["future"].shape[0],)
+lstm_instance.training_set["lag_1"] = lstm_instance.back_transformation(
+    np.array(lstm_instance.training_set.lag_1).reshape(1, -1)
+).reshape(lstm_instance.training_set["lag_1"].shape[0],)
+lstm_instance_2.training_set["lag_1"] = lstm_instance_2.back_transformation(
+    np.array(lstm_instance_2.training_set.lag_1).reshape(1, -1)
+).reshape(lstm_instance_2.training_set["lag_1"].shape[0],)
+
+
+df_lstm_complete = pd.concat(
+    [lstm_instance.training_set, lstm_instance_2.training_set]
+).reset_index(drop=True)
+
+
+plt.close()
+plt.plot(
+    har_instance.training_set.DATE,
+    har_instance.training_set.future,
+    label="HAR Future",
+    lw=0.5,
 )
-optimizer.max
-
-for i, res in enumerate(optimizer.res):
-    print("Iteration {}: \n\t{}".format(i, res))
-
-print(optimizer.max)
+plt.plot(df_lstm_complete.DATE, df_lstm_complete.future, "-.", label="LSTM", lw=0.5)
+plt.plot(df_lstm_complete.DATE, df_lstm_complete.lag_1, "-.", label="LSTM", lw=0.5)
+plt.legend()

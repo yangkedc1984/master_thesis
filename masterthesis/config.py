@@ -30,10 +30,13 @@ main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"
 "machine"
 data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"
 
+data_output_dashboard = "/Users/nickzumbuhl/Desktop/dashboard_deployment"
+
 
 class PathArchitecture:
-    def __init__(self, path_main, path_input):
+    def __init__(self, path_main, path_input, path_dashboard_deployment):
         self.path_main = path_main
+        self.path_dashboard_deployment = path_dashboard_deployment
         self.output_folder_name = "output"
         self.path_input = path_input
         self.HARModel = "HARModel"
@@ -44,6 +47,7 @@ class PathArchitecture:
         self.output_Tables = None
         self.output_Graphs = None
         self.output_AR = None
+        self.output_Bayesian = None
 
     def make_folder(self):
         if os.path.exists(self.path_main + "/" + self.output_folder_name) is not True:
@@ -66,16 +70,26 @@ class PathArchitecture:
         if os.path.exists(self.output_path + "/" + "Graphs") is not True:
             os.mkdir(self.output_path + "/" + "Graphs")
 
+        if os.path.exists(self.path_dashboard_deployment) is not True:
+            os.mkdir(self.path_dashboard_deployment)
+
+        if (
+            os.path.exists(self.output_path + "/" + "BayesianOptimizationOutput")
+            is not True
+        ):
+            os.mkdir(self.output_path + "/" + "BayesianOptimizationOutput")
+
         self.output_HAR = self.output_path + "/" + "HARModel"
         self.output_LSTM = self.output_path + "/" + "NeuralNet"
         self.output_Tables = self.output_path + "/" + "Tables"
         self.output_Graphs = self.output_path + "/" + "Graphs"
         self.output_AR = self.output_path + "/" + "AutoRegression"
+        self.output_Bayesian = self.output_path + "/" + "BayesianOptimizationOutput"
 
     def config_folder_structure(self):
         self.make_folder()
         self.make_sub_folder()
 
 
-folder_structure = PathArchitecture(main_path, data_input_path)
+folder_structure = PathArchitecture(main_path, data_input_path, data_output_dashboard)
 folder_structure.config_folder_structure()

@@ -342,7 +342,7 @@ class TrainLSTM:
         m.compile(optimizer=o, loss=tf.keras.losses.logcosh)
 
         es = tf.keras.callbacks.EarlyStopping(
-            monitor="val_loss", mode="min", patience=4, verbose=1,
+            monitor="val_loss", mode="min", patience=7, verbose=1,
         )
 
         m.fit(
@@ -392,10 +392,10 @@ class TrainLSTM:
 
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
-        self.fitness = 1 / (self.test_accuracy["MAE"]) + (
-            1 / self.train_accuracy["MAE"]
-        )
-        # just R-Squared as Fitness function as an alternative option? or just 1/MAE
+        self.fitness = self.train_accuracy["RSquared"] + self.test_accuracy["RSquared"]
+        # 1 / (self.test_accuracy["MAE"]) + (
+        #         1 / self.train_accuracy["MAE"]
+        # )
 
     def make_performance_plot(self, show_testing_sample=False):
         if show_testing_sample:

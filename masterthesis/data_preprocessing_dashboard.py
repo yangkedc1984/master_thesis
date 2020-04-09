@@ -1,6 +1,5 @@
+print("updated 3")
 # Preprocessing Data for the dashboard
-# goal is to get a data frame with all the predictions and the data
-
 from run_AutoRegression_Model import *
 from run_HAR_model import results_har
 from config import folder_structure
@@ -411,20 +410,29 @@ class DashboardDataPrep:
         ] = "validation"
 
 
-df_m = pd.read_csv(
-    folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
-)
-df_m.DATE = df_m.DATE.values
-df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
+def load_dashboard_data():
+    df_m = pd.read_csv(
+        folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
+    )
+    df_m.DATE = df_m.DATE.values
+    df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
 
-df = pd.read_csv(folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0)
-df.DATE = df.DATE.values
-df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
+    df = pd.read_csv(
+        folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0
+    )
+    df.DATE = df.DATE.values
+    df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
+
+    return df_m, df
 
 
-x = DashboardDataPrep(df_tt=df_m, df_validation=df)
-x.merge_all()
+def run_data_preprocessing_dashboard():
+    df_m, df = load_dashboard_data()
+    x = DashboardDataPrep(df_tt=df_m, df_validation=df)
+    x.merge_all()
+    x.df_final.to_csv(
+        folder_structure.path_dashboard_deployment + "/" + "DashboardData.csv"
+    )
 
-x.df_final
 
-x.df_final.to_csv(folder_structure.path_input + "/" + "DashboardData.csv")
+run_data_preprocessing_dashboard()
