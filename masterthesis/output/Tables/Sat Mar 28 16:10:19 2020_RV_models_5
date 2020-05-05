@@ -1,0 +1,14 @@
+\begin{tabular}{llrrr}
+\toprule
+{} &                           Model &       MAE &           MSE &  RSquared \\
+\midrule
+0  &    HAR\_RV\_train\_test\_False\_test &  0.000028 &  2.163203e-09 &  0.369052 \\
+1  &   HAR\_RV\_train\_test\_False\_train &  0.000037 &  1.121981e-08 &  0.735992 \\
+2  &    HAR\_RV\_validation\_False\_test &  0.000052 &  1.287934e-08 &  0.306951 \\
+3  &   HAR\_RV\_validation\_False\_train &  0.000052 &  1.287934e-08 &  0.306951 \\
+8  &   LSTM\_RV\_train\_test\_False\_test &  0.000027 &  2.194325e-09 &  0.359975 \\
+9  &  LSTM\_RV\_train\_test\_False\_train &  0.000033 &  9.965891e-09 &  0.768177 \\
+10 &   LSTM\_RV\_validation\_False\_test &  0.000062 &  1.645274e-08 &  0.163391 \\
+11 &  LSTM\_RV\_validation\_False\_train &  0.000062 &  1.645274e-08 &  0.163391 \\
+\bottomrule
+\end{tabular}
