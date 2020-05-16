@@ -7,14 +7,11 @@ This document outlines the following points:
 2. Pipeline Overview
 3. Python-Files in the Repo
    - feature_engineering.py
-   - AutoRegression_Model.py
-   - run_AutoRegression_Model.py
-   - HAR_Model.py
-   - run_HAR_model.py
-   - LSTM.py
-   - run_LSTM.py
-   - GeneticAlgorithm.py
-   - run_GeneticAlgorithm.py
+   - AutoRegression_Model.py & run_AutoRegression_Model.py
+   - HAR_Model.py & run_HAR_model.py
+   - LSTM.py, run_LSTM.py
+     - GeneticAlgorithm.py
+     - run_GeneticAlgorithm.py
    - dashboard_data_prep.py
    
 
