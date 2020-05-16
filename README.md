@@ -2,7 +2,10 @@
 
 The following document aims to provide an overview of the whole code base used throughout the thesis. Generally speaking, this repository contains code for all the data loading, preprocessing, estimation, training, and prediction. In contrast, for the predicton results and the visualizations, an individual repository was set up containing a dashboard with all the relevant information. The dashboard repository can be found here: https://github.com/nickzumbuehl/dashboard_deployment and runs under the url: http://nick-vola.herokuapp.com.
 
-
+This document follows a clear outline:
+1. asd list item 
+   - aasd list item
+     - asd list item
 
 ## Setting up Environment
 
