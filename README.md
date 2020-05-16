@@ -6,7 +6,7 @@ This document outlines the following points:
 1. Setting up the Environment
 2. Pipeline Overview
 3. Python-Files in the Repo
-   - feature-engineering.py
+   - feature_engineering.py
    - AutoRegression_Model.py
    - run_AutoRegression_Model.py
    - HAR_Model.py
