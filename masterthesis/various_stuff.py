@@ -1,9 +1,5 @@
 # Playground
-from LSTM import *
 from run_HAR_model import *
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LinearRegression
-from statsmodels.stats import sandwich_covariance
 import statsmodels.stats.api as sms
 from statsmodels.compat import lzip
 from sklearn import metrics
@@ -17,7 +13,7 @@ har_model_heteroskedasticity = HARModel(
     feature="RV",
     semi_variance=True,
     jump_detect=True,
-    log_transformation=True,
+    log_transformation=False,
     period_train=list(
         [
             pd.to_datetime("20030910", format="%Y%m%d"),
@@ -32,7 +28,79 @@ har_model_heteroskedasticity = HARModel(
     ),
 )
 har_model_heteroskedasticity.predict_values()
-print(har_model_heteroskedasticity.estimation_results)
+
+marker_sty = ["p", "s", "8"]
+colors = ["darkgreen", "mediumseagreen", "forestgreen"]
+periods = [1, 5, 20]
+plt.close()
+for i in range(3):
+    har_model_heteroskedasticity = HARModel(
+        df=df_input,
+        future=periods[i],
+        lags=[4, 20],
+        feature="RV",
+        semi_variance=True,
+        jump_detect=True,
+        log_transformation=False,
+        period_train=list(
+            [
+                pd.to_datetime("20030910", format="%Y%m%d"),
+                pd.to_datetime("20091231", format="%Y%m%d"),  # 20091231
+            ]
+        ),
+        period_test=list(
+            [
+                pd.to_datetime("20100101", format="%Y%m%d"),
+                pd.to_datetime("20101231", format="%Y%m%d"),
+            ]
+        ),
+    )
+    har_model_heteroskedasticity.predict_values()
+    plt.plot(
+        np.log(har_model_heteroskedasticity.training_set.RV_t),
+        har_model_heteroskedasticity.prediction_train
+        - har_model_heteroskedasticity.training_set.future,
+        marker_sty[i],
+        # fillstyles="none",
+        color=colors[i],
+        alpha=0.3,
+        label="HAR {}".format(periods[i]),
+    )
+plt.legend(loc="upper left")
+plt.savefig("heteroskedasticity")
+
+
+plt.plot(
+    np.log(har_model_heteroskedasticity.prediction_train),
+    har_model_heteroskedasticity.prediction_train
+    - har_model_heteroskedasticity.training_set.future,
+    marker_sty[i],
+    # fillstyles="none",
+    color=colors[i],
+    alpha=0.3,
+    label="HAR {}".format(periods[i]),
+)
+
+plt.close()
+plt.acorr(
+    har_model_heteroskedasticity.training_set.RV_t,
+    maxlags=50,
+    lw=2,
+    color="mediumseagreen",
+)
+
+
+plt.close()
+plt.plot(
+    np.log(har_model_heteroskedasticity.prediction_train),
+    har_model_heteroskedasticity.prediction_train
+    - har_model_heteroskedasticity.training_set.future,
+    ",",
+    # fillstyles="none",
+    color="mediumseagreen",
+    alpha=0.3,
+    label="HAR {}".format(periods[i]),
+)
 
 
 def print_results_log_har(
@@ -131,6 +199,37 @@ lzip(
     name, test
 )  # p-value is very small, thus heteroskedasticity is present :: Null Hypothesis --> Homoskedasticity is present
 
+
+for i in [1, 5, 20]:
+    har_model_heteroskedasticity = HARModel(
+        df=df_input,
+        future=i,
+        lags=[4, 20],
+        feature="RV",
+        semi_variance=True,
+        jump_detect=True,
+        log_transformation=False,
+        period_train=list(
+            [
+                pd.to_datetime("20030910", format="%Y%m%d"),
+                pd.to_datetime("20091231", format="%Y%m%d"),  # 20091231
+            ]
+        ),
+        period_test=list(
+            [
+                pd.to_datetime("20100101", format="%Y%m%d"),
+                pd.to_datetime("20101231", format="%Y%m%d"),
+            ]
+        ),
+    )
+    har_model_heteroskedasticity.predict_values()
+    name = ["Lagrange multiplier statistic", "p-value", "f-value", "f p-value"]
+    test = sms.het_breuschpagan(
+        har_model_heteroskedasticity.model.resid,
+        har_model_heteroskedasticity.model.model.exog,
+    )
+    print(lzip(name, test))
+
 # Heteroskedastic-robust Standard errors
 results_robust = har_model_heteroskedasticity.model.get_robustcov_results(
     cov_type="HAC", maxlags=20
@@ -142,172 +241,126 @@ print(results_robust.summary().as_latex())
 
 
 df_v = pd.read_csv(
-    folder_structure.path_input + "/" + "GeneticAlgorithm_5_hist40_True.csv",
+    folder_structure.path_input
+    + "/"
+    + "GeneticAlgorithm_20_hist40_True_new_modelafterGA2.csv",
     index_col=0,
 )
 
 df_fit_1 = df_v.iloc[df_v.Fitness.nlargest(50).index]
 
 df_fit = df_v.iloc[df_v.Fitness.nlargest(10).index]
-df_fit.Layer1.mode()
-df_fit.Layer2.mode()
-df_fit.Layer3.mode()
-df_fit.Layer4.mode()
 
 
-df_fit.head()
-
-model_test = tf.keras.models.load_model(
-    folder_structure.output_LSTM + "/" + "LSTM_{}_{}_{}.h5".format(False, 1, 20)
-)
+# Loss Fuctions: sigmoid, tanh(), ReLu, Elu
 
 
-# colorscheme: darkgreen mediumseagreen green
+vector_help = np.arange(-4, 4, 0.1)
 
 
-# solution finder ::
-
-import plotly.graph_objects as go
-
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/violin_data.csv"
-)
-
-fig = go.Figure()
-df.columns
-df.day.unique()
-
-days = ["Thur", "Fri", "Sat", "Sun"]
-
-day = "Thur"
-
-df["day"][df["day"] == day]
-
-df["total_bill"][df["day"] == day]
+def sigmoid(input):
+    return 1 / (1 + np.exp(-input))
 
 
-def load_dashboard_data():
-    df_m = pd.read_csv(
-        folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
-    )
-    df_m.DATE = df_m.DATE.values
-    df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
-
-    df = pd.read_csv(
-        folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0
-    )
-    df.DATE = df.DATE.values
-    df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
-
-    return df_m, df
+def tanh(input):
+    return (np.exp(input) - np.exp(-input)) / (np.exp(input) + np.exp(-input))
 
 
-df_m, df = load_dashboard_data()
-
-data_input = pd.concat(
-    [df_m[["DATE", "RV", "RSV_minus", "RSV_plus"]], df], sort=True,
-).reset_index(drop=True)
-
-
-har_instance = HARModelLogTransformed(
-    df=data_input,
-    future=5,
-    lags=[4, 20],
-    feature="RV",
-    semi_variance=True,
-    jump_detect=True,
-    log_transformation=False,
-    period_train=list(
-        [
-            pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-    period_test=list(
-        [
-            pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-)
-har_instance.make_testing_training_set()
+def LeakyReLu(input):
+    list_help = list([])
+    for i in range(len(input)):
+        list_help.append(max(0.05 * input[i], input[i]))
+    return list_help
 
 
-lstm_instance = TimeSeriesDataPreparationLSTM(
-    df=df_m,
-    future=5,
-    lag=20,
-    standard_scaler=False,
-    min_max_scaler=True,
-    log_transform=True,
-    semi_variance=True,
-    jump_detect=True,
-    period_train=list(
-        [
-            pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-    period_test=list(
-        [
-            pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-)
-lstm_instance.prepare_complete_data_set()
-
-lstm_instance_2 = TimeSeriesDataPreparationLSTM(
-    df=df,
-    future=5,
-    lag=20,
-    standard_scaler=False,
-    min_max_scaler=True,
-    log_transform=True,
-    semi_variance=True,
-    jump_detect=True,
-    period_train=list(
-        [
-            pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-    period_test=list(
-        [
-            pd.to_datetime("20030910", format="%Y%m%d"),
-            pd.to_datetime("20111231", format="%Y%m%d"),
-        ]
-    ),
-)
-lstm_instance_2.prepare_complete_data_set()
-
-
-lstm_instance.training_set["future"] = lstm_instance.back_transformation(
-    np.array(lstm_instance.training_set.future).reshape(1, -1)
-).reshape(lstm_instance.training_set["future"].shape[0],)
-lstm_instance_2.training_set["future"] = lstm_instance_2.back_transformation(
-    np.array(lstm_instance_2.training_set.future).reshape(1, -1)
-).reshape(lstm_instance_2.training_set["future"].shape[0],)
-lstm_instance.training_set["lag_1"] = lstm_instance.back_transformation(
-    np.array(lstm_instance.training_set.lag_1).reshape(1, -1)
-).reshape(lstm_instance.training_set["lag_1"].shape[0],)
-lstm_instance_2.training_set["lag_1"] = lstm_instance_2.back_transformation(
-    np.array(lstm_instance_2.training_set.lag_1).reshape(1, -1)
-).reshape(lstm_instance_2.training_set["lag_1"].shape[0],)
-
-
-df_lstm_complete = pd.concat(
-    [lstm_instance.training_set, lstm_instance_2.training_set]
-).reset_index(drop=True)
+def ELU(input):
+    list_help = list([])
+    for i in range(len(input)):
+        if input[i] < 0:
+            list_help.append(0.5 * (np.exp(input[i]) - 1))
+        else:
+            list_help.append(input[i])
+    return list_help
 
 
 plt.close()
 plt.plot(
-    har_instance.training_set.DATE,
-    har_instance.training_set.future,
-    label="HAR Future",
-    lw=0.5,
+    vector_help, sigmoid(vector_help), label="Sigmoid", color="darkgreen", alpha=0.7
 )
-plt.plot(df_lstm_complete.DATE, df_lstm_complete.future, "-.", label="LSTM", lw=0.5)
-plt.plot(df_lstm_complete.DATE, df_lstm_complete.lag_1, "-.", label="LSTM", lw=0.5)
+plt.plot(
+    vector_help[0:60],
+    LeakyReLu(vector_help)[0:60],
+    label="Leaky ReLU",
+    color="mediumseagreen",
+)
+plt.plot(
+    vector_help[0:60],
+    ELU(vector_help)[0:60],
+    "-.",
+    label="ELU",
+    color="darkgreen",
+    alpha=0.7,
+)
+plt.plot(
+    vector_help,
+    tanh(vector_help),
+    "-.",
+    label="Hyperbolic Tangent",
+    color="mediumseagreen",
+)
 plt.legend()
+plt.savefig("plot")
+
+
+# Linear Regression function with sklearn
+from sklearn.linear_model import LinearRegression
+
+X = np.array([[1, 1], [1, 2], [2, 2], [2, 3]])
+X = np.dot(X, np.array([1, 2])) + 2
+y = np.dot(X, np.array([1, 2])) + 3
+import pandas as pd
+
+y = pd.Series(y, name="k")
+np.array(y).reshape(-1, 1)
+
+reg = LinearRegression().fit(X, y)
+reg.intercept_
+reg.coef_
+
+
+def mincer_zarno_alpha_beta(y_real, y_pred):
+    y_pred = y_pred.reshape(-1, 1)
+    reg = LinearRegression().fit(y_pred, y_real)
+    beta = reg.coef_[0]
+    alpha = reg.intercept_
+    return alpha, beta
+
+
+alpha, beta = mincer_zarno_alpha_beta(y, X)
+alpha
+beta
+
+df_v = pd.read_csv(
+    folder_structure.path_dashboard_deployment + "/" + "DashboardData.csv", index_col=0
+)
+
+
+df = df_v.copy()
+df = df[
+    [
+        "A(1)",
+        "period",
+        "A(3)",
+        "H(SV,L)",
+        "H(RV,L)",
+        "H(SV)",
+        "H(RV)",
+        "L(SV,20)",
+        "L(SV,40)",
+        "L(RV,20)",
+        "L(RV,40)",
+        "future",
+    ]
+].copy()
+
+df.apply(lambda x: sum(x))

@@ -342,7 +342,7 @@ class TrainLSTM:
         m.compile(optimizer=o, loss=tf.keras.losses.logcosh)
 
         es = tf.keras.callbacks.EarlyStopping(
-            monitor="val_loss", mode="min", patience=7, verbose=1,
+            monitor="val_loss", mode="min", patience=10, verbose=1,
         )
 
         m.fit(

@@ -74,7 +74,7 @@ class GeneticAlgorithm:
             self.initial_population = pd.read_csv(
                 folder_structure.path_input
                 + "/"
-                + "GeneticAlgorithm_20_hist40_True.csv",
+                + "GeneticAlgorithm_20_hist40_True_new_modelafterGA.csv",
                 index_col=0,
             )
 
@@ -82,11 +82,11 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.01]
+                learning_rates = [0.001, 0.01]
                 layer_one = [2, 20, 40]
-                layer_two = [2, 10, 20, 40]
-                layer_three = [0, 2, 10, 20]
-                layer_four = [0, 2, 10, 20]
+                layer_two = [2, 15, 40]
+                layer_three = [0, 4, 15]
+                layer_four = [0, 2, 10]
 
                 dict_help = {}
                 for i in range(len(learning_rates)):
@@ -154,7 +154,9 @@ class GeneticAlgorithm:
 
                 if save_population_to_csv:
                     self.initial_population.to_csv(
-                        folder_structure.path_input + "/" + "InitialPopulation_all.csv"
+                        folder_structure.path_input
+                        + "/"
+                        + "InitialPopulation_all_new_new.csv"
                     )
 
             else:
@@ -215,7 +217,7 @@ class GeneticAlgorithm:
         parent1_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index, int(df_help.shape[0] * 0.05), replace=False,
+                    df_help.index, int(df_help.shape[0] * 0.02), replace=False,
                 )
             ]
             .nlargest(1)
@@ -225,7 +227,7 @@ class GeneticAlgorithm:
         parent2_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index, int(df_help.shape[0] * 0.05), replace=False,
+                    df_help.index, int(df_help.shape[0] * 0.02), replace=False,
                 )
             ]
             .nlargest(1)

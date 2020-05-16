@@ -1,4 +1,4 @@
-print("updated 3")
+print("updated 6")
 # Preprocessing Data for the dashboard
 from run_AutoRegression_Model import *
 from run_HAR_model import results_har
@@ -31,12 +31,12 @@ class DashboardDataPrep:
 
         for period in range(3):
             har_instance = HARModelLogTransformed(
-                df=data_input,
+                df=data_input.copy(),
                 future=periods_list[period],
                 lags=[4, 20],
                 feature="RV",
                 semi_variance=False,
-                jump_detect=True,
+                jump_detect=False,
                 log_transformation=False,
                 period_train=list(
                     [
@@ -77,14 +77,14 @@ class DashboardDataPrep:
         for lags in range(2):
             for period in range(3):
                 ar_instance = TimeSeriesDataPreparationLSTM(
-                    df=data_input,
+                    df=data_input.copy(),
                     future=periods_list[period],
                     lag=lags_list[lags],
                     standard_scaler=False,
                     min_max_scaler=False,
                     log_transform=False,
                     semi_variance=False,
-                    jump_detect=True,
+                    jump_detect=False,
                     period_train=list(
                         [
                             pd.to_datetime("20030910", format="%Y%m%d"),
@@ -155,12 +155,12 @@ class DashboardDataPrep:
             for semi_variance in range(2):
                 for i in range(3):
                     har_instance = HARModelLogTransformed(
-                        df=data_input,
+                        df=data_input.copy(),
                         future=future_periods[i],
                         lags=[4, 20],
                         feature="RV",
                         semi_variance=semi_variance_list[semi_variance],
-                        jump_detect=True,
+                        jump_detect=False,
                         log_transformation=log_trans_list[log_trans],
                         period_train=list(
                             [
@@ -285,14 +285,14 @@ class DashboardDataPrep:
                     for period in range(3):
 
                         lstm_instance = TimeSeriesDataPreparationLSTM(
-                            df=data_set_list[data_set],
+                            df=data_set_list[data_set].copy(),
                             future=periods_list[period],
                             lag=lags_list[lags],
                             standard_scaler=False,
                             min_max_scaler=True,
                             log_transform=True,
                             semi_variance=semi_variance_list[semi_variance],
-                            jump_detect=True,
+                            jump_detect=False,
                             period_train=list(
                                 [
                                     pd.to_datetime("20030910", format="%Y%m%d"),
@@ -402,12 +402,12 @@ class DashboardDataPrep:
         self.df_final.dataset[
             (self.df_final.DATE >= pd.to_datetime("20100101", format="%Y%m%d"))
             & (self.df_final.DATE <= pd.to_datetime("20101231", format="%Y%m%d"))
-        ] = "testing"
+        ] = "validation"
 
         self.df_final.dataset[
             (self.df_final.DATE >= pd.to_datetime("20110101", format="%Y%m%d"))
             & (self.df_final.DATE <= pd.to_datetime("20111231", format="%Y%m%d"))
-        ] = "validation"
+        ] = "testing"
 
 
 def load_dashboard_data():
@@ -423,12 +423,34 @@ def load_dashboard_data():
     df.DATE = df.DATE.values
     df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
 
-    return df_m, df
+    data_input = pd.concat(
+        [df_m[["DATE", "RV", "RSV_minus", "RSV_plus"]], df], sort=True,
+    ).reset_index(drop=True)
+
+    df_tmp = data_input.copy()
+    df_tmp["threshold"] = df_tmp["RV"].rolling(window=200).std() * 4
+    df_tmp.threshold = np.where(df_tmp.threshold.isna(), 1, df_tmp.threshold)
+    df_tmp["larger"] = np.where(df_tmp.RV > df_tmp.threshold, True, False)
+    df_tmp = df_tmp[df_tmp.larger == False]
+
+    df_tmp.drop(columns={"threshold", "larger"}, axis=1, inplace=True)
+
+    data_input = df_tmp
+
+    data_training = data_input[
+        data_input.DATE <= pd.to_datetime("20101231", format="%Y%m%d")
+    ]
+
+    data_validation = data_input[
+        data_input.DATE > pd.to_datetime("20101231", format="%Y%m%d")
+    ]
+
+    return data_input, data_training, data_validation
 
 
 def run_data_preprocessing_dashboard():
-    df_m, df = load_dashboard_data()
-    x = DashboardDataPrep(df_tt=df_m, df_validation=df)
+    df_input_all, data_training, data_validation = load_dashboard_data()
+    x = DashboardDataPrep(df_tt=data_training, df_validation=data_validation)
     x.merge_all()
     x.df_final.to_csv(
         folder_structure.path_dashboard_deployment + "/" + "DashboardData.csv"
@@ -436,3 +458,78 @@ def run_data_preprocessing_dashboard():
 
 
 run_data_preprocessing_dashboard()
+
+# df_m = pd.read_csv(
+#     folder_structure.path_input + "/" + "RealizedMeasures03_10.csv", index_col=0
+# )
+# df_m.DATE = df_m.DATE.values
+# df_m.DATE = pd.to_datetime(df_m.DATE, format="%Y%m%d")
+#
+# df = pd.read_csv(folder_structure.path_input + "/" + "DataFeatures.csv", index_col=0)
+# df.DATE = df.DATE.values
+# df.DATE = pd.to_datetime(df.DATE, format="%Y%m%d")
+#
+# data_input = pd.concat(
+#     [df_m[["DATE", "RV", "RSV_minus", "RSV_plus"]], df], sort=True,
+# ).reset_index(drop=True)
+#
+#
+# df_input_all, data_training, data_validation = load_dashboard_data()
+# df_m.columns
+#
+# plt.close()
+# plt.plot(df_m.DATE, df_m.RV, lw=0.5, color="black", label="Original series")
+# plt.plot(
+#     data_training.DATE,
+#     data_training.RV,
+#     "-.",
+#     lw=0.5,
+#     color="mediumseagreen",
+#     label="Series after jump detection",
+# )
+# plt.legend()
+# plt.savefig("jumpdetection")
+#
+# plt.close()
+# plt.hist(data_training.RV, bins=200, color="mediumseagreen")
+# plt.savefig("histogram")
+#
+#
+# plt.close()
+# plt.hist(np.log(data_training.RV), bins=50, color="mediumseagreen")
+# plt.savefig("log_histogram")
+#
+#
+# s = MinMaxScaler()
+# plt.close()
+# plt.hist(
+#     s.fit_transform(np.log(data_training.RV).values.reshape(-1, 1)),
+#     bins=50,
+#     color="mediumseagreen",
+# )
+# plt.savefig("lognormalizedhisto")
+#
+#
+# s = MinMaxScaler()
+# plt.close()
+# plt.hist(s.fit_transform(np.log(data_training.RV).values.reshape(-1, 1)), bins=50)
+#
+#
+# # colors_ = ["palegreen", "green", "black"]
+# plt.close()
+# fig, axs = plt.subplots(2, 2)
+# axs[0, 0].plot(df_m.DATE, df_m.RV, lw=0.5, color="black")
+# axs[0, 0].plot(
+#     data_training.DATE, data_training.RV, "-.", lw=0.5, color="mediumseagreen"
+# )
+# axs[0, 0].set_title("Jump Detection")
+# axs[0, 1].hist(data_training.RV, bins=200, color="mediumseagreen")
+# axs[0, 1].set_title("Untransformed Series")
+# axs[1, 0].hist(np.log(data_training.RV), bins=50, color="mediumseagreen")
+# axs[1, 0].set_title("Log Series")
+# axs[1, 1].hist(
+#     s.fit_transform(np.log(data_training.RV).values.reshape(-1, 1)),
+#     bins=50,
+#     color="mediumseagreen",
+# )
+# axs[1, 1].set_title("Log Normalized Series")
