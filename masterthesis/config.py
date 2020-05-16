@@ -47,7 +47,6 @@ class PathArchitecture:
         self.output_Tables = None
         self.output_Graphs = None
         self.output_AR = None
-        self.output_Bayesian = None
 
     def make_folder(self):
         if os.path.exists(self.path_main + "/" + self.output_folder_name) is not True:
@@ -73,18 +72,15 @@ class PathArchitecture:
         if os.path.exists(self.path_dashboard_deployment) is not True:
             os.mkdir(self.path_dashboard_deployment)
 
-        if (
-            os.path.exists(self.output_path + "/" + "BayesianOptimizationOutput")
-            is not True
-        ):
-            os.mkdir(self.output_path + "/" + "BayesianOptimizationOutput")
+        if os.path.exists(self.output_path + "/" + "Predictions") is not True:
+            os.mkdir(self.output_path + "/" + "Predictions")
 
         self.output_HAR = self.output_path + "/" + "HARModel"
         self.output_LSTM = self.output_path + "/" + "NeuralNet"
         self.output_Tables = self.output_path + "/" + "Tables"
         self.output_Graphs = self.output_path + "/" + "Graphs"
         self.output_AR = self.output_path + "/" + "AutoRegression"
-        self.output_Bayesian = self.output_path + "/" + "BayesianOptimizationOutput"
+        self.output_AR = self.output_path + "/" + "Predictions"
 
     def config_folder_structure(self):
         self.make_folder()

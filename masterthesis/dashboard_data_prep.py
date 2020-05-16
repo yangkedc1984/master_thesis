@@ -455,6 +455,9 @@ def run_data_preprocessing_dashboard():
     x.df_final.to_csv(
         folder_structure.path_dashboard_deployment + "/" + "DashboardData.csv"
     )
+    x.df_final.to_csv(
+        folder_structure.path_dashboard_deployment + "/" + "DashboardData.csv"
+    )
 
 
 run_data_preprocessing_dashboard()
