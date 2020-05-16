@@ -30,14 +30,10 @@ main_path = os.getcwd()
 "machine"
 data_input_path = main_path + "/" + "data"
 
-# this is some sort of problem / as we do need a second repo for this
-data_output_dashboard = "/Users/nickzumbuhl/Desktop/dashboard_deployment"
-
 
 class PathArchitecture:
-    def __init__(self, path_main, path_input, path_dashboard_deployment):
+    def __init__(self, path_main, path_input):
         self.path_main = path_main
-        self.path_dashboard_deployment = path_dashboard_deployment
         self.output_folder_name = "output"
         self.path_input = path_input
         self.HARModel = "HARModel"
@@ -72,9 +68,6 @@ class PathArchitecture:
         if os.path.exists(self.output_path + "/" + "Graphs") is not True:
             os.mkdir(self.output_path + "/" + "Graphs")
 
-        if os.path.exists(self.path_dashboard_deployment) is not True:
-            os.mkdir(self.path_dashboard_deployment)
-
         if os.path.exists(self.output_path + "/" + "Predictions") is not True:
             os.mkdir(self.output_path + "/" + "Predictions")
 
@@ -94,5 +87,5 @@ class PathArchitecture:
         self.make_sub_folder()
 
 
-folder_structure = PathArchitecture(main_path, data_input_path, data_output_dashboard)
+folder_structure = PathArchitecture(main_path, data_input_path)
 folder_structure.config_folder_structure()
