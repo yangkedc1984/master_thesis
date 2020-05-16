@@ -450,9 +450,6 @@ def run_data_preprocessing_dashboard():
     df_input_all, data_training, data_validation = load_dashboard_data()
     x = DashboardDataPrep(df_tt=data_training, df_validation=data_validation)
     x.merge_all()
-    x.df_final.to_csv(
-        folder_structure.path_dashboard_deployment + "/" + "DashboardData.csv"
-    )
     x.df_final.to_csv(folder_structure.output_Predictions + "/" + "DashboardData.csv")
 
 
