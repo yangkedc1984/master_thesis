@@ -1,4 +1,7 @@
-# Master Thesis Nick Zumbühl
+## ReadMe - Master Thesis Nick Zumbühl - 
+### Thesis Title: LSTM Neural Networks and HAR Models for Realized Volatility - An Application to Financial Volatility Forecasting
+
+
 
 ## Setting up Environment
 
