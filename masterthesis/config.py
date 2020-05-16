@@ -23,13 +23,14 @@ Path Architecture
 """
 
 "main_path: path where all the python files are located and where the output is placed later on"
-main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"
+main_path = os.getcwd()
 
 "data_input_path: folder path where the data is located on your local machine - the data consists of"
 "the engineered features. As the raw data is too large (~50GB of data) it was not possible to place on the local"
 "machine"
-data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"
+data_input_path = main_path + "/" + "data"
 
+# this is some sort of problem / as we do need a second repo for this
 data_output_dashboard = "/Users/nickzumbuhl/Desktop/dashboard_deployment"
 
 

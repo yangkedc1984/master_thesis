@@ -5,7 +5,6 @@ import random
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-import matplotlib.pyplot as plt
 
 
 class TimeSeriesDataPreparationLSTM:
@@ -393,86 +392,3 @@ class TrainLSTM:
         self.test_accuracy = test_accuracy
         self.train_accuracy = train_accuracy
         self.fitness = self.train_accuracy["RSquared"] + self.test_accuracy["RSquared"]
-        # 1 / (self.test_accuracy["MAE"]) + (
-        #         1 / self.train_accuracy["MAE"]
-        # )
-
-    def make_performance_plot(self, show_testing_sample=False):
-        if show_testing_sample:
-            plt.close()
-            fig, axs = plt.subplots(3)
-            axs[0].plot(
-                self.testing_set.DATE,
-                self.testing_set.future,
-                label="Realized Volatility",
-                alpha=0.5,
-                color="black",
-                lw=0.5,
-            )
-            axs[0].plot(
-                self.testing_set.DATE,
-                self.prediction_test,
-                label="Prediction",
-                alpha=0.8,
-                lw=1,
-            )
-            axs[0].legend()
-            axs[1].plot(
-                self.testing_set.future,
-                self.prediction_test,
-                "o",
-                alpha=0.4,
-                color="black",
-            )
-            axs[1].plot(
-                [np.min(self.prediction_test), np.max(self.prediction_test)],
-                [np.min(self.prediction_test), np.max(self.prediction_test)],
-                color="red",
-                alpha=0.5,
-            )
-            axs[2].hist(
-                self.testing_set.future
-                - self.prediction_test.reshape(self.prediction_test.shape[0],),
-                bins=20,
-                alpha=0.7,
-                color="black",
-            )
-        else:
-            plt.close()
-            fig, axs = plt.subplots(3)
-            axs[0].plot(
-                self.training_set.DATE,
-                self.training_set.future,
-                label="Realized Volatility",
-                alpha=0.5,
-                color="black",
-                lw=0.5,
-            )
-            axs[0].plot(
-                self.training_set.DATE,
-                self.prediction_train,
-                label="Prediction",
-                alpha=0.8,
-                lw=1,
-            )
-            axs[0].legend()
-            axs[1].plot(
-                self.training_set.future,
-                self.prediction_train,
-                "o",
-                alpha=0.4,
-                color="black",
-            )
-            axs[1].plot(
-                [np.min(self.prediction_train), np.max(self.prediction_train)],
-                [np.min(self.prediction_train), np.max(self.prediction_train)],
-                color="red",
-                alpha=0.5,
-            )
-            axs[2].hist(
-                self.training_set.future
-                - self.prediction_train.reshape(self.prediction_train.shape[0],),
-                bins=50,
-                alpha=0.7,
-                color="black",
-            )

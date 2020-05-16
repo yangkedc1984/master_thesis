@@ -1,5 +1,3 @@
-print("updated 6")
-# Preprocessing Data for the dashboard
 from run_AutoRegression_Model import *
 from run_HAR_model import results_har
 from config import folder_structure

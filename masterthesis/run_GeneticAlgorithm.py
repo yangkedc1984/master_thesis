@@ -1,9 +1,3 @@
-print("__________________________________________________")
-print(
-    "Future = 20 // Lag = 40 // Model = SV // Fitness Function: R Squared, AFTER GA patience 7 Check"
-)
-print("__________________________________________________")
-
 from GeneticAlgorithm import *
 from config import *
 from run_HAR_model import load_data
@@ -58,7 +52,7 @@ _ga_1.run_complete_genetic_algorithm(number_of_generations=20)
 result = _ga_1.initial_population
 
 result.to_csv(
-    folder_structure.path_input
+    folder_structure.output_GridSearch
     + "/"
     + "GeneticAlgorithm_{}_hist40_True_new_modelafterGA2.csv".format(20)
 )
