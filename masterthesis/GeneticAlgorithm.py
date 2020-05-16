@@ -1,9 +1,6 @@
 from LSTM import *
 from collections import OrderedDict
 from config import *
-from sklearn.decomposition import PCA
-
-plt.style.use("seaborn")
 
 
 class GeneticAlgorithm:
@@ -74,7 +71,7 @@ class GeneticAlgorithm:
             self.initial_population = pd.read_csv(
                 folder_structure.path_input
                 + "/"
-                + "GeneticAlgorithm_20_hist40_True.csv",
+                + "GeneticAlgorithm_20_hist40_True_new_modelafterGA.csv",
                 index_col=0,
             )
 
@@ -82,11 +79,11 @@ class GeneticAlgorithm:
 
             if self.build_grid_scenarios:
 
-                learning_rates = [0.01]
+                learning_rates = [0.001, 0.01]
                 layer_one = [2, 20, 40]
-                layer_two = [2, 10, 20, 40]
-                layer_three = [0, 2, 10, 20]
-                layer_four = [0, 2, 10, 20]
+                layer_two = [2, 15, 40]
+                layer_three = [0, 4, 15]
+                layer_four = [0, 2, 10]
 
                 dict_help = {}
                 for i in range(len(learning_rates)):
@@ -154,7 +151,9 @@ class GeneticAlgorithm:
 
                 if save_population_to_csv:
                     self.initial_population.to_csv(
-                        folder_structure.path_input + "/" + "InitialPopulation_all.csv"
+                        folder_structure.path_input
+                        + "/"
+                        + "InitialPopulation_all_new_new.csv"
                     )
 
             else:
@@ -215,7 +214,7 @@ class GeneticAlgorithm:
         parent1_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index, int(df_help.shape[0] * 0.05), replace=False,
+                    df_help.index, int(df_help.shape[0] * 0.02), replace=False,
                 )
             ]
             .nlargest(1)
@@ -225,7 +224,7 @@ class GeneticAlgorithm:
         parent2_location = (
             df_help.Fitness[
                 np.random.choice(
-                    df_help.index, int(df_help.shape[0] * 0.05), replace=False,
+                    df_help.index, int(df_help.shape[0] * 0.02), replace=False,
                 )
             ]
             .nlargest(1)
@@ -320,100 +319,3 @@ class GeneticAlgorithm:
             print(iteration)
             print(self.parent_location_one, self.parent_location_two)
             self.make_offsprings()
-
-
-def make_genetic_algorithm_plot(save_plot: bool = False):
-    direc_links = [
-        "InitialPopulation_all_scenarios_future_1_newfitness.csv",
-        "InitialPopulation_all_scenarios_future_5_newfitness.csv",
-        "InitialPopulation_all_scenarios_future_20_newfitness.csv",
-    ]
-
-    direc_links_2 = [
-        "InitialPopulation_sv_1_newfitness.csv",
-        "InitialPopulation_sv_5_newfitness.csv",
-        "InitialPopulation_sv_20_newfitness.csv",
-    ]
-    titles_set = [
-        "One Day",
-        "One Week",
-        "One Month",
-    ]
-
-    plt.close()
-    fig = plt.figure()
-    fig.suptitle("Hyperparameter Optimization using Genetic Algorithm", fontsize=16)
-    for i in range(3):
-        initial_population_scenarios = pd.read_csv(
-            folder_structure.path_input + "/" + direc_links[i], index_col=0,
-        )
-        initial_population_scenarios = initial_population_scenarios.reset_index(level=0)
-
-        df_1 = pd.read_csv(
-            folder_structure.path_input + "/" + direc_links_2[i], index_col=0,
-        )
-        df_2 = df_1.iloc[df_1.Fitness.nlargest(5).index]
-
-        # print PCA
-        pca = PCA(n_components=3)
-        pca.fit(
-            initial_population_scenarios[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]
-        )
-        x = pd.DataFrame(
-            pca.transform(
-                initial_population_scenarios[
-                    ["LR", "Layer1", "Layer2", "Layer3", "Layer4"]
-                ]
-            ),
-            columns={"one", "two", "three"},
-        ).reset_index(level=0)
-        x = x.merge(initial_population_scenarios[["Fitness", "index"]], on="index")
-
-        pca_2 = PCA(n_components=3)
-        pca_2.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
-
-        x_2 = pd.DataFrame(
-            pca.transform(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
-            columns={"one", "two", "three"},
-        ).reset_index(level=0)
-
-        x_2 = x_2.merge(
-            df_1.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]],
-            on="index",
-        )
-
-        pca_3 = PCA(n_components=3)
-        pca_3.fit(df_1[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]])
-
-        x_3 = pd.DataFrame(
-            pca.transform(df_2[["LR", "Layer1", "Layer2", "Layer3", "Layer4"]]),
-            columns={"one", "two", "three"},
-        ).reset_index(level=0)
-
-        x_3 = x_3.merge(
-            df_2.reset_index(drop=True).reset_index(level=0)[["Fitness", "index"]],
-            on="index",
-        )
-
-        from mpl_toolkits.mplot3d import Axes3D
-
-        axs = fig.add_subplot(1, 3, i + 1, projection="3d")
-        axs.scatter(
-            x_3.one, x_3.two, x_3.three, c="darkred", s=200, alpha=0.5,
-        )
-        axs.scatter(
-            x.one, x.two, x.three, alpha=0.2, marker="o", s=100, c="mediumseagreen"
-        )
-        axs.scatter(
-            x_2.one, x_2.two, x_2.three, c=x_2.Fitness, cmap="binary", alpha=1,
-        )
-        axs.view_init(elev=12, azim=135)
-
-        axs.set_title(titles_set[i])
-
-    if save_plot:
-        os.chdir(folder_structure.output_Graphs)
-        fig.savefig("Genetic_Algorithm_Output.png")
-
-
-# make_genetic_algorithm_plot(save_plot=True)  # plotting results of Genetic Algorithm

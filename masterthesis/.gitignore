@@ -1,6 +1,11 @@
 .idea
 new_env
 environment.yml
-DataFeatures.csv
 SPY2011.csv.zip
-
+SPY03_10.zip
+assets
+dashboard
+output/Tables
+output/Graphs
+run_Result_Tables_Graphs.py
+Result_Tables_Graphs.py

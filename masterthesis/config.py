@@ -23,13 +23,14 @@ Path Architecture
 """
 
 "main_path: path where all the python files are located and where the output is placed later on"
-main_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis"
+main_path = os.getcwd()
 
 "data_input_path: folder path where the data is located on your local machine - the data consists of"
 "the engineered features. As the raw data is too large (~50GB of data) it was not possible to place on the local"
 "machine"
-data_input_path = "/Users/nickzumbuhl/Desktop/master_thesis/masterthesis/data"
+data_input_path = main_path + "/" + "data"
 
+# this is some sort of problem / as we do need a second repo for this
 data_output_dashboard = "/Users/nickzumbuhl/Desktop/dashboard_deployment"
 
 
@@ -45,9 +46,10 @@ class PathArchitecture:
         self.output_HAR = None
         self.output_LSTM = None
         self.output_Tables = None
+        self.output_Predictions = None
         self.output_Graphs = None
         self.output_AR = None
-        self.output_Bayesian = None
+        self.output_GridSearch_GA = None
 
     def make_folder(self):
         if os.path.exists(self.path_main + "/" + self.output_folder_name) is not True:
@@ -73,18 +75,19 @@ class PathArchitecture:
         if os.path.exists(self.path_dashboard_deployment) is not True:
             os.mkdir(self.path_dashboard_deployment)
 
-        if (
-            os.path.exists(self.output_path + "/" + "BayesianOptimizationOutput")
-            is not True
-        ):
-            os.mkdir(self.output_path + "/" + "BayesianOptimizationOutput")
+        if os.path.exists(self.output_path + "/" + "Predictions") is not True:
+            os.mkdir(self.output_path + "/" + "Predictions")
+
+        if os.path.exists(self.output_path + "/" + "GridSearch_GA") is not True:
+            os.mkdir(self.output_path + "/" + "GridSearch_GA")
 
         self.output_HAR = self.output_path + "/" + "HARModel"
         self.output_LSTM = self.output_path + "/" + "NeuralNet"
         self.output_Tables = self.output_path + "/" + "Tables"
         self.output_Graphs = self.output_path + "/" + "Graphs"
         self.output_AR = self.output_path + "/" + "AutoRegression"
-        self.output_Bayesian = self.output_path + "/" + "BayesianOptimizationOutput"
+        self.output_Predictions = self.output_path + "/" + "Predictions"
+        self.output_GridSearch_GA = self.output_path + "/" + "GridSearch_GA"
 
     def config_folder_structure(self):
         self.make_folder()
