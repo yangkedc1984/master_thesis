@@ -1,6 +1,6 @@
 ## ReadMe: LSTM Neural Networks and HAR Models for Realized Volatility - An Application to Financial Volatility Forecasting
 
-The following document aims to provide an overview of the whole code base used throughout the thesis. It does not aim to explain theoretical background for the thesis, but rather provide an overview of how the code, the data and the results are structured. For theoretical background I kindly refer to the text version of the thesis: 
+The following document aims to provide an overview of the whole code base used throughout the thesis. It does not aim to explain theoretical background for the thesis, but rather provide an overview of how the code, the data and the results are structured. For theoretical background I kindly refer to the text version of the [thesis](https://drive.google.com/file/d/1sFjBdkEn4uDCQQai29F9_MvP1YgXFALn/view?usp=sharing)
 
 Generally speaking, this repository contains code for all the data loading, preprocessing, estimation, training, and prediction. For reporting the results an individual repository was set up containing a dashboard with all the relevant information. The dashboard repository can be found here: https://github.com/nickzumbuehl/dashboard_deployment and the dashboard runs under the url: http://nick-vola.herokuapp.com.
 
