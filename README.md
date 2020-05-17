@@ -79,6 +79,59 @@ Naturally, the [```HAR_Model.py```](masterthesis/HAR_Model.py)-file does not exe
 
 ### LSTM
 #### Define & Run LSTM Model
+Similarly to the HAR model, the LSTM models are defined by a python script and then subsequently run by another one. The 
+[```LSTM.py```](masterthesis/LSTM.py)-file contains two classes that define the LSTM model. The ```class TimeSeriesDataPreparationLSTM``` defines the preprocessing part, whereas the ```class TrainLSTM``` trains a LSTM model for a given set of hyperparamteres.
+
+Taking a look on how the ```class TimeSeriesDataPreparationLSTM``` is defined, one can observe the level of customizability.
+```
+class TimeSeriesDataPreparationLSTM:
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        future: int = 1,
+        lag: int = 20,
+        feature: str = "RV",
+        semi_variance: bool = False,
+        jump_detect: bool = True,
+        log_transform: bool = True,
+        min_max_scaler: bool = True,
+        standard_scaler: bool = False,
+        period_train=list(
+            [
+                pd.to_datetime("20030910", format="%Y%m%d"),
+                pd.to_datetime("20091231", format="%Y%m%d"),
+            ]
+        ),
+        period_test=list(
+            [
+                pd.to_datetime("20100101", format="%Y%m%d"),
+                pd.to_datetime("20101231", format="%Y%m%d"),
+            ]
+        ),
+    ):
+
+```
+The input variable ```df```, ```future```, ```lag```, ```semi_variance```, ```jump_detection``` & ```log_transform``` have already be discussed in the previous paragraph and thus are neglected here. The only new inputs in this class are the ```min_max_scaler``` and the ```standard_scaler```, which both aim to scale the data after having it log-transformed. Please not that only one of the two scalers can be set to True. 
+
+The ```class TrainLSTM``` then takes the preprocessed data as input and trains an LSTM model. The class is defined as follows: 
+```
+class TrainLSTM:
+    def __init__(
+        self,
+        training_set,
+        testing_set,
+        activation=tf.nn.elu,
+        epochs=50,
+        learning_rate=0.01,
+        layer_one=40,
+        layer_two=40,
+        layer_three=0,
+        layer_four=0,
+        adam_optimizer: bool = True,
+    ):
+```
+
+
 
 ### Autoregressive Model
 The autoregressive model is defined in its most generic form in [```AutoRegression_Model.py```](masterthesis/AutoRegression_Model.py). The ```class AutoRegressionModel``` defines a generic AR model which can be customized according to the following specifications. 
