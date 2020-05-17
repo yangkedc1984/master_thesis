@@ -5,6 +5,9 @@ The following document aims to provide an overview of the whole code base used t
 This document outlines the following points:
 1. Setting up the Environment
 2. Pipeline Overview
+   - Input Files
+   - Process Files
+   - Output Files
 3. Python-Files in the Repo
    - feature_engineering.py
    - AutoRegression_Model.py & run_AutoRegression_Model.py
@@ -15,7 +18,11 @@ This document outlines the following points:
    - dashboard_data_prep.py
    
 
-## Setting up Environment
+### 1. Setting up Environment
+The ```requirements.txt``` contains information on all the relevant packages and versions used in the code base. In order to set up the environment, the please follow the subsequent process:
+1. cd to the directory where your ```requirements.txt```is located
+2. activate your virtual environment
+3. run: ``` pip install -r requirements.txt``` in your shell. Alternatively, when working with conda run: ```conda install --file requirements.txt```.
 
 ## Pipeline 
 ![](pipeline_advance.png)
