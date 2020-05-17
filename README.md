@@ -7,11 +7,8 @@ This document outlines the following points:
    - Environment
    - Configuration
 2. Pipeline Overview
-   - Input Files
-   - Process Files
-   - Output Files
 3. Pipeline Walk-Through
-   - feature_engineering.py
+   - Feature Engineering
    - AutoRegression_Model.py & run_AutoRegression_Model.py
    - HAR_Model.py & run_HAR_model.py
    - LSTM.py, run_LSTM.py
@@ -39,5 +36,8 @@ The output files are often times the input files for another python file in the 
 ![](pipeline_advance.png)
 
 ## 3. Pipeline Walk-Through
+#### Feature-Engineering
+The file ```feature_engineering.py``` processes high-frequency data to compute the relevant features (realized volatility, positive- & negative realized semi-variance). As a input it takes high-frequency data in a ```.csv```-format retrieved from the WRDS data base. High-frequency data tend to be extremely large files (for the period considered in the application at hand, we face approximately 50GB of high-frequency data). Therefore, each year of high-frequency data was processed separately and later concatenated to obtain the complete time series of volatility measures. The ```zip```-files for the raw high-frequency data pulled from WRDS can be found here: https://drive.google.com/drive/folders/1VVNbAx8bbY2Km-NGu5cBaK8lHFdmjRD1?usp=sharing
+
 
 https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax
