@@ -190,5 +190,9 @@ The accuracy results of the autoregressive models are dumped in the output folde
 ### Dashboard
 The file [```dashboard_data_prep.py```](masterthesis/dashboard_data_prep.py) prepares the data for the results-dashboard which runs under the url: http://nick-vola.herokuapp.com
 
-The ```class DashboardDataPrep``` takes the all data sets along with all the estimated models as input. From thereon, it predicts realized volatility for each model specification and each data set. The resulting data frame contains all relevant information to compute accuracy measures. The accuracy computations and visualizations of the resulting predictions is done by [```dashb.py```](https://github.com/nickzumbuehl/dashboard_deployment/blob/master/dashb.py)-file in the repository https://github.com/nickzumbuehl/dashboard_deployment
+The ```class DashboardDataPrep``` takes the all data sets along with all the estimated models as input. From thereon, it predicts realized volatility for each model specification and each data set. The resulting data frame contains all relevant information to compute accuracy measures. The accuracy computations and visualizations of the resulting predictions is done by [```dashb.py```](https://github.com/nickzumbuehl/dashboard_deployment/blob/master/dashb.py)-file in the repository https://github.com/nickzumbuehl/dashboard_deployment.
+
+The csv-file with all the predictions is saved in the output folder [```Predictions```](masterthesis/output/Predictions)
+
+
 
