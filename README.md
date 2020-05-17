@@ -20,7 +20,7 @@ This document outlines the following points:
    - dashboard_data_prep.py
    
 
-### 1. Setting up the Code Base
+## 1. Setting up the Code Base
 
 #### Environment
 The ```requirements.txt``` contains information on all the relevant packages and versions used in the code base. In order to set up the environment, the please follow the subsequent process:
@@ -31,7 +31,9 @@ The ```requirements.txt``` contains information on all the relevant packages and
 #### Configuration
 The ```config.py``` file sets up the folder structure. When cloning the repository from GitHub, all the relevant folders are already in place. Nevertheless, the ```config.py``` defines the path architecture and makes sure it runs on each individual local machine.
 
-## Pipeline 
+## 2. Pipeline Overview
+The pipeline of the overall project is illustrated in the following figure. It can be splited into input-, process- and output files. The blue-colored boxes describe the proces or the content which is relevant for the corresponding step in the pipeline. The grey-colored boxes are indicating the name of the corresponding file in the repository.
+
 ![](pipeline_advance.png)
 ## Description of each file
 
