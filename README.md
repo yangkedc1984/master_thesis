@@ -131,7 +131,7 @@ class TrainLSTM:
     ):
 ```
 
-Having defined both the classes the [```run_LSTM.py```](masterthesis/run_LSTM.py)-files executes the model for a given set of hyperparameters and input specifications. 
+Having defined both the classes the [```run_LSTM.py```](masterthesis/run_LSTM.py)-files executes the model for a given set of hyperparameters and input specifications. The saved LSTM models are saved in the output folder [```NeuralNet```](masterthesis/output/NeuralNet.py)
 
 #### Grid Search & Genetic Algorithm
 Facing the probelm of hyperparamter tuning, a python moule for hyperparameter optimization was put in place. The [```GeneticAlgorithm.py```](masterthesis/GeneticAlgorithm.py)-files contains the code for a genetic algorithm with an integrated grid search method.
@@ -157,6 +157,8 @@ class GeneticAlgorithm:
     ):
 ```
 The training & testing set are defined to valiadte the performance for a given set of hyperparameters. The ```network_architecture``` dictionary defines the search space for the layers one to four. The ```learning_rate``` defines the search space for the learning rate. The boolean ```initial_population_source_external``` allows to start with an external initial population. This can be beneficial when an initial population has been computed perviously and thus improves ompimization time. Finally, ```build_grid_scenarios``` indicates whether the initial population of the genetic algorithm should be based on a grid search method, or rather a random allocation in the search space. 
+
+Similarly to the previous approach, the [```GeneticAlgorithm.py```](masterthesis/GeneticAlgorithm.py) is run by [```run_GeneticAlgorithm.py```](masterthesis/run_GeneticAlgorithm.py). This file preprocesses the data and then executes the grid search & genetic algorithm according the given specification. The results of the process are then saved in the output folder [```GridSearch_GA```](masterthesis/output/GridSearch_GA.py).
 
 ### Autoregressive Model
 The autoregressive model is defined in its most generic form in [```AutoRegression_Model.py```](masterthesis/AutoRegression_Model.py). The ```class AutoRegressionModel``` defines a generic AR model which can be customized according to the following specifications. 
