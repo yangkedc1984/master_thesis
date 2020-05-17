@@ -1,6 +1,8 @@
 ## ReadMe: LSTM Neural Networks and HAR Models for Realized Volatility - An Application to Financial Volatility Forecasting
 
-The following document aims to provide an overview of the whole code base used throughout the thesis. Generally speaking, this repository contains code for all the data loading, preprocessing, estimation, training, and prediction. For reporting the results an individual repository was set up containing a dashboard with all the relevant information. The dashboard repository can be found here: https://github.com/nickzumbuehl/dashboard_deployment and the dashboard runs under the url: http://nick-vola.herokuapp.com.
+The following document aims to provide an overview of the whole code base used throughout the thesis. It does not aim to explain theoretical background for the thesis, but rather provide an overview of how the code, the data and the results are structured.
+
+Generally speaking, this repository contains code for all the data loading, preprocessing, estimation, training, and prediction. For reporting the results an individual repository was set up containing a dashboard with all the relevant information. The dashboard repository can be found here: https://github.com/nickzumbuehl/dashboard_deployment and the dashboard runs under the url: http://nick-vola.herokuapp.com.
 
 This document outlines the following points:
 1. Setting up the Code Base
@@ -157,7 +159,7 @@ class GeneticAlgorithm:
         build_grid_scenarios=True,
     ):
 ```
-The training & testing set are defined to valiadte the performance for a given set of hyperparameters. The ```network_architecture``` dictionary defines the search space for the layers one to four. The ```learning_rate``` defines the search space for the learning rate. The boolean ```initial_population_source_external``` allows to start with an external initial population. This can be beneficial when an initial population has been computed perviously and thus improves ompimization time. Finally, ```build_grid_scenarios``` indicates whether the initial population of the genetic algorithm should be based on a grid search method, or rather a random allocation in the search space. 
+The training & testing set are defined to valiadte the performance for a given set of hyperparameters. The ```network_architecture``` dictionary defines the search space for the layers one to four. The ```learning_rate``` defines the search space for the learning rate. The boolean ```initial_population_source_external``` allows to start with an external initial population. This can be beneficial when an initial population has been computed perviously and thus improves optimization time. Finally, ```build_grid_scenarios``` indicates whether the initial population of the genetic algorithm should be based on a grid search method, or rather a random allocation in the search space. 
 
 Similarly to the previous approach, the [```GeneticAlgorithm.py```](masterthesis/GeneticAlgorithm.py) is run by [```run_GeneticAlgorithm.py```](masterthesis/run_GeneticAlgorithm.py). This file preprocesses the data and then executes the grid search & genetic algorithm according the given specification. The results of the process are then saved in the output folder [```GridSearch_GA```](masterthesis/output/GridSearch_GA).
 
