@@ -14,7 +14,7 @@ This document outlines the following points:
      - Define & Run LSTM Model
      - Grid Search & Genetic Algorithm
    - Autoregressive Model
-   - dashboard_data_prep.py
+   - Dashboard
    
 
 ## 1. Setting up the Code Base
@@ -74,8 +74,9 @@ The input variable ```df``` is defined as the data frame that is used for traini
 
 Having defined a class instance with the specific inputs, the complete model can be run by the method ```run_complete_model()```. To keep this readme-document relatively well-arranged, the author decided not to explain each individual method in the class. However, please checkout the file [```HAR_Model.py```](masterthesis/HAR_Model.py) to investigate all available methods.
 
-Naturally, the [```HAR_Model.py```](masterthesis/HAR_Model.py)-file does not execute any code. It is rather a framework to define the HAR model in a generic setting. The model is run in [```run_HAR_model.py```](masterthesis/run_HAR_model.py). This file runs each specification of interest of the HAR model and saves it in a dictionary which can later be accessed by other python files. The file [```run_HAR_model.py```](masterthesis/run_HAR_model.py) estimates the models for each forecasting period, for both semi-variance indications and both indications of log-transformation.
+Naturally, the [```HAR_Model.py```](masterthesis/HAR_Model.py)-file does not execute any code. It is rather a framework to define the HAR model in a generic setting. The model is run in [```run_HAR_model.py```](masterthesis/run_HAR_model.py). This file runs each specification of interest of the HAR model and saves it in a dictionary which can later be accessed by other python files. The file [```run_HAR_model.py```](masterthesis/run_HAR_model.py) estimates the models for each forecasting period, for both semi-variance indications and both indications of log-transformation. 
 
+The results of the estimation along with the accuracy measures are saved in the output folder [```HARModel```](masterthesis/output/HARModel). The models itself are not saved, and thus have to be re-estimated each time the code is run.
 
 ### LSTM
 #### Define & Run LSTM Model
@@ -183,7 +184,11 @@ class AutoRegressionModel:
         ),
     ):
 ```
+The accuracy results of the autoregressive models are dumped in the output folder [```AutoRegression```](masterthesis/output/AutoRegression). The models itself are not saved and thus have to be re-estimated each time.
 
 
+### Dashboard
+The file [```dashboard_data_prep.py```](masterthesis/dashboard_data_prep.py) prepares the data for the results-dashboard which runs under the url: http://nick-vola.herokuapp.com
 
-https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax
+The ```class DashboardDataPrep``` takes the all data sets along with all the estimated models as input. From thereon, it predicts realized volatility for each model specification and each data set. The resulting data frame contains all relevant information to compute accuracy measures. The accuracy computations and visualizations of the resulting predictions is done by [```dashb.py```](https://github.com/nickzumbuehl/dashboard_deployment/blob/master/dashb.py)-file in the repository https://github.com/nickzumbuehl/dashboard_deployment
+
