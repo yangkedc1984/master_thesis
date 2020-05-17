@@ -131,7 +131,32 @@ class TrainLSTM:
     ):
 ```
 
+Having defined both the classes the [```run_LSTM.py```](masterthesis/run_LSTM.py)-files executes the model for a given set of hyperparameters and input specifications. 
 
+#### Grid Search & Genetic Algorithm
+Facing the probelm of hyperparamter tuning, a python moule for hyperparameter optimization was put in place. The [```GeneticAlgorithm.py```](masterthesis/GeneticAlgorithm.py)-files contains the code for a genetic algorithm with an integrated grid search method.
+
+The ```class GeneticAlgorithm``` aims to optimize the hyperparameters number of layers, neurons per layer and learning rate. For that reason, a search space has to be fined when initating the class. This class initiation is defined as follows:
+``` 
+class GeneticAlgorithm:
+    def __init__(
+        self,
+        training_set_ga,
+        testing_set_ga,
+        network_architecture=OrderedDict(
+            [
+                ("Layer1", [10, 21, 5]),
+                ("Layer2", [2, 20, 5]),
+                ("Layer3", [1, 21, 1]),
+                ("Layer4", [0, 5, 1]),
+            ]
+        ),
+        learning_rate=[0.001, 0.1, 0.005],
+        initial_population_source_external=False,
+        build_grid_scenarios=True,
+    ):
+```
+The training & testing set are defined to valiadte the performance for a given set of hyperparameters. The ```network_architecture``` dictionary defines the search space for the layers one to four. The ```learning_rate``` defines the search space for the learning rate. The boolean ```initial_population_source_external``` allows to start with an external initial population. This can be beneficial when an initial population has been computed perviously and thus improves ompimization time. Finally, ```build_grid_scenarios``` indicates whether the initial population of the genetic algorithm should be based on a grid search method, or rather a random allocation in the search space. 
 
 ### Autoregressive Model
 The autoregressive model is defined in its most generic form in [```AutoRegression_Model.py```](masterthesis/AutoRegression_Model.py). The ```class AutoRegressionModel``` defines a generic AR model which can be customized according to the following specifications. 
