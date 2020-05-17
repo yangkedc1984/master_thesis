@@ -3,7 +3,9 @@
 The following document aims to provide an overview of the whole code base used throughout the thesis. Generally speaking, this repository contains code for all the data loading, preprocessing, estimation, training, and prediction. For reporting the results an individual repository was set up containing a dashboard with all the relevant information. The dashboard repository can be found here: https://github.com/nickzumbuehl/dashboard_deployment and runs under the url: http://nick-vola.herokuapp.com.
 
 This document outlines the following points:
-1. Setting up the Environment
+1. Setting up the Code Base
+   - Environment
+   - Configuration
 2. Pipeline Overview
    - Input Files
    - Process Files
@@ -18,11 +20,16 @@ This document outlines the following points:
    - dashboard_data_prep.py
    
 
-### 1. Setting up Environment
+### 1. Setting up the Code Base
+
+#### Environment
 The ```requirements.txt``` contains information on all the relevant packages and versions used in the code base. In order to set up the environment, the please follow the subsequent process:
 1. cd to the directory where your ```requirements.txt```is located
 2. activate your virtual environment
-3. run: ``` pip install -r requirements.txt``` in your shell. Alternatively, when working with conda run: ```conda install --file requirements.txt```.
+3. run: ``` pip install -r requirements.txt``` in your shell. Alternatively, when working with conda, run: ```conda install --file requirements.txt```.
+
+#### Configuration
+The ```config.py``` file sets up the folder structure. When cloning the repository from GitHub, all the relevant folders are already in place. Nevertheless, the ```config.py``` defines the path architecture and makes sure it runs on each individual local machine.
 
 ## Pipeline 
 ![](pipeline_advance.png)
