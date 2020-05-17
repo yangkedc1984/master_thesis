@@ -10,7 +10,7 @@ This document outlines the following points:
    - Input Files
    - Process Files
    - Output Files
-3. Python-Files in the Repo
+3. Pipeline Walk-Through
    - feature_engineering.py
    - AutoRegression_Model.py & run_AutoRegression_Model.py
    - HAR_Model.py & run_HAR_model.py
@@ -33,10 +33,11 @@ The ```config.py``` file sets up the folder structure. When cloning the reposito
 
 ## 2. Pipeline Overview
 The pipeline of the overall project is illustrated in the following figure. It can be splited into input-, process- and output files. The blue-colored boxes describe the proces or the content which is relevant for the corresponding step in the pipeline. The grey-colored boxes are indicating the name of the corresponding file in the repository.
+Naturally, the input files are the files that are later processed by the python process files. The input files consist of ```.csv``` and ```.h5``` files, where the input data is stored in .csv-format and the models are stored in .h5-files. 
+The output files are often times the input files for another python file in the pipeline. Hence, an output file can be an input file later in the process.
 
 ![](pipeline_advance.png)
-## Description of each file
 
-#write a brief text of how the whole thesis is structured. (Data Preprocessing, Feature #Engineering, HAR Model (Data Preprocessing & Estimation), LSTM Model (Data #Preprocessing), Genetic Algorithm (Hyperparameter Optimization), Results (Accuracy #Measures, Graphs, Export of all results)
+## 3. Pipeline Walk-Through
 
 https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax
