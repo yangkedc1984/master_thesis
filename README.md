@@ -72,6 +72,8 @@ class HARModelLogTransformed:
 ```
 The input variable ```df``` is defined as the data frame that is used for training & validation. Then the variable ```future``` lets us define the dependent variable (e.g. 1-day or 20-day ahead forecast). Through the ```lags```variable one can specify the lags to be included in the model. The ```semi-variance``` indicator is used to either include or exclude the additional volatility measure semi-realized volatility. The ```jump_detect``` boolean lets the user define how to preprocess the data and thus whether the jump detection methodology should be applied. Similarly, the ```log_transformation``` indication allows to choose whether to log-transform the data before estimating the model. Finally, through the two period lists, the training & valiadtion periods can be defined.
 
+Having defined a class instance with the specific inputs, the complete model can be run by the method ```run_complete_model()```. To keep this readme-document relatively well-arranged, the author decided not to explain each individual method in the class. However, please checkout the file [```HAR_Model.py```](masterthesis/HAR_Model.py) to investigate all available methods.
+
 
 
 #### Autoregressive Model
